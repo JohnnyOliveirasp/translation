@@ -1,0 +1,214 @@
+<title>Live Translation — How It Works</title>
+<style>
+  :root {
+    --bg: #F7F6F2;
+    --ink: #23292F;
+    --muted: #5C6670;
+    --accent: #2E5EAA;
+    --gold: #A87D1F;
+    --card: #FFFFFF;
+    --rule: #DDD8CE;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14181D; --ink: #E8E6E1; --muted: #9AA3AC; --accent: #7DA3E0; --gold: #D9B45B; --card: #1D232A; --rule: #333B44; }
+  }
+  :root[data-theme="dark"] { --bg: #14181D; --ink: #E8E6E1; --muted: #9AA3AC; --accent: #7DA3E0; --gold: #D9B45B; --card: #1D232A; --rule: #333B44; }
+  :root[data-theme="light"] { --bg: #F7F6F2; --ink: #23292F; --muted: #5C6670; --accent: #2E5EAA; --gold: #A87D1F; --card: #FFFFFF; --rule: #DDD8CE; }
+
+  body { background: var(--bg); color: var(--ink); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 20px 72px; display: flex; flex-direction: column; gap: 40px; }
+
+  .eyebrow { color: var(--gold); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  h1 { font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: clamp(30px, 5vw, 42px); line-height: 1.15; margin: 6px 0 10px; text-wrap: balance; }
+  h2 { font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 24px; margin: 0 0 12px; }
+  p { margin: 0 0 12px; }
+  .lead { font-size: 19px; color: var(--ink); max-width: 60ch; }
+  .muted { color: var(--muted); }
+
+  section { border-top: 1px solid var(--rule); padding-top: 28px; }
+  figure { margin: 0; }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; text-align: center; }
+  .diagram-wrap { overflow-x: auto; }
+  svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+
+  ol.sunday { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; counter-reset: step; }
+  ol.sunday li { display: flex; gap: 14px; align-items: baseline; }
+  ol.sunday li::before {
+    counter-increment: step; content: counter(step);
+    flex: 0 0 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: var(--bg);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; line-height: 28px; text-align: center;
+  }
+  ol.sunday b { font-weight: 650; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  .card p { margin: 0; font-size: 15px; color: var(--muted); }
+
+  .langs { display: flex; flex-wrap: wrap; gap: 10px; }
+  .lang { background: var(--card); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; font-size: 15px; }
+
+  .note { background: var(--card); border-left: 3px solid var(--gold); border-radius: 0 8px 8px 0; padding: 14px 18px; font-size: 15px; }
+  footer { border-top: 1px solid var(--rule); padding-top: 18px; font-size: 13px; color: var(--muted); }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">For Pastor Cris</div>
+    <h1>Live Translation for Our Services</h1>
+    <p class="lead">While you preach in English, every visitor can hear your words in their own
+    language — live, through their own phone and earbuds. Nothing to install, nothing to hand out:
+    they scan a poster on the wall and tap their language.</p>
+  </header>
+
+  <section>
+    <h2>The journey of your voice</h2>
+    <div class="diagram-wrap">
+    <figure>
+      <svg viewBox="0 0 940 400" role="img" aria-label="The pastor's voice travels from the lapel microphone to a phone at the sound desk, then to a secure translation service, and arrives translated on each listener's phone about three seconds later. Listeners join by scanning a QR-code poster on the wall once and tapping their language.">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- 1. Pastor + lapel mic -->
+        <g stroke="currentColor" fill="none" stroke-width="2">
+          <circle cx="105" cy="80" r="22"/>
+          <path d="M70 150 Q105 112 140 150"/>
+          <rect x="97" y="118" width="16" height="26" rx="8"/>
+          <line x1="105" y1="144" x2="105" y2="156"/>
+        </g>
+        <text x="105" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="currentColor">Pastor Cris</text>
+        <text x="105" y="210" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">wireless lapel mic,</text>
+        <text x="105" y="227" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">preaching as usual</text>
+
+        <line x1="165" y1="115" x2="250" y2="115" stroke="currentColor" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="207" y="100" text-anchor="middle" font-size="12.5" fill="currentColor" opacity="0.75">your voice</text>
+
+        <!-- 2. Sound desk phone -->
+        <g stroke="currentColor" fill="none" stroke-width="2">
+          <rect x="277" y="55" width="66" height="118" rx="10"/>
+          <line x1="297" y1="160" x2="323" y2="160"/>
+          <path d="M296 100 v20 M306 88 v44 M316 96 v28 M326 104 v12" stroke-linecap="round"/>
+        </g>
+        <text x="310" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="currentColor">Sound desk</text>
+        <text x="310" y="210" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">one phone, attended</text>
+        <text x="310" y="227" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">by our operator</text>
+
+        <line x1="368" y1="115" x2="453" y2="115" stroke="currentColor" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="410" y="100" text-anchor="middle" font-size="12.5" fill="currentColor" opacity="0.75">secure internet</text>
+
+        <!-- 3. Translation service (accent) -->
+        <g stroke="var(--accent)" fill="none" stroke-width="2.5">
+          <path d="M497 145 a26 26 0 0 1 6 -51 a34 34 0 0 1 65 -8 a27 27 0 0 1 12 52 z"/>
+          <path d="M517 118 l10 10 l20 -24" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <text x="540" y="190" text-anchor="middle" font-size="15" font-weight="600" fill="var(--accent)">AI translation (LLM)</text>
+        <text x="540" y="210" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">turns English speech into</text>
+        <text x="540" y="227" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">spoken Portuguese, Spanish…</text>
+
+        <line x1="628" y1="115" x2="713" y2="115" stroke="currentColor" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="670" y="93" text-anchor="middle" font-size="12.5" fill="currentColor" opacity="0.75">translated voice</text>
+        <text x="670" y="109" text-anchor="middle" font-size="12.5" fill="currentColor" opacity="0.75">+ captions</text>
+
+        <!-- 4. Listeners -->
+        <g stroke="currentColor" fill="none" stroke-width="2">
+          <rect x="742" y="62" width="52" height="96" rx="8"/>
+          <rect x="806" y="82" width="52" height="96" rx="8"/>
+          <path d="M756 100 a12 12 0 0 1 24 0" />
+          <circle cx="756" cy="104" r="3.5" fill="currentColor"/>
+          <circle cx="780" cy="104" r="3.5" fill="currentColor"/>
+          <line x1="814" y1="110" x2="850" y2="110"/>
+          <line x1="814" y1="124" x2="850" y2="124"/>
+          <line x1="814" y1="138" x2="842" y2="138"/>
+        </g>
+        <text x="800" y="205" text-anchor="middle" font-size="15" font-weight="600" fill="currentColor">Each listener's phone</text>
+        <text x="800" y="225" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">earbuds + captions, in the</text>
+        <text x="800" y="242" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">language they chose</text>
+
+        <text x="330" y="300" text-anchor="middle" font-size="13.5" fill="var(--gold)" font-weight="600">From your lips to their ears: about 3 seconds.</text>
+
+        <!-- Poster com QR na parede → como o ouvinte entra -->
+        <g stroke="currentColor" fill="none" stroke-width="2">
+          <line x1="560" y1="252" x2="700" y2="252"/>
+          <rect x="592" y="262" width="76" height="98" rx="4"/>
+          <g fill="currentColor" stroke="none">
+            <rect x="604" y="274" width="14" height="14"/>
+            <rect x="642" y="274" width="14" height="14"/>
+            <rect x="604" y="312" width="14" height="14"/>
+            <rect x="608" y="278" width="6" height="6" fill="var(--card)"/>
+            <rect x="646" y="278" width="6" height="6" fill="var(--card)"/>
+            <rect x="608" y="316" width="6" height="6" fill="var(--card)"/>
+            <rect x="626" y="276" width="6" height="6"/>
+            <rect x="634" y="290" width="6" height="6"/>
+            <rect x="624" y="298" width="6" height="6"/>
+            <rect x="644" y="298" width="6" height="6"/>
+            <rect x="628" y="314" width="6" height="6"/>
+            <rect x="646" y="320" width="6" height="6"/>
+          </g>
+          <line x1="600" y1="342" x2="660" y2="342"/>
+        </g>
+        <text x="630" y="382" text-anchor="middle" font-size="13" fill="currentColor" opacity="0.65">printed poster on the wall</text>
+
+        <path d="M676 300 Q740 290 782 210" stroke="var(--gold)" stroke-width="2" fill="none" stroke-dasharray="6 5" marker-end="url(#arr)"/>
+        <text x="768" y="278" text-anchor="middle" font-size="12.5" fill="var(--gold)" font-weight="600">people scan it once,</text>
+        <text x="768" y="294" text-anchor="middle" font-size="12.5" fill="var(--gold)" font-weight="600">tap their language</text>
+      </svg>
+      <figcaption>The whole journey is automatic — the operator only starts it before the service.</figcaption>
+    </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>What Sunday looks like</h2>
+    <ol class="sunday">
+      <li><span><b>Before the service</b> — our operator connects the lapel mic and starts the system, silenced. A printed poster with a QR code is on the wall.</span></li>
+      <li><span><b>People arrive</b> — anyone who wants translation scans the poster with their phone camera, taps their language, and puts in their earbuds. That's all they ever do.</span></li>
+      <li><span><b>Worship &amp; announcements</b> — the system stays silenced; nothing plays in the earbuds.</span></li>
+      <li><span><b>You preach</b> — the operator taps one button, and your message flows to every listener in their own language, about 3 seconds behind your voice, with written captions on screen.</span></li>
+      <li><span><b>After the service</b> — the operator ends the session with one tap.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Languages ready today</h2>
+    <div class="langs">
+      <span class="lang">🇧🇷 Português</span>
+      <span class="lang">🇪🇸 Español</span>
+      <span class="lang">🇫🇷 Français</span>
+      <span class="lang">🇨🇳 中文</span>
+      <span class="lang">🇮🇳 हिन्दी</span>
+      <span class="lang">🇸🇦 العربية</span>
+    </div>
+    <p class="muted" style="margin-top:12px">Each listener picks their own — different people can listen in different languages at the same time.</p>
+  </section>
+
+  <section>
+    <h2>Where it all lives</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Our own server</h3>
+        <p>The system runs on a private server we operate in a professional data center — managed by JC Business Solutions, protected behind encryption and passwords.</p>
+      </div>
+      <div class="card">
+        <h3>AI translation engine</h3>
+        <p>The translating is done automatically by a state-of-the-art AI language model (LLM) that listens to speech and speaks the translation live — no human interpreter involved.</p>
+      </div>
+      <div class="card">
+        <h3>Nobody installs anything</h3>
+        <p>Listeners just open a web page. No app, no account, no personal information collected.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What the church needs to provide</h2>
+    <p><b>Nothing, really.</b> Each phone uses its own mobile data (about 20&nbsp;MB per hour — less than a few minutes of video). The church's Wi-Fi is optional — helpful only for visitors who have no data plan.</p>
+    <div class="note">Usage is measured per minute and per language, and a simple report is available after each service.</div>
+  </section>
+
+  <footer>Prepared by Johnny — JC Business Solutions · traducao.jcsolutionsus.com</footer>
+</main>

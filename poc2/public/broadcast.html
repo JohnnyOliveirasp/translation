@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>POC2 — Broadcast</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: system-ui, sans-serif; background: #10141c; color: #eef2f8;
+         max-width: 480px; margin: 0 auto; padding: 18px; }
+  h1 { font-size: 1.4rem; margin: 10px 0; }
+  input, select, button { width: 100%; font-size: 1.05rem; padding: 14px; margin: 8px 0;
+         border-radius: 12px; border: 1px solid #2c3648; background: #1a2130; color: #eef2f8; }
+  button { cursor: pointer; font-weight: 600; }
+  .gigante { background: #2563eb; border: none; padding: 18px; font-size: 1.15rem; }
+  .mute { background: #334155; border: none; padding: 18px; font-size: 1.15rem; }
+  .mute.ativo { background: #b45309; }
+  .perigo { background: #7f1d1d; border: none; }
+  .linha { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+  .vivo { color: #34d399; font-weight: 700; }
+  .medidor { height: 10px; background: #1a2130; border-radius: 6px; overflow: hidden; margin: 8px 0; }
+  .medidor > div { height: 100%; background: #34d399; width: 0; transition: width .1s; }
+  .aviso { color: #fbbf24; }
+  .fonte { background: #0d1117; border: 1px solid #2c3648; border-radius: 12px; padding: 12px;
+           margin-top: 12px; min-height: 180px; max-height: 45vh; overflow-y: auto;
+           font-size: 0.98rem; line-height: 1.5; }
+  .fonte p { margin: 0 0 8px; }
+  .fonte .spk { color: #60a5fa; font-weight: 700; }
+  .rotulo { font-size: .85rem; color: #8b97a9; margin-top: 14px; text-transform: uppercase; letter-spacing: .05em; }
+  .badge { font-size: .8rem; color: #8b97a9; }
+</style>
+</head>
+<body>
+  <div id="login">
+    <h1>Broadcast</h1>
+    <input id="senha" type="password" placeholder="Operator password" autocomplete="current-password">
+    <button class="gigante" onclick="entrar()">Sign in</button>
+    <p id="erroLogin" class="aviso"></p>
+  </div>
+
+  <div id="pronto" style="display:none">
+    <h1>Microphone</h1>
+    <select id="mics"></select>
+    <button class="gigante" onclick="iniciar()">▶ Start broadcast</button>
+    <p id="erroStart" class="aviso"></p>
+  </div>
+
+  <div id="aovivo" style="display:none">
+    <div class="linha"><span class="vivo">● ON AIR</span><span id="relogio">00:00</span></div>
+    <div class="medidor"><div id="nivel"></div></div>
+    <button id="btnMute" class="mute" onclick="alternarMute()">🎤 MUTE (use during music)</button>
+    <div class="linha"><span class="badge" id="pipeline">pipeline: —</span><span class="badge" id="ouvintes"></span></div>
+    <div class="rotulo">What the system is hearing (EN)</div>
+    <div class="fonte" id="fonte"><p style="color:#8b97a9">Waiting for speech…</p></div>
+    <button class="perigo" onclick="encerrar()">End broadcast</button>
+  </div>
+
+<script>
+let senha = '', ctx = null, worklet = null, stream = null, mutado = false, rel = 0, relTimer = null;
+let filaEnvio = Promise.resolve();
+
+async function entrar() {
+  senha = document.getElementById('senha').value;
+  const r = await fetch('api/control', { method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ action: 'login', password: senha }) });
+  if (!r.ok) { document.getElementById('erroLogin').textContent = 'Wrong password'; return; }
+  // permissão primeiro p/ liberar os labels dos microfones
+  await navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop()));
+  const list = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+  const sel = document.getElementById('mics');
+  sel.innerHTML = list.map(d => `<option value="${d.deviceId}">🎙 ${d.label || 'Microphone'}</option>`).join('');
+  const mesa = list.find(d => /scarlett|focusrite|qu-6|allen|usb audio/i.test(d.label || ''));
+  if (mesa) sel.value = mesa.deviceId;
+  troca('login', 'pronto');
+}
+
+// AudioWorklet: 48k float → 16k s16le mono, blocos de ~256ms
+const WORKLET = `
+class Down extends AudioWorkletProcessor {
+  constructor() { super(); this.buf = []; this.acc = 0; }
+  process(inputs) {
+    const ch = inputs[0][0];
+    if (!ch) return true;
+    const ratio = sampleRate / 16000;
+    for (let i = 0; i < ch.length; i += ratio) {
+      const v = Math.max(-1, Math.min(1, ch[Math.floor(i)]));
+      this.buf.push(v < 0 ? v * 0x8000 : v * 0x7FFF);
+    }
+    if (this.buf.length >= 4096) {
+      const out = new Int16Array(this.buf.splice(0, 4096));
+      this.port.postMessage(out.buffer, [out.buffer]);
+    }
+    return true;
+  }
+}
+registerProcessor('down', Down);
+`;
+
+async function iniciar() {
+  try {
+    const r = await fetch('api/control', { method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'start', password: senha }) });
+    if (!r.ok) throw new Error('server refused');
+
+    stream = await navigator.mediaDevices.getUserMedia({ audio: {
+      deviceId: document.getElementById('mics').value || undefined,
+      echoCancellation: false, noiseSuppression: true, autoGainControl: true,
+    }});
+    ctx = new AudioContext();
+    await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' })));
+    const src = ctx.createMediaStreamSource(stream);
+    worklet = new AudioWorkletNode(ctx, 'down');
+    src.connect(worklet);
+
+    // nível
+    const an = ctx.createAnalyser(); an.fftSize = 256; src.connect(an);
+    const buf = new Uint8Array(an.frequencyBinCount);
+    (function loop() {
+      an.getByteFrequencyData(buf);
+      document.getElementById('nivel').style.width =
+        Math.min(100, Math.round((buf.reduce((a,b)=>a+b,0)/buf.length)/1.2)) + '%';
+      requestAnimationFrame(loop);
+    })();
+
+    // envio sequencial (garante ordem sem numerar chunks)
+    worklet.port.onmessage = e => {
+      if (mutado) return;
+      filaEnvio = filaEnvio.then(() =>
+        fetch('api/audio', { method: 'POST', headers: { 'x-pw': senha }, body: e.data })
+      ).catch(() => {});
+    };
+
+    relTimer = setInterval(() => {
+      rel++;
+      document.getElementById('relogio').textContent =
+        String(Math.floor(rel/60)).padStart(2,'0') + ':' + String(rel%60).padStart(2,'0');
+    }, 1000);
+
+    escutarSse();
+    wakeLock();
+    pollStatus();
+    troca('pronto', 'aovivo');
+  } catch (e) {
+    document.getElementById('erroStart').textContent = 'Failed to start: ' + e.message;
+  }
+}
+
+function escutarSse() {
+  const es = new EventSource('api/captions?lang=src');
+  const div = document.getElementById('fonte');
+  let primeiro = true;
+  es.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+    if (m.type === 'caption') {
+      if (primeiro) { div.innerHTML = ''; primeiro = false; }
+      const p = document.createElement('p');
+      p.innerHTML = (m.speaker != null ? `<span class="spk">Falante ${m.speaker}:</span> ` : '') + m.text;
+      div.appendChild(p);
+      while (div.children.length > 30) div.removeChild(div.firstChild);
+      div.scrollTop = div.scrollHeight;
+    }
+    if (m.type === 'pipeline') document.getElementById('pipeline').textContent = 'pipeline: ' + m.state;
+  };
+}
+
+async function pollStatus() {
+  setInterval(async () => {
+    try {
+      const d = await (await fetch('api/status')).json();
+      document.getElementById('ouvintes').textContent =
+        Object.entries(d.listeners).map(([l,n]) => `${l}: ${n}`).join('  ') || 'no listeners yet';
+    } catch {}
+  }, 5000);
+}
+
+async function alternarMute() {
+  mutado = !mutado;
+  const b = document.getElementById('btnMute');
+  b.classList.toggle('ativo', mutado);
+  b.textContent = mutado ? '🔇 MUTED — tap to resume' : '🎤 MUTE (use during music)';
+  fetch('api/control', { method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ action: 'set-mute', muted: mutado, password: senha }) }).catch(()=>{});
+}
+
+async function encerrar() {
+  if (!confirm('End the broadcast for everyone?')) return;
+  await fetch('api/control', { method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ action: 'stop', password: senha }) });
+  location.reload();
+}
+
+// A3 — tela sempre acesa (aprendido no culto 09/08)
+async function wakeLock() {
+  const pedir = async () => { try { await navigator.wakeLock?.request('screen'); } catch {} };
+  pedir();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') pedir();
+  });
+}
+
+function troca(de, para) {
+  document.getElementById(de).style.display = 'none';
+  document.getElementById(para).style.display = 'block';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Live Captions</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: system-ui, sans-serif; background: #10141c; color: #eef2f8;
+         max-width: 520px; margin: 0 auto; padding: 18px; min-height: 100vh; }
+  h1 { font-size: 1.5rem; margin: 12px 0; text-align: center; }
+  .sub { text-align: center; color: #8b97a9; margin-bottom: 18px; }
+  button { width: 100%; font-size: 1.2rem; padding: 20px; margin: 10px 0; cursor: pointer;
+           border-radius: 14px; border: none; background: #2563eb; color: #fff; font-weight: 600; }
+  .secundario { background: #1a2130; border: 1px solid #2c3648; font-size: 1rem; padding: 12px; }
+  .linha { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+  .vivo { color: #34d399; font-weight: 700; }
+  .off { color: #8b97a9; }
+  .legenda { background: #0d1117; border: 1px solid #2c3648; border-radius: 14px; padding: 16px;
+             margin: 12px 0; min-height: 55vh; max-height: 62vh; overflow-y: auto;
+             font-size: 1.35rem; line-height: 1.65; }
+  .legenda p { margin: 0 0 14px; }
+  .legenda .spk { color: #60a5fa; font-weight: 700; font-size: 1.05rem; display: block; margin-bottom: 2px; }
+  .placeholder { color: #8b97a9; font-size: 1rem; }
+  .aviso-louvor { background: #221a05; border: 1px solid #b45309; border-radius: 14px;
+                  padding: 16px; margin: 12px 0; }
+  .aviso-louvor strong { display: block; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+  <div id="inicio">
+    <h1>Live Translation</h1>
+    <p class="sub">🎧 Please use headphones<br>Tap your language:</p>
+    <button onclick="escolher('pt-BR')">🇧🇷 Português</button>
+    <button onclick="escolher('es')">🇪🇸 Español</button>
+  </div>
+
+  <div id="ouvindo" style="display:none">
+    <div class="linha">
+      <span id="rotulo"></span>
+      <span id="estado" class="off">connecting…</span>
+    </div>
+    <div id="avisoLouvor" class="aviso-louvor" style="display:none"></div>
+    <button id="btnPausa" onclick="alternarPausa()">⏸ PAUSE</button>
+    <div class="legenda" id="legenda"><p class="placeholder" id="ph">Captions will appear here…</p></div>
+    <button class="secundario" onclick="location.reload()">Change language</button>
+  </div>
+
+<script>
+const AVISO_LOUVOR = {
+  'pt-BR': { titulo: '🎵 Momento de louvor', texto: 'As legendas voltam automaticamente quando a pregação começar.' },
+  es:      { titulo: '🎵 Momento de alabanza', texto: 'Los subtítulos volverán automáticamente cuando comience la prédica.' },
+};
+const SEM_TRANSMISSAO = {
+  'pt-BR': 'Aguardando a transmissão começar…',
+  es:      'Esperando a que comience la transmisión…',
+};
+const ROTULO = { 'pt-BR': '🇧🇷 Português', es: '🇪🇸 Español' };
+
+let lang = null, es = null, ultimoSpeaker = null;
+let actx = null, gain = null, proximo = 0, pausado = false;
+
+function escolher(codigo) {
+  lang = codigo;
+  // o toque no idioma é o gesto que o navegador (iOS!) exige p/ liberar áudio
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  gain = actx.createGain();
+  // saída via elemento <audio> (como o v1): iOS trata como mídia e TOCA
+  // mesmo com o iPhone no modo silencioso (chavinha lateral)
+  try { navigator.audioSession.type = 'playback'; } catch {}
+  const dest = actx.createMediaStreamDestination();
+  gain.connect(dest);
+  const player = new Audio();
+  player.srcObject = dest.stream;
+  player.play().catch(() => {});
+  actx.resume();
+  document.getElementById('inicio').style.display = 'none';
+  document.getElementById('ouvindo').style.display = 'block';
+  document.getElementById('rotulo').textContent = ROTULO[codigo];
+  conectar();
+  wakeLock();
+}
+
+// PCM s16le 24kHz base64 → toca na sequência, sem buracos
+function tocar(b64) {
+  try {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const i16 = new Int16Array(bytes.buffer, 0, Math.floor(bytes.length / 2));
+    const buf = actx.createBuffer(1, i16.length, 24000);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < i16.length; i++) ch[i] = i16[i] / 32768;
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    src.connect(gain);
+    proximo = Math.max(actx.currentTime + 0.05, proximo);
+    src.start(proximo);
+    proximo += buf.duration;
+  } catch (e) { /* áudio ruim não derruba as legendas */ }
+}
+
+function alternarPausa() {
+  pausado = !pausado;
+  gain.gain.value = pausado ? 0 : 1; // silencia mas segue "ao vivo" (sem atraso ao voltar)
+  document.getElementById('btnPausa').textContent = pausado ? '▶ RESUME' : '⏸ PAUSE';
+}
+
+function conectar() {
+  es = new EventSource('api/captions?lang=' + encodeURIComponent(lang));
+  const div = document.getElementById('legenda');
+  const estadoEl = document.getElementById('estado');
+
+  es.onopen = () => { estadoEl.textContent = '● LIVE'; estadoEl.className = 'vivo'; };
+  es.onerror = () => { estadoEl.textContent = 'reconnecting…'; estadoEl.className = 'off'; };
+
+  es.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+
+    if (m.type === 'hello') {
+      atualizarMute(m.muted);
+      if (!m.live) document.getElementById('ph').textContent = SEM_TRANSMISSAO[lang];
+      return;
+    }
+    if (m.type === 'audio') { if (!pausado) tocar(m.data); return; }
+    if (m.type === 'mute') { atualizarMute(m.muted); return; }
+    if (m.type === 'live') {
+      if (!m.live) { document.getElementById('ph')?.remove(); atualizarMute(false); }
+      return;
+    }
+    if (m.type !== 'caption') return;
+
+    document.getElementById('ph')?.remove();
+
+    // parágrafo novo quando troca o falante; senão, texto corrido
+    let p = div.lastElementChild;
+    const trocouFalante = m.speaker != null && m.speaker !== ultimoSpeaker;
+    if (!p || trocouFalante || (p.dataset.chars || 0) > 320) {
+      p = document.createElement('p');
+      if (trocouFalante) {
+        const s = document.createElement('span');
+        s.className = 'spk';
+        s.textContent = (lang === 'es' ? 'Hablante ' : 'Falante ') + m.speaker;
+        p.appendChild(s);
+      }
+      div.appendChild(p);
+    }
+    ultimoSpeaker = m.speaker ?? ultimoSpeaker;
+    p.appendChild(document.createTextNode((p.dataset.chars > 0 ? ' ' : '') + m.text));
+    p.dataset.chars = (Number(p.dataset.chars || 0)) + m.text.length;
+
+    while (div.children.length > 12) div.removeChild(div.firstChild);
+    div.scrollTop = div.scrollHeight;
+  };
+}
+
+function atualizarMute(muted) {
+  const box = document.getElementById('avisoLouvor');
+  if (muted) {
+    const a = AVISO_LOUVOR[lang];
+    box.innerHTML = '<strong>' + a.titulo + '</strong><p>' + a.texto + '</p>';
+    box.style.display = 'block';
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+// A3 — mantém a tela acesa (aprendido no culto 09/08)
+async function wakeLock() {
+  const pedir = async () => { try { await navigator.wakeLock?.request('screen'); } catch {} };
+  pedir();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') pedir();
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "poc2-cascata",
+  "private": true,
+  "type": "module",
+  "version": "0.2.0",
+  "description": "POC2 — tradução em cascata ASR (Soniox) → LLM (Gemini) → legendas. Zero dependências.",
+  "scripts": {
+    "start": "node server.js",
+    "fase1": "node fase1-cli.js"
+  }
+}

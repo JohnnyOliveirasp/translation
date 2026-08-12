@@ -1,0 +1,22 @@
+# Segredos — NUNCA commitar (chaves Gemini/Soniox/LiveKit, senhas)
+.env
+.env.*
+*.pem
+credentials.json
+service-account.json
+
+# Dependências e builds
+node_modules/
+.next/
+out/
+
+# Logs
+logs/
+*.log
+
+# Áudio de teste (arquivos grandes, gerados localmente)
+test-audio/
+
+# Sistema
+.DS_Store
+Thumbs.db
