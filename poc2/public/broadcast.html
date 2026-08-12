@@ -49,6 +49,8 @@
   <div id="aovivo" style="display:none">
     <div class="linha"><span class="vivo">● ON AIR</span><span id="relogio">00:00</span></div>
     <div class="medidor"><div id="nivel"></div></div>
+    <select id="micsLive" onchange="trocarMic(this.value)"></select>
+    <p id="avisoLive" class="aviso"></p>
     <button id="btnMute" class="mute" onclick="alternarMute()">🎤 MUTE (use during music)</button>
     <div class="linha"><span class="badge" id="pipeline">pipeline: —</span><span class="badge" id="ouvintes"></span></div>
     <div class="rotulo">What the system is hearing (EN)</div>
@@ -57,8 +59,18 @@
   </div>
 
 <script>
-let senha = '', ctx = null, worklet = null, stream = null, mutado = false, rel = 0, relTimer = null;
+let senha = '', ctx = null, worklet = null, stream = null, srcNode = null, anNode = null,
+    deviceAtual = '', mutado = false, rel = 0, relTimer = null;
 let filaEnvio = Promise.resolve();
+
+async function listarMics() {
+  return (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+}
+
+function preencherSelect(sel, list, manter) {
+  sel.innerHTML = list.map(d => `<option value="${d.deviceId}">🎙 ${d.label || 'Microphone'}</option>`).join('');
+  if (manter && list.some(d => d.deviceId === manter)) sel.value = manter;
+}
 
 async function entrar() {
   senha = document.getElementById('senha').value;
@@ -67,12 +79,56 @@ async function entrar() {
   if (!r.ok) { document.getElementById('erroLogin').textContent = 'Wrong password'; return; }
   // permissão primeiro p/ liberar os labels dos microfones
   await navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop()));
-  const list = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
+  const list = await listarMics();
   const sel = document.getElementById('mics');
-  sel.innerHTML = list.map(d => `<option value="${d.deviceId}">🎙 ${d.label || 'Microphone'}</option>`).join('');
+  preencherSelect(sel, list);
+  // prefere a interface da mesa de som (USB-C) quando ela estiver conectada
   const mesa = list.find(d => /scarlett|focusrite|qu-6|allen|usb audio/i.test(d.label || ''));
   if (mesa) sel.value = mesa.deviceId;
+  // lista viva: plugar/desplugar o cabo USB atualiza as opções e dispara o failover
+  navigator.mediaDevices.ondevicechange = atualizarMics;
   troca('login', 'pronto');
+}
+
+async function atualizarMics() {
+  const list = await listarMics();
+  const sel = document.getElementById('mics');
+  preencherSelect(sel, list, sel.value);
+  preencherSelect(document.getElementById('micsLive'), list, deviceAtual);
+  // FAILOVER: a fonte ativa sumiu no ar (cabo da mesa caiu, interface desligou)
+  // → assume sozinho o próximo microfone; sem isso o culto ficaria mudo até alguém perceber
+  if (ctx && deviceAtual && !list.some(d => d.deviceId === deviceAtual)) {
+    const reserva = list[0];
+    if (!reserva) { avisar('⚠️ No microphone available!'); return; }
+    avisar(`⚠️ Audio source lost — switched to ${reserva.label || 'backup microphone'}`);
+    trocarMic(reserva.deviceId);
+  }
+}
+
+function avisar(msg) {
+  document.getElementById('avisoLive').textContent = msg;
+}
+
+// Troca a fonte de áudio AO VIVO (mesa USB-C ↔ lapela) sem derrubar a transmissão
+async function trocarMic(novoId) {
+  if (!ctx) return;
+  try {
+    const novo = await navigator.mediaDevices.getUserMedia({ audio: {
+      deviceId: { exact: novoId },
+      echoCancellation: false, noiseSuppression: true, autoGainControl: true,
+    }});
+    stream?.getTracks().forEach(t => t.stop());
+    srcNode?.disconnect();
+    stream = novo;
+    srcNode = ctx.createMediaStreamSource(stream);
+    srcNode.connect(worklet);
+    srcNode.connect(anNode);
+    deviceAtual = novoId;
+    document.getElementById('micsLive').value = novoId;
+    avisar('');
+  } catch (e) {
+    avisar('Could not switch microphone: ' + e.message);
+  }
 }
 
 // AudioWorklet: 48k float → 16k s16le mono, blocos de ~256ms
@@ -103,19 +159,24 @@ async function iniciar() {
       body: JSON.stringify({ action: 'start', password: senha }) });
     if (!r.ok) throw new Error('server refused');
 
+    deviceAtual = document.getElementById('mics').value || '';
     stream = await navigator.mediaDevices.getUserMedia({ audio: {
-      deviceId: document.getElementById('mics').value || undefined,
+      deviceId: deviceAtual || undefined,
       echoCancellation: false, noiseSuppression: true, autoGainControl: true,
     }});
     ctx = new AudioContext();
     await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WORKLET], { type: 'text/javascript' })));
-    const src = ctx.createMediaStreamSource(stream);
+    srcNode = ctx.createMediaStreamSource(stream);
     worklet = new AudioWorkletNode(ctx, 'down');
-    src.connect(worklet);
+    srcNode.connect(worklet);
 
     // nível
-    const an = ctx.createAnalyser(); an.fftSize = 256; src.connect(an);
+    anNode = ctx.createAnalyser(); anNode.fftSize = 256; srcNode.connect(anNode);
+    const an = anNode;
     const buf = new Uint8Array(an.frequencyBinCount);
+
+    // seletor de microfone ao vivo (mesa USB-C ↔ lapela)
+    preencherSelect(document.getElementById('micsLive'), await listarMics(), deviceAtual);
     (function loop() {
       an.getByteFrequencyData(buf);
       document.getElementById('nivel').style.width =
