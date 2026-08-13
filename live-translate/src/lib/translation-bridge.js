@@ -31,6 +31,9 @@ export class TranslationBridge {
     this.pendingB64 = [];                 // áudio captado durante a troca de sessão (reenviado depois)
     this.swapPending = false;             // goAway recebido → trocar na próxima pausa de fala
     this.swapTimer = null;
+    this.sessaoNova = null;               // make-before-break: sessão pré-aberta no goAway
+    this.preparandoNova = false;
+    this.drenando = null;                 // sessão antiga terminando de falar após o chaveio
     this.stats = { startedAt: null, lastAudioOutAt: null, geminiReconnects: 0, firstLatencyMs: null, droppedSilenceMs: 0 };
     this._lastInputAt = null;
   }
@@ -105,7 +108,8 @@ export class TranslationBridge {
     }, QUADRO_MS);
   }
 
-  async connectGemini() {
+  // abre UMA sessão Gemini (usada pela ativa, pela pré-aberta do goAway e pelo fallback)
+  async abrirSessao() {
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const config = {
       responseModalities: ['AUDIO'],
@@ -126,15 +130,22 @@ export class TranslationBridge {
       config.speechConfig = { voiceConfig: { prebuiltVoiceConfig: { voiceName: process.env.VOICE_NAME } } };
     }
 
-    this.session = await ai.live.connect({
+    let sess = null;
+    sess = await ai.live.connect({
       model: MODEL,
       config,
       callbacks: {
-        onmessage: (msg) => this.onGeminiMessage(msg),
+        onmessage: (msg) => this.onGeminiMessage(msg, sess),
         onerror: (e) => this.log('erro gemini:', e?.message ?? e),
-        onclose: () => { if (this.running) this.reconnectGemini('conexão fechada'); },
+        // só a sessão ATIVA dispara reconexão; drenando/pré-aberta fecham em silêncio
+        onclose: () => { if (this.running && sess === this.session && !this.reconnecting) this.reconnectGemini('conexão fechada'); },
       },
     });
+    return sess;
+  }
+
+  async connectGemini() {
+    this.session = await this.abrirSessao();
     // o log reflete o modo REALMENTE usado (antes dizia "com handle" só porque o
     // handle existia — mesmo com NO_RESUME=1 enviando sessão limpa)
     this.log('sessão Gemini aberta', this.usarHandle() ? '(retomada com handle)' : '(nova/limpa)');
@@ -142,20 +153,59 @@ export class TranslationBridge {
 
   usarHandle() { return process.env.NO_RESUME !== '1' && !!this.resumeHandle; }
 
-  onGeminiMessage(msg) {
+  // MAKE-BEFORE-BREAK: usa os ~50s de aviso do goAway para abrir a sessão nova EM
+  // PARALELO, com a antiga ainda falando. No chaveio não há estado "reconectando",
+  // não há buffer nem reenvio — o corte seco de ~3-5s vira latência normal.
+  // MAKE_BEFORE_BREAK=0 no .env desativa e volta à troca clássica.
+  async prepararSessaoNova() {
+    if (process.env.MAKE_BEFORE_BREAK === '0') return;
+    if (this.sessaoNova || this.preparandoNova || !this.running) return;
+    this.preparandoNova = true;
+    try {
+      this.sessaoNova = await this.abrirSessao();
+      this.log('sessão nova pré-aberta (make-before-break) — aguardando pausa de fala para chavear');
+    } catch (e) {
+      this.log('pré-abertura falhou (cai na troca clássica):', e?.message ?? e);
+    } finally {
+      this.preparandoNova = false;
+    }
+  }
+
+  chavear(motivo) {
+    const velha = this.session;
+    this.session = this.sessaoNova;
+    this.sessaoNova = null;
+    this.stats.geminiReconnects++;
+    this.log(`chaveado sem corte (${motivo}) — sessão antiga drena por 4s`);
+    // a antiga ainda entrega a tradução do que ouviu antes do chaveio
+    this.drenando = velha;
+    setTimeout(() => {
+      if (this.drenando === velha) this.drenando = null;
+      try { velha?.close?.(); } catch {}
+    }, 4000);
+  }
+
+  onGeminiMessage(msg, sess) {
     if (msg.sessionResumptionUpdate?.newHandle) this.resumeHandle = msg.sessionResumptionUpdate.newHandle;
     if (msg.goAway) {
-      // temos ~50s de aviso: troca na próxima PAUSA DE FALA (não corta palavra no meio);
-      // se o orador não pausar em 25s, troca à força mesmo assim
-      this.log(`goAway recebido (timeLeft=${msg.goAway.timeLeft}) → troca agendada para a próxima pausa de fala`);
+      if (sess && sess !== this.session) return; // goAway de sessão antiga/nova: ignora
+      // temos ~50s de aviso: pré-abre a sessão nova JÁ e troca na próxima PAUSA DE
+      // FALA (não corta palavra no meio); sem pausa em 25s, chaveia à força
+      this.log(`goAway recebido (timeLeft=${msg.goAway.timeLeft}) → pré-abrindo sessão nova; troca na próxima pausa de fala`);
       if (!this.swapPending && !this.reconnecting) {
         this.swapPending = true;
+        this.prepararSessaoNova();
         this.swapTimer = setTimeout(() => {
-          if (this.swapPending) { this.swapPending = false; this.reconnectGemini('goAway — sem pausa de fala em 25s'); }
+          if (!this.swapPending) return;
+          this.swapPending = false;
+          if (this.sessaoNova) this.chavear('forçado — sem pausa de fala em 25s');
+          else this.reconnectGemini('goAway — sem pausa de fala em 25s');
         }, 25000);
       }
       return;
     }
+    // conteúdo vale da sessão ativa E da drenando (que termina de falar após o chaveio)
+    if (sess && sess !== this.session && sess !== this.drenando) return;
     const sc = msg.serverContent;
     if (sc?.outputTranscription?.text) this.sendLegenda(sc.outputTranscription.text);
     for (const part of sc?.modelTurn?.parts ?? []) {
@@ -224,11 +274,21 @@ export class TranslationBridge {
           const d = frame.data;
           for (let i = 0; i < d.length; i += 8) { const v = Math.abs(d[i]); if (v > pico) pico = v; }
           if (pico < 300) {
-            this.swapPending = false;
-            clearTimeout(this.swapTimer);
-            this.pendingB64.push(b64);
-            this.reconnectGemini('goAway — trocado em pausa de fala');
-            continue;
+            if (this.sessaoNova) {
+              // make-before-break: chaveia na hora; o frame segue para a sessão nova
+              // pelo fluxo normal abaixo — sem gap, sem buffer, sem reenvio
+              this.swapPending = false;
+              clearTimeout(this.swapTimer);
+              this.chavear('pausa de fala');
+            } else if (!this.preparandoNova) {
+              // pré-abertura falhou → troca clássica (com o pequeno corte de antes)
+              this.swapPending = false;
+              clearTimeout(this.swapTimer);
+              this.pendingB64.push(b64);
+              this.reconnectGemini('goAway — trocado em pausa de fala (sem sessão pré-aberta)');
+              continue;
+            }
+            // ainda pré-abrindo: segue transmitindo e espera a próxima pausa
           }
         }
 
@@ -290,6 +350,8 @@ export class TranslationBridge {
     clearInterval(this.keepAlive);
     clearTimeout(this.swapTimer);
     try { this.session?.close?.(); } catch {}
+    try { this.sessaoNova?.close?.(); } catch {}
+    try { this.drenando?.close?.(); } catch {}
     try { await this.room?.disconnect(); } catch {}
     this.log('encerrado');
   }
