@@ -18,6 +18,8 @@ const ARQUIVOS = [
   [`${BASE}/wasm/audio_wasm_nosimd_internal.js`, 'wasm/audio_wasm_nosimd_internal.js'],
   [`${BASE}/wasm/audio_wasm_nosimd_internal.wasm`, 'wasm/audio_wasm_nosimd_internal.wasm'],
   [MODELO, 'yamnet.tflite'],
+  // mesma versão do livekit-client que o v1 usa em produção (pinada desde 04/08)
+  ['https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js', 'livekit-client.umd.min.js'],
 ];
 
 (async () => {
