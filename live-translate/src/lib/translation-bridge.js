@@ -113,7 +113,11 @@ export class TranslationBridge {
       outputAudioTranscription: {},
       translationConfig: { targetLanguageCode: this.lang, echoTargetLanguage: false },
       contextWindowCompression: { slidingWindow: { targetTokens: 4000 }, triggerTokens: 100000 },
-      sessionResumption: this.resumeHandle ? { handle: this.resumeHandle } : {},
+      // NO_RESUME=1: renovação abre sessão LIMPA (sem handle). O modelo preview às vezes
+      // ignora a voz fixa (A1) nos primeiros segundos de sessão RETOMADA (blip de voz
+      // feminina após o goAway). Palavras não se perdem: o buffer pendingB64 reenvia o
+      // áudio da troca de qualquer forma.
+      sessionResumption: (process.env.NO_RESUME !== '1' && this.resumeHandle) ? { handle: this.resumeHandle } : {},
     };
 
     // A1 — VOZ FIXA: sem isto o modelo sorteia voz nova a cada renovação de sessão
