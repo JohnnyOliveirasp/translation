@@ -1,0 +1,10 @@
+{
+  "name": "poc3-detector-louvor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "POC3 — detector automático de louvor × pregação (YAMNet/MediaPipe no navegador)",
+  "scripts": {
+    "vendor": "node scripts/baixar-vendor.js",
+    "start": "node server.js"
+  }
+}
