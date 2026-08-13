@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>POC3 — Broadcast Automático</title>
+<title>POC3 — Auto Broadcast</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; margin: 0; }
@@ -53,25 +53,28 @@
   .log .fala { color: #34d399; }
   details { margin: 10px 0; }
   summary { cursor: pointer; color: #8b97a9; font-size: .9rem; }
+  .radio { cursor: pointer; }
+  .radio input { width: 24px; height: 24px; margin: 0; }
 </style>
 </head>
 <body>
-  <h1>🤖 POC3 — Broadcast Automático</h1>
+  <h1>🤖 POC3 — Auto Broadcast</h1>
 
   <div id="login">
-    <p class="badge">Transmite pela MESMA infraestrutura do v1 (LiveKit + Gemini). O detector de
-    louvor × pregação controla o MUTE sozinho. Ouvintes usam a página normal do v1.
-    ⚠️ Não rode junto com o /broadcast do v1 — um derruba o outro (mesma identidade).</p>
-    <input id="senha" type="password" placeholder="Senha do operador" autocomplete="current-password">
-    <button class="gigante" onclick="entrar()">Entrar</button>
+    <p class="badge">Broadcasts through the same v1 infrastructure (LiveKit + Gemini). The
+    worship/speech detector controls MUTE automatically. Listeners use the regular v1 page.
+    ⚠️ Do not run together with the v1 /broadcast — one will disconnect the other.</p>
+    <input id="senha" type="password" placeholder="Operator password" autocomplete="current-password">
+    <button class="gigante" onclick="entrar()">Sign in</button>
     <p id="erroLogin" class="aviso"></p>
   </div>
 
   <div id="pronto" style="display:none">
-    <h2>Microfone</h2>
+    <h2>Microphone</h2>
     <select id="mics"></select>
-    <p class="badge">Idioma do orador: 🇺🇸 English (fixo nesta POC)</p>
-    <button class="gigante" onclick="iniciar()">▶ Iniciar transmissão automática</button>
+    <h2>Speaker's language</h2>
+    <div id="fontes"></div>
+    <button class="gigante" onclick="iniciar()">▶ Start auto broadcast</button>
     <p id="erroStart" class="aviso"></p>
   </div>
 
@@ -79,39 +82,41 @@
     <div class="linha"><span class="vivo">● ON AIR</span><span id="relogio">00:00</span></div>
     <div class="medidor"><div id="nivel"></div></div>
 
-    <div id="banner" class="banner mutado">🔇 MUTADO<small id="bannerSub">aguardando fala…</small></div>
+    <div id="banner" class="banner mutado">🔇 MUTED<small id="bannerSub">waiting for speech…</small></div>
 
     <div class="modos">
       <button id="mAUTO" class="ativo" onclick="setModo('AUTO')">AUTO</button>
       <button id="mFORCE_ON" onclick="setModo('FORCE_ON')">FORCE ON</button>
       <button id="mFORCE_OFF" onclick="setModo('FORCE_OFF')">FORCE OFF</button>
     </div>
+    <p class="badge">AUTO: detector decides · FORCE ON: always translate · FORCE OFF: always muted</p>
 
-    <div class="score"><div class="rot"><span>🗣 Fala</span><output id="vFala">0%</output></div>
+    <div class="score"><div class="rot"><span>🗣 Speech</span><output id="vFala">0%</output></div>
       <div class="trilho"><div id="bFala" class="barra b-fala"></div></div></div>
-    <div class="score"><div class="rot"><span>🎵 Música</span><output id="vMusica">0%</output></div>
+    <div class="score"><div class="rot"><span>🎵 Music</span><output id="vMusica">0%</output></div>
       <div class="trilho"><div id="bMusica" class="barra b-musica"></div></div></div>
 
-    <div class="linha"><span class="badge" id="ouvintes">— ouvintes</span><span class="badge" id="topo">—</span></div>
+    <h2>Translations</h2>
+    <div id="ativos"><p class="badge">no listeners yet</p></div>
 
     <details>
-      <summary>⚙ Calibragem</summary>
-      <div class="ajuste"><label>Limiar de fala (liga)</label>
+      <summary>⚙ Calibration</summary>
+      <div class="ajuste"><label>Speech threshold (turn ON)</label>
         <input type="range" id="cLimFala" min="0.1" max="0.9" step="0.05" value="0.5" oninput="oLimFala.value=this.value"><output id="oLimFala">0.5</output></div>
-      <div class="ajuste"><label>Janelas de fala p/ ligar</label>
+      <div class="ajuste"><label>Speech windows to turn ON</label>
         <input type="range" id="cJanFala" min="1" max="6" step="1" value="2" oninput="oJanFala.value=this.value"><output id="oJanFala">2</output></div>
-      <div class="ajuste"><label>Limiar de música (desliga)</label>
+      <div class="ajuste"><label>Music threshold (turn OFF)</label>
         <input type="range" id="cLimMus" min="0.1" max="0.9" step="0.05" value="0.5" oninput="oLimMus.value=this.value"><output id="oLimMus">0.5</output></div>
-      <div class="ajuste"><label>Teto de fala p/ desligar</label>
+      <div class="ajuste"><label>Max speech to allow OFF</label>
         <input type="range" id="cTetoFala" min="0.05" max="0.6" step="0.05" value="0.3" oninput="oTetoFala.value=this.value"><output id="oTetoFala">0.3</output></div>
-      <div class="ajuste"><label>Janelas de música p/ desligar</label>
+      <div class="ajuste"><label>Music windows to turn OFF</label>
         <input type="range" id="cJanMus" min="1" max="8" step="1" value="4" oninput="oJanMus.value=this.value"><output id="oJanMus">4</output></div>
     </details>
 
-    <h2>Decisões do detector <span class="badge" id="contadores"></span></h2>
-    <div id="log" class="log"><p class="badge">aguardando primeira decisão…</p></div>
-    <button onclick="baixarCsv()">⬇ Exportar CSV da sessão</button>
-    <button class="perigo" onclick="encerrar()">Encerrar transmissão</button>
+    <h2>Detector decisions <span class="badge" id="contadores"></span></h2>
+    <div id="log" class="log"><p class="badge">waiting for first decision…</p></div>
+    <button onclick="baixarCsv()">⬇ Export session CSV</button>
+    <button class="perigo" onclick="encerrar()">End broadcast</button>
   </div>
 
 <script src="./vendor/livekit-client.umd.min.js"></script>
@@ -119,11 +124,13 @@
 import { AudioClassifier, FilesetResolver } from './vendor/audio_bundle.js';
 
 // ── estado ──────────────────────────────────────────────────────────────────
-let senha = '', room = null, track = null;         // transmissão (LiveKit)
+let senha = '', room = null, track = null;              // transmissão (LiveKit)
 let classificador = null, ctx = null, streamCls = null; // detecção (YAMNet)
 let modo = 'AUTO', estado = 'UNKNOWN', contFala = 0, contMusica = 0;
-let mutado = null;                                  // null = ainda não aplicado
+let mutado = null;                                      // null = ainda não aplicado
 let ultimaTransicao = Date.now(), nTransicoes = 0, rel = 0;
+let catalogo = [], fonte = 'en';
+const FONTES = ['en', 'pt-BR', 'es'];                   // mesmas opções do v1
 let csv = [['hora','fala','musica','top1','estado','modo','mutado']];
 
 const $ = id => document.getElementById(id);
@@ -137,19 +144,35 @@ window.entrar = async function () {
   senha = $('senha').value;
   const r = await fetch('/api/token', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ role: 'operador', password: senha }) });
-  if (!r.ok) { $('erroLogin').textContent = 'Senha errada'; return; }
+  if (!r.ok) { $('erroLogin').textContent = 'Wrong password'; return; }
   await navigator.mediaDevices.getUserMedia({ audio: true }).then(s => s.getTracks().forEach(t => t.stop()));
   const list = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput');
-  $('mics').innerHTML = list.map(d => `<option value="${d.deviceId}">🎙 ${d.label || 'Microfone'}</option>`).join('');
+  $('mics').innerHTML = list.map(d => `<option value="${d.deviceId}">🎙 ${d.label || 'Microphone'}</option>`).join('');
   const mesa = list.find(d => /scarlett|focusrite|qu-6|allen|usb audio/i.test(d.label || ''));
   if (mesa) $('mics').value = mesa.deviceId;
+
+  // idioma do orador — some da lista dos ouvintes (mesmo comportamento do v1)
+  const d = await (await fetch('/api/translate')).json();
+  catalogo = d.catalogo || [];
+  fonte = d.sourceLang || 'en';
+  desenharFontes();
   troca('login', 'pronto');
 };
+
+function desenharFontes() {
+  $('fontes').innerHTML = catalogo.filter(l => FONTES.includes(l.code)).map(l => `
+    <label class="linha radio">
+      <span>${l.flag} ${l.label}</span>
+      <input type="radio" name="fonte" value="${l.code}" ${l.code === fonte ? 'checked' : ''}
+        onchange="setFonte(this.value)">
+    </label>`).join('');
+}
+window.setFonte = v => { fonte = v; };
 
 // ── início: publica no LiveKit + liga o detector ────────────────────────────
 window.iniciar = async function () {
   try {
-    $('erroStart').textContent = 'carregando modelo…';
+    $('erroStart').textContent = 'loading model…';
     const deviceId = $('mics').value || undefined;
 
     // 1. detector (áudio CRU — sem supressão de ruído, para ouvir a música de verdade)
@@ -177,12 +200,12 @@ window.iniciar = async function () {
       requestAnimationFrame(nivel);
     })();
 
-    $('erroStart').textContent = 'conectando ao LiveKit…';
+    $('erroStart').textContent = 'connecting to LiveKit…';
 
     // 2. transmissão (mesmo fluxo do broadcast v1, captura PROCESSADA p/ tradução)
     const rs = await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'set-source', lang: 'en', password: senha }) });
-    if (!rs.ok) throw new Error((await rs.json()).error || 'set-source falhou');
+      body: JSON.stringify({ action: 'set-source', lang: fonte, password: senha }) });
+    if (!rs.ok) throw new Error((await rs.json()).error || 'failed to set speaker language');
     const { token, url } = await (await fetch('/api/token', { method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role: 'operador', password: senha }) })).json();
@@ -194,28 +217,36 @@ window.iniciar = async function () {
     await room.localParticipant.publishTrack(track, { name: 'mic-orador' });
 
     // começa MUTADO (fluxo real do culto) até o detector confirmar fala
-    await aplicarMute(true, 'início da sessão');
+    await aplicarMute(true, 'session start');
 
     setInterval(() => {
       rel++;
       $('relogio').textContent = String(Math.floor(rel / 60)).padStart(2, '0') + ':' + String(rel % 60).padStart(2, '0');
     }, 1000);
-    setInterval(async () => {
-      try {
-        const d = await (await fetch('/api/translate')).json();
-        const tot = (d.active || []).reduce((s, a) => s + (a.listeners || 0), 0);
-        $('ouvintes').textContent = `${tot} ouvinte${tot === 1 ? '' : 's'}`;
-      } catch {}
-    }, 5000);
+    setInterval(atualizarOuvintes, 5000);
 
     wakeLock();
     troca('pronto', 'aovivo');
   } catch (e) {
-    $('erroStart').textContent = 'Falhou: ' + e.message;
+    $('erroStart').textContent = 'Failed to start: ' + e.message;
   }
 };
 
-// ── classificação + máquina de estados (idêntica ao detector) ───────────────
+// ouvintes por idioma, como no v1 (🟢 traduzindo, ⚪ parado)
+async function atualizarOuvintes() {
+  try {
+    const d = await (await fetch('/api/translate')).json();
+    const langs = d.languages || [];
+    const rotulo = code => { const l = langs.find(x => x.code === code); return l ? `${l.flag} ${l.label}` : code; };
+    const ativos = d.active || [];
+    $('ativos').innerHTML = ativos.length
+      ? ativos.map(a => `<div class="linha"><span>${rotulo(a.lang)} ${a.traduzindo ? '🟢' : '⚪'}</span>
+          <span>${a.listeners} listener${a.listeners === 1 ? '' : 's'}</span></div>`).join('')
+      : '<p class="badge">no listeners yet</p>';
+  } catch {}
+}
+
+// ── classificação + máquina de estados ──────────────────────────────────────
 function classificar(amostras) {
   if (!classificador) return;
   const resultados = classificador.classify(amostras, 16000);
@@ -239,7 +270,6 @@ function classificar(amostras) {
 
   decidir();
   põe('Fala', fala); põe('Musica', musica);
-  $('topo').textContent = top1;
   csv.push([new Date().toISOString(), fala.toFixed(3), musica.toFixed(3), top1, estado, modo, mutado]);
 }
 
@@ -247,8 +277,8 @@ function transicao(novo, fala, musica) {
   const dt = ((Date.now() - ultimaTransicao) / 1000).toFixed(0);
   ultimaTransicao = Date.now(); nTransicoes++; estado = novo;
   logar(novo === 'SPEECH'
-    ? `▶ FALA (fala ${pc(fala)}, música ${pc(musica)}) — ${dt}s no estado anterior`
-    : `🎵 MÚSICA (música ${pc(musica)}, fala ${pc(fala)}) — ${dt}s no estado anterior`,
+    ? `▶ SPEECH (speech ${pc(fala)}, music ${pc(musica)}) — ${dt}s in previous state`
+    : `🎵 MUSIC (music ${pc(musica)}, speech ${pc(fala)}) — ${dt}s in previous state`,
     novo === 'SPEECH' ? 'fala' : 'mute');
   $('contadores').textContent = `(${nTransicoes})`;
 }
@@ -268,16 +298,16 @@ async function aplicarMute(alvo, motivo) {
     // A4: mesmo aviso sincronizado do v1 → ouvintes veem "worship time" no idioma deles
     fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'set-mute', muted: alvo, password: senha }) }).catch(() => {});
-    logar(alvo ? `🔇 MUTE aplicado (${motivo})` : `🎤 UNMUTE aplicado (${motivo})`, alvo ? 'mute' : 'fala');
+    logar(alvo ? `🔇 MUTE applied (${motivo})` : `🎤 UNMUTE applied (${motivo})`, alvo ? 'mute' : 'fala');
   } catch (e) {
-    logar('⚠️ falha ao aplicar mute: ' + e.message, 'mute');
+    logar('⚠️ mute failed: ' + e.message, 'mute');
   }
   const b = $('banner');
   b.className = 'banner ' + (alvo ? 'mutado' : 'traduzindo');
-  b.childNodes[0].textContent = alvo ? '🔇 MUTADO ' : '🎤 TRADUZINDO ';
-  $('bannerSub').textContent = modo !== 'AUTO' ? `modo ${modo}` :
-    estado === 'UNKNOWN' ? 'aguardando fala…' :
-    estado === 'SPEECH' ? 'pregação detectada' : 'louvor detectado';
+  b.childNodes[0].textContent = alvo ? '🔇 MUTED ' : '🎤 TRANSLATING ';
+  $('bannerSub').textContent = modo !== 'AUTO' ? `${modo} mode` :
+    estado === 'UNKNOWN' ? 'waiting for speech…' :
+    estado === 'SPEECH' ? 'sermon detected' : 'worship detected';
 }
 
 window.setModo = function (m) {
@@ -288,7 +318,7 @@ window.setModo = function (m) {
 };
 
 window.encerrar = async function () {
-  if (!confirm('Encerrar a transmissão para todos?')) return;
+  if (!confirm('End the broadcast for everyone?')) return;
   await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'stop-all', password: senha }) });
   try { await room?.disconnect(); } catch {}
@@ -308,7 +338,7 @@ function logar(msg, classe) {
   if (log.firstChild?.classList?.contains('badge')) log.innerHTML = '';
   const p = document.createElement('p');
   p.className = classe;
-  p.textContent = `${new Date().toLocaleTimeString('pt-BR')} ${msg}`;
+  p.textContent = `${new Date().toLocaleTimeString('en-US', { hour12: false })} ${msg}`;
   log.appendChild(p); log.scrollTop = log.scrollHeight;
 }
 
