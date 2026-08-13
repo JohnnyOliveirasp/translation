@@ -108,7 +108,7 @@
   </div>
 
 <script type="module">
-import { AudioClassifier, FilesetResolver } from '/vendor/audio_bundle.mjs';
+import { AudioClassifier, FilesetResolver } from './vendor/audio_bundle.js';
 
 // ── estado global ────────────────────────────────────────────────────────────
 let classificador = null, ctx = null, stream = null;
@@ -136,9 +136,9 @@ if (mesa) $('mics').value = mesa.deviceId;
 window.iniciar = async function () {
   try {
     $('erro').textContent = 'carregando modelo…';
-    const fileset = await FilesetResolver.forAudioTasks('/vendor/wasm');
+    const fileset = await FilesetResolver.forAudioTasks('vendor/wasm');
     classificador = await AudioClassifier.createFromOptions(fileset, {
-      baseOptions: { modelAssetPath: '/vendor/yamnet.tflite' },
+      baseOptions: { modelAssetPath: 'vendor/yamnet.tflite' },
     });
 
     // captura CRUA: noiseSuppression desligado para não "limpar" a música que queremos detectar

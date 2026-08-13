@@ -12,7 +12,7 @@ const BASE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-audio@${VERSAO}`;
 const MODELO = 'https://storage.googleapis.com/mediapipe-models/audio_classifier/yamnet/float32/1/yamnet.tflite';
 
 const ARQUIVOS = [
-  [`${BASE}/audio_bundle.mjs`, 'audio_bundle.mjs'],
+  [`${BASE}/audio_bundle.mjs`, 'audio_bundle.js'],
   [`${BASE}/wasm/audio_wasm_internal.js`, 'wasm/audio_wasm_internal.js'],
   [`${BASE}/wasm/audio_wasm_internal.wasm`, 'wasm/audio_wasm_internal.wasm'],
   [`${BASE}/wasm/audio_wasm_nosimd_internal.js`, 'wasm/audio_wasm_nosimd_internal.js'],
