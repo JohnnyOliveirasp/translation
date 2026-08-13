@@ -6,9 +6,9 @@
 
 **Subject:** Audio feed from the Qu-6D for the live translation system — 2 simple options
 
-Hi [name],
+Hi Brat,
 
-As you know, we've been running the live translation system during the services — people scan the QR code and hear the sermon in their own language on their phones.
+As you know, we've been running the live translation system during the services — people scan the QR code and hear the sermon in their own language on their phones. It went really well on Sunday!
 
 Right now the system listens through a lapel microphone, which means it also picks up room echo and background noise. To make the translation faster and more accurate, the best solution is to feed the audio **directly from the sound board** into the laptop that runs the system. I checked your board (the Allen & Heath Qu-6D) and this is very easy to do — I've attached a small diagram showing the two possible ways:
 
