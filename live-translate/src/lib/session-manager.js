@@ -87,6 +87,11 @@ class SessionManager {
   varrer() {
     const agora = Date.now(), limite = agora - 15000;
     for (const [id, p] of this.presencas) if (p.visto <= limite) this.presencas.delete(id);
+    // MUTE (louvor) = ponte NÃO cai por ociosidade. Descoberto no teste de 13/08:
+    // o Safari do iPhone suspende a página no louvor longo → heartbeats param →
+    // ponte era derrubada e o ouvinte ficava mudo quando a pregação voltava.
+    // Ponte mutada custa ~zero (nenhum áudio vai ao Gemini), então manter é seguro.
+    if (this.muted) { for (const e of this.entries.values()) e.vazioDesde = null; return; }
     const idleMs = (Number(process.env.IDLE_TIMEOUT_SECONDS) || 120) * 1000;
     for (const [lang, e] of this.entries) {
       if (this.contar(lang) > 0) { e.vazioDesde = null; continue; }

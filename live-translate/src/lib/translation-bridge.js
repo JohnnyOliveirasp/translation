@@ -117,7 +117,7 @@ export class TranslationBridge {
       // ignora a voz fixa (A1) nos primeiros segundos de sessão RETOMADA (blip de voz
       // feminina após o goAway). Palavras não se perdem: o buffer pendingB64 reenvia o
       // áudio da troca de qualquer forma.
-      sessionResumption: (process.env.NO_RESUME !== '1' && this.resumeHandle) ? { handle: this.resumeHandle } : {},
+      sessionResumption: this.usarHandle() ? { handle: this.resumeHandle } : {},
     };
 
     // A1 — VOZ FIXA: sem isto o modelo sorteia voz nova a cada renovação de sessão
@@ -135,8 +135,12 @@ export class TranslationBridge {
         onclose: () => { if (this.running) this.reconnectGemini('conexão fechada'); },
       },
     });
-    this.log('sessão Gemini aberta', this.resumeHandle ? '(retomada com handle)' : '(nova)');
+    // o log reflete o modo REALMENTE usado (antes dizia "com handle" só porque o
+    // handle existia — mesmo com NO_RESUME=1 enviando sessão limpa)
+    this.log('sessão Gemini aberta', this.usarHandle() ? '(retomada com handle)' : '(nova/limpa)');
   }
+
+  usarHandle() { return process.env.NO_RESUME !== '1' && !!this.resumeHandle; }
 
   onGeminiMessage(msg) {
     if (msg.sessionResumptionUpdate?.newHandle) this.resumeHandle = msg.sessionResumptionUpdate.newHandle;
