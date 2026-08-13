@@ -126,6 +126,12 @@ que um operador humano. O buffer rolante de 1s para NÃO perder nada exige mover
 ### Fase 3 — (futuro, só após G3) Gate no bridge com buffer rolante
 - Move a decisão para o servidor, buffer de 1s, zero perda de palavras na transição.
 
+### Decisão de produto (Johnny, 13/08)
+Scores, sliders de calibragem e exportação CSV são ferramentas de DESENVOLVIMENTO.
+Na versão produto, a tela do operador mostra só: banner de status, AUTO/FORCE ON/FORCE OFF
+e ouvintes. Todo o instrumental de debug migra para um MODO ADMIN restrito (mesma
+filosofia do v1: custo existe só em log, nunca na tela do operador).
+
 ### Fora de escopo da POC3
 - Glossário/contexto (impossível no S2S do v1 — pertence à POC2).
 - Scripture detection nas legendas (roadmap, depois).
