@@ -23,11 +23,13 @@ export default function Ouvinte() {
   const [estado, setEstado] = useState('inicio'); // inicio | conectando | ouvindo | reconectando
   const [pausado, setPausado] = useState(false);
   const [mutado, setMutado] = useState(false);   // operador está em MUTE (louvor)
+  const [precisaToque, setPrecisaToque] = useState(false); // navegador bloqueou o áudio
   const [paragrafos, setParagrafos] = useState([]); // legenda como texto corrido
   const legendaRef = useRef(null);
   const roomRef = useRef(null);
   const audioRef = useRef(null);
   const langRef = useRef(null);
+  const pausadoRef = useRef(false); // espelho de `pausado` para uso dentro do vigia
 
   // id estável deste ouvinte (sobrevive a recarregar a página)
   const idRef = useRef(null);
@@ -73,6 +75,42 @@ export default function Ouvinte() {
       try { lock?.release(); } catch {}
     };
   }, [estado]);
+
+  // VIGIA DE ÁUDIO — Chrome no iPhone (e Android) pausa o elemento <audio> durante o
+  // louvor longo (áudio só silêncio, aba em segundo plano, interrupção do sistema) e
+  // NÃO retoma sozinho quando a voz volta: o ouvinte fica só com a legenda, porque
+  // as legendas chegam por data channel, independente do áudio. Achado em 15/08 no
+  // Chrome iOS — o Safari retomava sozinho, por isso funcionou ao trocar de navegador.
+  async function garantirAudio() {
+    const a = audioRef.current;
+    if (!a || pausadoRef.current) return;   // respeita a pausa manual do ouvinte
+    if (!a.paused) { setPrecisaToque(false); return; }
+    try { await a.play(); setPrecisaToque(false); }
+    catch { setPrecisaToque(true); }        // política do navegador: só volta com toque
+  }
+
+  useEffect(() => { pausadoRef.current = pausado; }, [pausado]);
+
+  useEffect(() => {
+    if (estado !== 'ouvindo') return;
+    const a = audioRef.current;
+    if (!a) return;
+    const aoPausar = () => { if (!pausadoRef.current) garantirAudio(); };
+    const aoVoltar = () => { if (document.visibilityState === 'visible') garantirAudio(); };
+    a.addEventListener('pause', aoPausar);
+    document.addEventListener('visibilitychange', aoVoltar);
+    const t = setInterval(garantirAudio, 3000); // rede de segurança
+    return () => {
+      a.removeEventListener('pause', aoPausar);
+      document.removeEventListener('visibilitychange', aoVoltar);
+      clearInterval(t);
+    };
+  }, [estado]);
+
+  // fim do louvor: momento exato em que a voz volta — tenta destravar na hora
+  useEffect(() => {
+    if (!mutado && estado === 'ouvindo') garantirAudio();
+  }, [mutado, estado]);
 
   // avisa o servidor quando a aba fecha (decrementa ouvintes → derruba sessão ociosa)
   useEffect(() => {
@@ -162,8 +200,10 @@ export default function Ouvinte() {
 
   function pausar() {
     if (!audioRef.current) return;
-    if (pausado) { audioRef.current.play().catch(() => {}); } else { audioRef.current.pause(); }
-    setPausado(!pausado);
+    const novo = !pausado;
+    pausadoRef.current = novo; // antes do play/pause: o vigia não pode brigar com o ouvinte
+    if (novo) audioRef.current.pause(); else audioRef.current.play().catch(() => setPrecisaToque(true));
+    setPausado(novo);
   }
 
   async function voltar() {
@@ -217,6 +257,13 @@ export default function Ouvinte() {
               <strong>{(AVISO_LOUVOR[lang] || AVISO_LOUVOR.en).titulo}</strong>
               <p>{(AVISO_LOUVOR[lang] || AVISO_LOUVOR.en).texto}</p>
             </div>
+          )}
+          {/* último recurso: o navegador exige um toque para religar o som */}
+          {precisaToque && estado === 'ouvindo' && !pausado && (
+            <button className="botao-gigante" onClick={garantirAudio}
+              style={{ background: '#b45309' }}>
+              🔊 TAP TO TURN THE SOUND BACK ON
+            </button>
           )}
           <button className="botao-gigante" onClick={pausar} disabled={mutado}>
             {mutado ? '🎵 —' : pausado ? '▶ RESUME' : '⏸ PAUSE'}
