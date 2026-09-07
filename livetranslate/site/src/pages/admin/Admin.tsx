@@ -14,6 +14,43 @@ import { downloadPosterPdf } from '../../lib/poster';
 type Tab = 'overview' | 'settings' | 'languages' | 'team' | 'services' | 'sermons' | 'billing';
 const SITE = 'https://livetranslate.church';
 
+/** Logado sem igreja. Se o signup deixou a igreja pendente no navegador (fluxo do
+ *  Google: preencheu o formulário → OAuth → voltou aqui), cria sozinha; senão manda
+ *  para o /signup, que para quem já está logado pede só os dados da igreja. */
+function SemIgreja() {
+  const { t } = useLang();
+  const { refresh, signOut } = useAuth();
+  const [criando, setCriando] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    const pendente = JSON.parse(sessionStorage.getItem('lt-pending-church') || 'null');
+    if (!pendente?.name || !pendente?.slug) return;
+    setCriando(true);
+    const defaults = pendente.lang === 'en' ? ['es', 'pt-BR'] : ['en'];
+    supabase.rpc('create_church', {
+      p_name: pendente.name, p_slug: pendente.slug, p_speaker_lang: pendente.lang, p_languages: defaults,
+    }).then(async ({ error }) => {
+      sessionStorage.removeItem('lt-pending-church');
+      if (error) { setErr(error.message); setCriando(false); return; }
+      await refresh();   // memberships chegam e o Admin renderiza normal
+    });
+  }, [refresh]);
+  return (
+    <AuthShell>
+      {criando ? (
+        <p className="flex items-center gap-2 text-sm text-muted"><Loader2 className="h-4 w-4 animate-spin" /> {t('a.working')}</p>
+      ) : (
+        <>
+          <ErrorMsg msg={err} />
+          <p className={`text-sm text-muted ${err ? 'mt-4' : ''}`}>{t('ad.noChurch')}</p>
+          <a href="/signup" className="mt-6 inline-block rounded-full bg-ink px-6 py-3 text-sm text-white">{t('ad.createChurch')}</a>
+          <button onClick={signOut} className="mt-4 block text-xs text-muted hover:text-ink">{t('ad.signout')}</button>
+        </>
+      )}
+    </AuthShell>
+  );
+}
+
 export default function Admin() {
   const { t } = useLang();
   const { navigate } = useRouter();
@@ -24,15 +61,7 @@ export default function Admin() {
   if (loading || !user) return null;
 
   const m = memberships[0];
-  if (!m) {
-    return (
-      <AuthShell>
-        <p className="text-sm text-muted">{t('ad.noChurch')}</p>
-        <a href="/signup" className="mt-6 inline-block rounded-full bg-ink px-6 py-3 text-sm text-white">{t('ad.createChurch')}</a>
-        <button onClick={signOut} className="mt-4 block text-xs text-muted hover:text-ink">{t('ad.signout')}</button>
-      </AuthShell>
-    );
-  }
+  if (!m) return <SemIgreja />;
   const church = m.churches;
   const isAdmin = m.role === 'admin';
   const items: (NavItem & { admin?: boolean; sub?: string })[] = [

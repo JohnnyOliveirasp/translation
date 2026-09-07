@@ -4,7 +4,7 @@ import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
 import { LANGUAGE_CATALOG } from '../../lib/languages';
-import { AuthShell, Title, Field, Select, Button, ErrorMsg, slugify } from './ui';
+import { AuthShell, Title, Field, Select, Button, ErrorMsg, GoogleButton, OrDivider, slugify } from './ui';
 
 type Step = 'form' | 'verify';
 const PENDING_KEY = 'lt-pending-church';
@@ -12,7 +12,7 @@ const PENDING_KEY = 'lt-pending-church';
 export default function Signup() {
   const { t } = useLang();
   const { navigate } = useRouter();
-  const { refresh } = useAuth();
+  const { refresh, user, memberships } = useAuth();
   const [step, setStep] = useState<Step>('form');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -70,6 +70,34 @@ export default function Signup() {
     await supabase.auth.resend({ type: 'signup', email });
   }
 
+  // Chegou logado (login com Google) e ainda sem igreja: só falta batizar a igreja.
+  // A conta já existe — não pedimos nome/e-mail/senha de novo.
+  async function submitLogado(e: FormEvent) {
+    e.preventDefault(); setErr(null); setBusy(true);
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang }));
+    await createChurch();
+    setBusy(false);
+  }
+
+  if (user && !memberships.length) {
+    return (
+      <AuthShell>
+        <Title text={t('a.finish.title')} />
+        <p className="mt-3 text-sm text-muted">{t('a.finish.sub')}</p>
+        <form onSubmit={submitLogado} className="mt-8 space-y-4">
+          <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required autoFocus />
+          <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
+            required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || 'your-church'}`} />
+          <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
+            {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
+          </Select>
+          <ErrorMsg msg={err} />
+          <Button type="submit" loading={busy}>{busy ? t('a.working') : t('a.finish.cta')}</Button>
+        </form>
+      </AuthShell>
+    );
+  }
+
   if (step === 'verify') {
     return (
       <AuthShell>
@@ -90,7 +118,12 @@ export default function Signup() {
     <AuthShell>
       <Title text={t('a.signup.title')} />
       <p className="mt-3 text-sm text-muted">{t('a.signup.sub')}</p>
-      <form onSubmit={submit} className="mt-8 space-y-4">
+      {/* Google: se a pessoa já preencheu a igreja, guardamos para criar sozinha na volta */}
+      <div className="mt-8"><GoogleButton label={t('a.google')} onBefore={() => {
+        if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang }));
+      }} /></div>
+      <OrDivider label={t('a.or')} />
+      <form onSubmit={submit} className="space-y-4">
         <Field label={t('a.fullName')} value={fullName} onChange={e => setFullName(e.target.value)} required autoComplete="name" />
         <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required />
         <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}

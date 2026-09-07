@@ -9,6 +9,7 @@ import Admin from './pages/admin/Admin';
 import Listen from './pages/Listen';
 import Broadcast from './pages/admin/Broadcast';
 import { useRouter, matchPath } from './router';
+import { Privacy, Terms } from './pages/Legal';
 
 /** Caminhos do produto — tudo que sobrar de 1 segmento é slug de igreja (/{slug}). */
 const RESERVED = new Set(['signup', 'login', 'recover', 'admin', 'invite', 'broadcast', 'assets', 'terms', 'privacy']);
@@ -26,6 +27,8 @@ export default function App() {
   else if (path === '/login') page = <Login />;
   else if (path === '/recover') page = <Recover />;
   else if (path === '/admin') page = <Admin />;
+  else if (path === '/privacy') page = <Privacy />;
+  else if (path === '/terms') page = <Terms />;
   else if (invite) page = <Invite token={invite.token} />;
   else if (bc) page = <Broadcast slug={bc.slug} />;
   else if (slug) page = <Listen slug={slug} />;
