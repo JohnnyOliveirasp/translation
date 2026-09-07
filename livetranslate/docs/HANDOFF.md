@@ -158,3 +158,13 @@ Quando o operador clica em **Encerrar transmissão** (`stop-all`), o servidor ge
 - **Download**: `GET /api/sermons?slug=` lista e `&file=` baixa — só membro da igreja (o sermão não é público). No painel virou a aba **Sermons**.
 - **Limitação de fonte**: as fontes base do PDF cobrem só Latin-1; chinês, coreano, japonês, árabe e hindi saem como "?". Para esses idiomas será preciso embutir uma fonte (ou gerar a página como imagem, como no cartaz).
 - **Falta o envio por e-mail** — depende do SMTP (pendência do Johnny). Quando existir: ler `listener_emails` (idioma de cada pessoa) + `churches.sermon_recipients` e anexar o PDF certo.
+
+## 18. Login com Google + páginas legais (07/09)
+- Google Cloud: projeto `livetranslate-507920` (conta johnny.oliveira@jcsolutionsus.com), cliente OAuth "LiveTranslate Web", app EM PRODUÇÃO (escopos básicos; sem logo de propósito — logo exige verificação do Google). Redirect: `https://yrqtncjkwfrgwecyxkmc.supabase.co/auth/v1/callback`.
+- Supabase: provider Google Enabled (dashboard → Auth → Sign In/Providers).
+- Site: `GoogleButton`/`OrDivider` em `site/src/pages/auth/ui.tsx`; botão no /login e /signup; usuário logado sem igreja → /signup pede só a igreja (`a.finish.*`); /admin auto-cria a igreja se `lt-pending-church` estiver no sessionStorage.
+- `/privacy` e `/terms` criados (`site/src/pages/Legal.tsx`, rotas no App.tsx) — texto padrão, Johnny precisa revisar.
+- Pendente de decisão: Custom Domain do Supabase (US$10/mês) p/ tela do Google mostrar `auth.livetranslate.church`.
+
+## 19. Próximo: Stripe
+Copiar a integração de um projeto do Johnny (ele passa o caminho; provável ResumePro). Schema já tem plan/status/trial; painel já tem a aba Subscription.
