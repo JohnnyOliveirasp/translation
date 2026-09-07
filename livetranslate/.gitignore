@@ -1,0 +1,16 @@
+
+
+# vendor do detector (YAMNet/MediaPipe/livekit-client) — igual à POC3: fora do git,
+# são ~18 MB de binários; copiar de /mnt/volume/traducao/poc3/vendor/ no servidor
+site/public/vendor/
+
+# backend do broadcast
+api/node_modules/
+api/.next/
+api/logs/
+
+# vídeos/logos crus enviados pelo Johnny (o site usa as versões processadas em public/assets)
+images/
+
+# build do site (gerado por npm run build)
+site/dist/

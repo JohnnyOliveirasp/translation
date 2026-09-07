@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" width="900" height="500">
+  <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;display=swap');
+  .wm{font-family:'Instrument Serif',Georgia,'Times New Roman',serif;font-size:118px;letter-spacing:-2px}</style>
+  <g transform="translate(250 0) scale(1)"><g><rect x="10" y="130" width="28" height="80" rx="14" fill="#000000"/><rect x="54" y="95" width="28" height="150" rx="14" fill="#000000"/><rect x="98" y="70" width="28" height="200" rx="14" fill="#000000"/><rect x="142" y="120" width="28" height="100" rx="14" fill="#000000"/><rect x="230" y="120" width="28" height="100" rx="14" fill="#000000"/><rect x="274" y="70" width="28" height="200" rx="14" fill="#000000"/><rect x="318" y="95" width="28" height="150" rx="14" fill="#000000"/><rect x="362" y="130" width="28" height="80" rx="14" fill="#000000"/>
+  <rect x="186" y="40" width="28" height="260" rx="14" fill="#000000"/>
+  <rect x="150" y="90" width="100" height="28" rx="14" fill="#000000"/></g></g>
+  <text class="wm" x="450" y="425" text-anchor="middle" fill="#000000">LiveTranslate</text>
+</svg>

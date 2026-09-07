@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LiveTranslate — Sunday Operator Manual</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1a1a1a; --muted: #6f6c66; --bg: #faf9f6; --card: #ffffff;
+    --line: rgba(0,0,0,.09); --accent: #b5443c; --green-bg:#ecfdf5; --green-bd:#a7f3d0; --green-tx:#065f46;
+    --amber-bg:#fffbeb; --amber-bd:#fde68a; --amber-tx:#92400e; --dark:#0f172a;
+  }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; color: var(--ink); background:#fff; font-size: 10.5pt; line-height: 1.55; }
+  .page { width: 210mm; height: 296mm; padding: 16mm 17mm; page-break-after: always; position: relative; background: var(--bg); overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+  h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 30pt; line-height: 1.1; }
+  h2 { font-family: Georgia, serif; font-weight: 400; font-size: 19pt; margin-bottom: 4mm; }
+  h2 .stepnum { display:inline-flex; align-items:center; justify-content:center; width: 9.5mm; height: 9.5mm; border-radius: 50%; background: var(--ink); color:#fff; font-family:'Segoe UI',sans-serif; font-size: 12pt; font-weight: 600; vertical-align: middle; margin-right: 3mm; }
+  p.lead { color: var(--muted); font-size: 11pt; }
+  .muted { color: var(--muted); }
+  .small { font-size: 9pt; }
+
+  /* browser frame mockup */
+  .browser { border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.06); overflow: hidden; margin: 5mm 0; }
+  .browser .bar { display:flex; align-items:center; gap: 6px; background:#f1efeb; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+  .browser .dot { width:9px; height:9px; border-radius:50%; background:#d6d3cd; }
+  .browser .url { flex:1; background:#fff; border:1px solid var(--line); border-radius: 99px; padding: 3px 12px; font-size: 9pt; color:#3b3b3b; }
+  .browser .url b { color:#000; }
+  .screen { padding: 7mm 8mm; background: var(--bg); }
+
+  /* UI pieces */
+  .serif { font-family: Georgia, serif; }
+  .field { margin-bottom: 4mm; }
+  .field .lab { font-size: 8pt; font-weight: 600; color: var(--muted); margin-bottom: 1.2mm; }
+  .input { border: 1px solid rgba(0,0,0,.12); background:#fff; border-radius: 9px; padding: 3mm 4mm; font-size: 9.5pt; color:#333; }
+  .btn-dark { display: inline-block; background: var(--ink); color: #fff; border-radius: 99px; padding: 3mm 7mm; font-size: 10pt; }
+  .btn-red { display:inline-block; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius: 99px; padding: 3mm 7mm; font-size: 10pt; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 5mm; margin-bottom: 4mm; }
+  .pill { display:inline-block; border-radius:99px; padding: 1.6mm 4mm; font-size: 9pt; border: 1px solid rgba(0,0,0,.12); background:#fff; margin-right: 2mm; }
+  .pill.sel { background: var(--ink); color:#fff; border-color: var(--ink); }
+  .chip { display:inline-block; border-radius:99px; padding: 1.6mm 4mm; font-size: 9pt; background: rgba(0,0,0,.045); margin-right: 2mm; }
+  .onair { display:inline-flex; align-items:center; gap: 2mm; background:#fef2f2; color:#b91c1c; border-radius:99px; padding: 2mm 4.5mm; font-size: 9.5pt; }
+  .onair .d { width: 2.6mm; height: 2.6mm; border-radius: 50%; background: #dc2626; }
+  .statecard { border-radius: 12px; padding: 5mm; margin-bottom: 4mm; }
+  .statecard.green { background: var(--green-bg); border: 1px solid var(--green-bd); }
+  .statecard.amber { background: var(--amber-bg); border: 1px solid var(--amber-bd); }
+  .meter { height: 3mm; border-radius: 99px; background: rgba(0,0,0,.10); overflow: hidden; margin-top: 3.5mm; }
+  .meter i { display:block; height: 100%; width: 58%; background: var(--ink); }
+  .logocard { display: inline-flex; align-items: center; background: var(--dark); border-radius: 12px; padding: 3mm 5mm; }
+  .logocard img { height: 9mm; }
+
+  /* callout badges */
+  .anno { position: relative; }
+  .rel { position: relative; }
+  .badge { position: absolute; width: 7.5mm; height: 7.5mm; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; font-size: 11pt; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,.35); z-index: 5; }
+  .badge.in { right: -3.2mm; top: 50%; margin-top: -3.75mm; }
+  .steps { margin: 4mm 0 0; }
+  .steps li { list-style: none; display: flex; gap: 3mm; margin-bottom: 2.8mm; align-items: flex-start; }
+  .steps .n { flex: 0 0 auto; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; font-size: 9.5pt; display: flex; align-items: center; justify-content: center; margin-top: .5mm; }
+
+  .callout { border-left: 3px solid var(--ink); background: #fff; border-radius: 0 10px 10px 0; padding: 4mm 5mm; margin: 4mm 0; }
+  .callout.warn { border-left-color: #d97706; background: #fffbeb; }
+  .callout.danger { border-left-color: #dc2626; background: #fef2f2; }
+  .callout b.t { display:block; margin-bottom: 1mm; }
+
+  table.trouble { width: 100%; border-collapse: collapse; margin-top: 4mm; }
+  table.trouble th { text-align: left; font-size: 9pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 2.5mm 3mm; border-bottom: 2px solid var(--ink); }
+  table.trouble td { padding: 3mm; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 9.8pt; }
+  table.trouble td:first-child { width: 38%; font-weight: 600; }
+
+  .footer { position: absolute; bottom: 9mm; left: 17mm; right: 17mm; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 2.5mm; }
+  .tag { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .18em; color: var(--muted); }
+  .bigcheck { display:flex; gap:3mm; align-items: flex-start; margin-bottom: 3mm; }
+  .bigcheck .box { flex:0 0 auto; width: 5mm; height: 5mm; border: 1.5px solid var(--ink); border-radius: 2px; margin-top: 1mm; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ PAGE 1 — COVER ═══════════════ -->
+<div class="page" style="display:flex; flex-direction:column; justify-content:center;">
+  <p class="tag">LiveTranslate · livetranslate.church</p>
+  <h1 style="margin-top:8mm;">Sunday Operator<br>Manual</h1>
+  <p class="lead" style="margin-top:6mm; max-width: 130mm;">
+    How to run the live translation during the service — step by step, with pictures of
+    every screen and every button you will press.
+  </p>
+  <div style="margin-top:14mm;" class="logocard"><img src="logo.png" alt="Redeem Community Church"></div>
+  <p class="muted" style="margin-top:4mm;">Redeem Community Church</p>
+
+  <div class="callout" style="margin-top:16mm; max-width:150mm;">
+    <b class="t">What this system does</b>
+    While the pastor preaches, people in the congregation hear the sermon <b>live in Spanish or
+    Portuguese</b> on their own phones, through their earbuds. Your job is simple: start it before
+    the service, glance at it now and then, and end it after the service. The system does the rest —
+    it even mutes itself automatically during worship music.
+  </div>
+
+  <div class="footer"><span>LiveTranslate — Sunday Operator Manual</span><span>Page 1 of 6</span></div>
+</div>
+
+<!-- ═══════════════ PAGE 2 — LOGIN ═══════════════ -->
+<div class="page">
+  <h2><span class="stepnum">1</span>Before the service — log in <span class="muted small">(arrive ~20 min early)</span></h2>
+  <p class="lead">On the computer at the sound desk, open <b>Google Chrome</b>.</p>
+
+  <div class="browser anno">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url rel">🔒 <b>livetranslate.church/login</b><span class="badge in">1</span></span></div>
+    <div class="screen" style="text-align:center; padding: 10mm 30mm;">
+      <div class="serif" style="font-size:19pt;">Welcome <i>back.</i></div>
+      <div style="text-align:left; margin-top:6mm;">
+        <div class="field"><div class="lab">EMAIL</div><div class="input rel">support.livetranslate.001@gmail.com<span class="badge in">2</span></div></div>
+        <div class="field"><div class="lab">PASSWORD</div><div class="input rel">••••••••••<span class="badge in">3</span></div></div>
+        <div style="text-align:center; margin-top:5mm;"><span class="btn-dark rel" style="min-width:60mm; text-align:center;">Log in<span class="badge in">4</span></span></div>
+        <p class="small muted" style="text-align:center; margin-top:3mm;">Forgot your password?</p>
+      </div>
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li><span class="n">1</span><span>In the address bar, type <b>livetranslate.church/login</b> and press Enter.</span></li>
+    <li><span class="n">2</span><span>Email: <b>support.livetranslate.001@gmail.com</b></span></li>
+    <li><span class="n">3</span><span>Password: <b>the one Johnny gave you</b> (it is not printed here on purpose — keep it private).</span></li>
+    <li><span class="n">4</span><span>Click <b>Log in</b>.</span></li>
+  </ol>
+
+  <div class="callout warn">
+    <b class="t">⚡ Two things to check on the computer</b>
+    • Plug the computer into <b>power</b> — it must not go to sleep during the service.<br>
+    • The <b>sound board (USB) cable</b> must be connected to the computer before you continue.
+  </div>
+
+  <div class="footer"><span>LiveTranslate — Sunday Operator Manual</span><span>Page 2 of 6</span></div>
+</div>
+
+<!-- ═══════════════ PAGE 3 — OPEN BROADCAST + SETUP ═══════════════ -->
+<div class="page">
+  <h2><span class="stepnum">2</span>Open the broadcast screen and set it up</h2>
+  <p class="lead">After logging in you land on the church dashboard. Find the <b>Open broadcast</b> button and click it.</p>
+
+  <div class="browser anno" style="max-width:140mm; margin: 4mm 0;">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url">🔒 <b>livetranslate.church/admin</b></span></div>
+    <div class="screen" style="padding: 4mm 6mm;">
+      <p class="small muted" style="letter-spacing:.15em; margin-bottom:2.5mm;">REDEEM COMMUNITY CHURCH — DASHBOARD</p>
+      <span class="btn-dark rel">Open broadcast<span class="badge in">1</span></span>
+      <span class="pill" style="margin-left:6mm;">Listener link: livetranslate.church/redeem-community-church</span>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-top:2mm;">The Broadcast screen opens. Check two dropdowns, then go live:</p>
+
+  <div class="browser anno" style="margin: 4mm 0;">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url">🔒 <b>livetranslate.church/broadcast/redeem-community-church</b></span></div>
+    <div class="screen" style="padding: 5mm 6mm 5mm 6mm; padding-right: 10mm;">
+      <p class="small muted" style="letter-spacing:.15em;">REDEEM COMMUNITY CHURCH</p>
+      <div class="serif" style="font-size:15pt; margin-bottom:3mm;">Broadcast</div>
+      <div class="card" style="padding:4mm;">
+        <div class="field"><div class="lab">MICROPHONE</div><div class="input rel">USB Audio — Allen &amp; Heath Qu (sound board)&nbsp; ▾<span class="badge in">2</span></div>
+          <p class="small muted" style="margin-top:1.5mm;">Pick the board or USB input the speaker uses.</p></div>
+        <div class="field" style="margin-bottom:0;"><div class="lab">LANGUAGE THE SPEAKER USES</div><div class="input rel">English&nbsp; ▾<span class="badge in">3</span></div></div>
+      </div>
+      <div class="card" style="padding:4mm;">
+        <div class="lab">LANGUAGES THIS SERVICE</div>
+        <p style="font-size:10pt; margin-top:1mm;">Español · Português &nbsp;<span class="small muted">— listeners hear it at livetranslate.church/redeem-community-church</span></p>
+      </div>
+      <span class="btn-dark rel">Go live<span class="badge in">4</span></span>
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li><span class="n">1</span><span>Click <b>Open broadcast</b> on the dashboard.</span></li>
+    <li><span class="n">2</span><span><b>Microphone</b>: choose the <b>sound board / USB input</b> (usually named “USB Audio” or “Allen &amp; Heath Qu”). <b>Not</b> the laptop’s internal mic.</span></li>
+    <li><span class="n">3</span><span><b>Language the speaker uses</b>: <b>English</b> (already selected — just confirm).</span></li>
+    <li><span class="n">4</span><span>Click <b>Go live</b>. If Chrome asks for microphone permission, click <b>Allow</b>.</span></li>
+  </ol>
+
+  <div class="footer"><span>LiveTranslate — Sunday Operator Manual</span><span>Page 3 of 6</span></div>
+</div>
+
+<!-- ═══════════════ PAGE 4 — ON AIR ═══════════════ -->
+<div class="page">
+  <h2><span class="stepnum">3</span>During the service — what you will see</h2>
+  <p class="lead">Once live, the screen looks like this. <b>Leave this tab open the whole service.</b></p>
+
+  <div class="browser anno">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url">🔒 <b>livetranslate.church/broadcast/redeem-community-church</b></span></div>
+    <div class="screen" style="padding-right: 11mm;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <p class="small muted" style="letter-spacing:.15em;">REDEEM COMMUNITY CHURCH</p>
+          <div class="serif" style="font-size:17pt;">Broadcast</div>
+        </div>
+        <span class="onair rel"><span class="d"></span> ON AIR<span class="badge in">A</span></span>
+      </div>
+      <div class="statecard green rel" style="margin-top:4mm;">
+        <span class="badge in">B</span>
+        <p style="font-size:11.5pt; color:var(--green-tx);">🎙️ &nbsp;<b>Translating</b></p>
+        <p class="small muted">Detector: speech · speech 0.78 · music 0.12</p>
+        <div class="meter"><i></i></div>
+      </div>
+      <div class="card rel">
+        <span class="badge in">C</span>
+        <div class="lab">WORSHIP SENSE</div>
+        <div style="margin-top:2mm;">
+          <span class="pill sel">Automatic</span><span class="pill">Always translating</span><span class="pill">Always muted</span>
+        </div>
+        <p class="small muted" style="margin-top:2mm;">Automatic mutes during singing and turns translation back on when preaching starts.</p>
+      </div>
+      <div class="card rel" style="margin-bottom:0;">
+        <span class="badge in">D</span>
+        <div class="lab">👥 LISTENERS RIGHT NOW</div>
+        <div style="margin-top:2mm;"><span class="chip">Español · 1</span><span class="chip">Português · 2</span></div>
+      </div>
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li><span class="n">A</span><span><b>ON AIR</b> — confirms you are broadcasting.</span></li>
+    <li><span class="n">B</span><span>The big status card. <b style="color:#065f46;">Green “Translating”</b> = preaching is being translated. During worship music it turns <b style="color:#92400e;">amber “Muted — worship”</b> — <b>this is normal and automatic</b>. It comes back to green by itself when preaching resumes (give it a few seconds).</span></li>
+    <li><span class="n">C</span><span><b>Worship Sense</b> buttons — normally you never touch them. Keep it on <b>Automatic</b>. (When to use the others: next page.)</span></li>
+    <li><span class="n">D</span><span>How many people are listening in each language. Numbers going up and down is normal.</span></li>
+  </ol>
+
+  <div class="callout">
+    <b class="t">Sound check (optional, before people arrive)</b>
+    Open <b>livetranslate.church/redeem-community-church</b> on your own phone, pick a language, and put in
+    one earbud. Have someone speak into the pastor’s mic — you should hear the translated voice ~3 seconds later.
+  </div>
+
+  <div class="footer"><span>LiveTranslate — Sunday Operator Manual</span><span>Page 4 of 6</span></div>
+</div>
+
+<!-- ═══════════════ PAGE 5 — TROUBLESHOOTING ═══════════════ -->
+<div class="page">
+  <h2><span class="stepnum">4</span>If something looks wrong</h2>
+  <p class="lead">Almost everything fixes itself. Here is the short list, in order of how likely it is:</p>
+
+  <table class="trouble">
+    <tr><th>What you see / hear</th><th>What to do</th></tr>
+    <tr>
+      <td>Someone says: “I see the captions but the sound stopped” on their phone</td>
+      <td>Their phone paused the audio (common on iPhones). Tell them to tap the big
+        <b>“TAP TO RESUME SOUND”</b> button shown on their screen — or leave and re-pick their language.
+        <b>Nothing is wrong on your side.</b></td>
+    </tr>
+    <tr>
+      <td>Preaching has started but the card is still amber <b>“Muted — worship”</b> for more than ~15 seconds</td>
+      <td>Click <b>Always translating</b>. When the next worship set starts, click <b>Automatic</b> again.</td>
+    </tr>
+    <tr>
+      <td>Pastor is chatting near a live mic before the service and you don’t want that translated</td>
+      <td>Click <b>Always muted</b>. Click <b>Automatic</b> when the service starts.</td>
+    </tr>
+    <tr>
+      <td>A red error message appears, or the level meter stays at zero while the pastor speaks</td>
+      <td>Refresh the page (<b>F5</b>), check the microphone dropdown, and click <b>Go live</b> again.
+        Listeners just re-pick their language — takes them 5 seconds.</td>
+    </tr>
+    <tr>
+      <td>You closed the tab by accident</td>
+      <td>Open <b>livetranslate.church/broadcast/redeem-community-church</b> again and click <b>Go live</b>. Same as above.</td>
+    </tr>
+  </table>
+
+  <div class="callout danger" style="margin-top:6mm;">
+    <b class="t">🚫 Please don’t</b>
+    • Don’t close the laptop lid or let it sleep while ON AIR.<br>
+    • Don’t click <b>End broadcast</b> in the middle of the service.<br>
+    • Don’t change anything under <b>Detector tuning</b> — those sliders are pre-calibrated.
+  </div>
+
+  <div class="footer"><span>LiveTranslate — Sunday Operator Manual</span><span>Page 5 of 6</span></div>
+</div>
+
+<!-- ═══════════════ PAGE 6 — END + CHEAT SHEET ═══════════════ -->
+<div class="page">
+  <h2><span class="stepnum">5</span>After the service — end the broadcast</h2>
+
+  <div class="browser anno" style="max-width:130mm;">
+    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="url">🔒 <b>livetranslate.church/broadcast/redeem-community-church</b></span></div>
+    <div class="screen">
+      <p class="small muted">(scroll to the bottom of the page)</p>
+      <div style="margin-top:3mm;"><span class="btn-red rel">End broadcast<span class="badge in">1</span></span></div>
+    </div>
+  </div>
+
+  <ol class="steps">
+    <li><span class="n">1</span><span>When the service is over, scroll down and click <b>End broadcast</b>.</span></li>
+    <li><span class="n">2</span><span>That’s it. The sermon PDFs (English, Spanish and Portuguese) are generated
+      <b>automatically</b> and appear in the dashboard under <b>Sermons</b>. You may close the browser.</span></li>
+  </ol>
+
+  <div style="border: 2px solid var(--ink); border-radius: 14px; padding: 6mm 7mm; margin-top: 8mm; background:#fff;">
+    <p class="tag" style="margin-bottom:4mm;">Quick reference — the whole Sunday in 6 lines</p>
+    <div class="bigcheck"><span class="box"></span><span>Computer on power · sound-board USB cable connected · open Chrome</span></div>
+    <div class="bigcheck"><span class="box"></span><span><b>livetranslate.church/login</b> → email + password → <b>Log in</b></span></div>
+    <div class="bigcheck"><span class="box"></span><span><b>Open broadcast</b> → Microphone = <b>sound board (USB)</b> → <b>Go live</b> → Allow mic</span></div>
+    <div class="bigcheck"><span class="box"></span><span>During service: green = translating, amber during worship = normal. Leave it alone.</span></div>
+    <div class="bigcheck"><span class="box"></span><span>Stuck on “Muted — worship” during preaching? → <b>Always translating</b>, then back to <b>Automatic</b></span></div>
+    <div class="bigcheck"><span class="box"></span><span>After the service: <b>End broadcast</b>. Done — the sermon PDFs are created automatically.</span></div>
+  </div>
+
+  <div class="callout" style="margin-top:6mm;">
+    <b class="t">Need help during the service?</b>
+    Text or call Johnny — and don’t worry: the worst case is refreshing the page and clicking
+    <b>Go live</b> again. You cannot break anything.
+  </div>
+
+  <div class="footer"><span>LiveTranslate — Sunday Operator Manual</span><span>Page 6 of 6</span></div>
+</div>
+
+</body>
+</html>

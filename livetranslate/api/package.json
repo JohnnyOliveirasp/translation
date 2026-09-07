@@ -1,0 +1,21 @@
+{
+  "name": "livetranslate-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LiveTranslate — API multi-tenant (LiveKit + Gemini) por igreja",
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "2.13.0",
+    "@livekit/rtc-node": "0.13.32",
+    "livekit-client": "2.21.0",
+    "livekit-server-sdk": "2.17.0",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "scripts": {
+    "dev": "next dev -p 4020",
+    "build": "next build",
+    "start": "next start -p 4020"
+  }
+}
