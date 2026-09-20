@@ -1,0 +1,250 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "LiveTranslate" [ref=e6] [cursor=pointer]:
+        - /url: "#top"
+        - img "LiveTranslate" [ref=e7]
+      - navigation "Main" [ref=e8]:
+        - link "Home" [ref=e9] [cursor=pointer]:
+          - /url: "#top"
+        - link "How it works" [ref=e10] [cursor=pointer]:
+          - /url: "#how"
+        - link "Worship Sense" [ref=e11] [cursor=pointer]:
+          - /url: "#features"
+        - link "Pricing" [ref=e12] [cursor=pointer]:
+          - /url: "#pricing"
+        - link "FAQ" [ref=e13] [cursor=pointer]:
+          - /url: "#faq"
+      - generic [ref=e14]:
+        - group "Language" [ref=e15]:
+          - button "EN" [ref=e16] [cursor=pointer]
+          - button "ES" [ref=e17] [cursor=pointer]
+          - button "PT" [ref=e18] [cursor=pointer]
+        - link "Log in" [ref=e19] [cursor=pointer]:
+          - /url: /login
+        - link "Try it free" [ref=e20] [cursor=pointer]:
+          - /url: "#pricing"
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - heading [level=1] [ref=e23]:
+        - text: Every sermon,
+        - emphasis [ref=e24]: in every language.
+      - paragraph [ref=e25]: Live AI translation for church services. Your members scan a QR code and hear the sermon in their own language, on their own phone — no app, no headsets, no operator. It even knows when worship starts.
+      - link "Try it this Sunday" [ref=e26] [cursor=pointer]:
+        - /url: "#pricing"
+      - paragraph [ref=e27]: No app · No hardware · No operator · Unlimited listeners
+    - generic [ref=e29]:
+      - paragraph [ref=e30]: Our story
+      - generic [ref=e31]:
+        - generic [ref=e32]: We
+        - generic [ref=e33]: built
+        - generic [ref=e34]: LiveTranslate
+        - generic [ref=e35]: for
+        - generic [ref=e36]: one
+        - generic [ref=e37]: church
+        - generic [ref=e38]: in
+        - generic [ref=e39]: Florida,
+        - generic [ref=e40]: so
+        - generic [ref=e41]: "no"
+        - generic [ref=e42]: one
+        - generic [ref=e43]: would
+        - generic [ref=e44]: sit
+        - generic [ref=e45]: in
+        - generic [ref=e46]: silence.
+        - generic [ref=e47]: Now
+        - generic [ref=e48]: every
+        - generic [ref=e49]: sermon
+        - generic [ref=e50]: can
+        - generic [ref=e51]: reach
+        - generic [ref=e52]: every
+        - generic [ref=e53]: language.
+      - paragraph [ref=e54]: On our very first Sunday, one listener followed the whole sermon in Spanish and came up afterwards to say she had understood every word for the first time. That is the entire product. Everything else — the automatic worship detection, the sermon PDF on Monday morning, the flat monthly price — exists so that moment happens in your church too.
+    - generic [ref=e57]:
+      - generic [ref=e58]:
+        - heading "Everything a church needs to be heard in every language." [level=2] [ref=e59]:
+          - generic [ref=e60]: Everything
+          - generic [ref=e61]: a
+          - generic [ref=e62]: church
+          - generic [ref=e63]: needs
+          - generic [ref=e64]: to
+          - generic [ref=e65]: be
+          - generic [ref=e66]: heard
+          - generic [ref=e67]: in
+          - generic [ref=e68]: every
+          - generic [ref=e69]: language.
+        - paragraph [ref=e70]:
+          - generic [ref=e71]: Built
+          - generic [ref=e72]: for
+          - generic [ref=e73]: Sundays.
+          - generic [ref=e74]: Powered
+          - generic [ref=e75]: by
+          - generic [ref=e76]: AI.
+      - generic [ref=e77]:
+        - paragraph [ref=e81]: Hear every word.
+        - generic [ref=e82]:
+          - generic [ref=e88]:
+            - heading "Worship Sense." [level=3] [ref=e89]
+            - generic [ref=e90]: "01"
+          - list [ref=e91]:
+            - listitem [ref=e92]:
+              - generic [ref=e95]: Hears the music and pauses translation automatically
+            - listitem [ref=e96]:
+              - generic [ref=e99]: Resumes the moment the pastor speaks
+            - listitem [ref=e100]:
+              - generic [ref=e103]: Your minutes never burn during songs
+            - listitem [ref=e104]:
+              - generic [ref=e107]: Nobody babysits it — your volunteer can worship too
+          - link "Learn more" [ref=e108] [cursor=pointer]:
+            - /url: "#pricing"
+        - generic [ref=e112]:
+          - generic [ref=e117]:
+            - heading "Sermon PDF." [level=3] [ref=e118]
+            - generic [ref=e119]: "02"
+          - list [ref=e120]:
+            - listitem [ref=e121]:
+              - generic [ref=e124]: Clean transcript with every Bible verse quoted correctly
+            - listitem [ref=e125]:
+              - generic [ref=e128]: Summary and small-group questions
+            - listitem [ref=e129]:
+              - generic [ref=e132]: Emailed to listeners in their language, pastor approves with one click
+          - link "Learn more" [ref=e133] [cursor=pointer]:
+            - /url: "#pricing"
+        - generic [ref=e137]:
+          - generic [ref=e141]:
+            - heading "Unlimited Sundays." [level=3] [ref=e142]
+            - generic [ref=e143]: "03"
+          - list [ref=e144]:
+            - listitem [ref=e145]:
+              - generic [ref=e148]: Flat monthly price — no hourly billing
+            - listitem [ref=e149]:
+              - generic [ref=e152]: Unlimited listeners, no per-language add-ons
+            - listitem [ref=e153]:
+              - generic [ref=e156]: Sunday support, because that is when it matters
+          - link "Learn more" [ref=e157] [cursor=pointer]:
+            - /url: "#pricing"
+    - generic [ref=e162]:
+      - paragraph [ref=e163]: How it works
+      - generic [ref=e164]:
+        - generic [ref=e165]: Set
+        - generic [ref=e166]: it
+        - generic [ref=e167]: up
+        - generic [ref=e168]: once.
+        - generic [ref=e169]: Forget
+        - generic [ref=e170]: it
+        - generic [ref=e171]: every
+        - generic [ref=e172]: Sunday.
+      - generic [ref=e173]:
+        - generic [ref=e174]:
+          - generic [ref=e175]: "1"
+          - heading "Plug in" [level=3] [ref=e176]
+          - paragraph [ref=e177]: One cable from your sound desk to a laptop or iPad. Open the broadcast page. That is the whole setup.
+        - generic [ref=e178]:
+          - generic [ref=e179]: "2"
+          - heading "Print the QR" [level=3] [ref=e180]
+          - paragraph [ref=e181]: Put it on the seats, the screen, the bulletin. Members scan it and choose their language — no app to install.
+        - generic [ref=e182]:
+          - generic [ref=e183]: "3"
+          - heading "Preach" [level=3] [ref=e184]
+          - paragraph [ref=e185]: Translation starts when the sermon starts and pauses for worship — automatically.
+      - generic [ref=e186]:
+        - generic [ref=e187]:
+          - paragraph [ref=e188]: Live demo
+          - generic [ref=e189]:
+            - generic [ref=e190]: Hear
+            - generic [ref=e191]: it
+            - generic [ref=e192]: right
+            - generic [ref=e193]: now.
+          - paragraph [ref=e194]: This QR code is real. Point your camera, pick a language and listen to a live church broadcast — no sign-up. This is exactly what your members will see.
+          - paragraph [ref=e195]: Broadcasts run during live services. Off-air? Come back Sunday morning.
+        - img "Scan to try LiveTranslate" [ref=e198]
+    - generic [ref=e200]:
+      - paragraph [ref=e201]: Pricing
+      - generic [ref=e202]:
+        - generic [ref=e203]: Flat
+        - generic [ref=e204]: price.
+        - generic [ref=e205]: Unlimited
+        - generic [ref=e206]: Sundays.
+      - paragraph [ref=e207]: Others bill by the hour and charge per extra language. We don't. First Sunday free, no card required.
+      - generic [ref=e208]:
+        - generic [ref=e210]:
+          - heading "Starter" [level=3] [ref=e211]
+          - generic [ref=e212]: $79.90/month
+          - list [ref=e213]:
+            - listitem [ref=e214]:
+              - generic [ref=e217]: 2 languages
+            - listitem [ref=e218]:
+              - generic [ref=e221]: Unlimited listeners
+            - listitem [ref=e222]:
+              - generic [ref=e225]: Unlimited Sundays*
+            - listitem [ref=e226]:
+              - generic [ref=e229]: Worship Sense auto-pause
+            - listitem [ref=e230]:
+              - generic [ref=e233]: Sermon PDF by email
+            - listitem [ref=e234]:
+              - generic [ref=e237]: Sunday support
+          - link "Start free" [ref=e238] [cursor=pointer]:
+            - /url: /signup?plan=starter
+        - generic [ref=e240]:
+          - generic [ref=e241]: Most churches
+          - heading "Growth" [level=3] [ref=e242]
+          - generic [ref=e243]: $139/month
+          - list [ref=e244]:
+            - listitem [ref=e245]:
+              - generic [ref=e248]: 5 languages
+            - listitem [ref=e249]:
+              - generic [ref=e252]: Unlimited listeners
+            - listitem [ref=e253]:
+              - generic [ref=e256]: Unlimited Sundays*
+            - listitem [ref=e257]:
+              - generic [ref=e260]: Worship Sense auto-pause
+            - listitem [ref=e261]:
+              - generic [ref=e264]: Sermon PDF by email
+            - listitem [ref=e265]:
+              - generic [ref=e268]: Priority Sunday support
+          - link "Start free" [ref=e269] [cursor=pointer]:
+            - /url: /signup?plan=growth
+        - generic [ref=e271]:
+          - heading "Congregation" [level=3] [ref=e272]
+          - generic [ref=e273]: Let's talk
+          - list [ref=e274]:
+            - listitem [ref=e275]:
+              - generic [ref=e278]: 6+ languages
+            - listitem [ref=e279]:
+              - generic [ref=e282]: Multiple campuses or services
+            - listitem [ref=e283]:
+              - generic [ref=e286]: Custom onboarding with your branding
+            - listitem [ref=e287]:
+              - generic [ref=e290]: Unlimited listeners
+          - link "Contact us" [ref=e291] [cursor=pointer]:
+            - /url: mailto:hello@livetranslate.church
+      - paragraph [ref=e292]: "*Fair use: up to 30 hours of translation per month — more than enough for weekly services."
+    - generic [ref=e294]:
+      - paragraph [ref=e295]: Questions pastors ask
+      - generic [ref=e296]:
+        - generic [ref=e297]: Honest
+        - generic [ref=e298]: answers.
+      - generic [ref=e299]:
+        - generic [ref=e300]:
+          - button "Our Wi-Fi in the sanctuary is bad. Will it work?" [expanded] [ref=e301] [cursor=pointer]
+          - paragraph [ref=e308]: It only streams audio — about the same data as a phone call. Members can use Wi-Fi or their own mobile data. If the connection drops, the page reconnects by itself.
+        - button "Will it mangle Scripture or the pastor's name?" [ref=e310] [cursor=pointer]
+        - button "What happens during worship songs?" [ref=e315] [cursor=pointer]
+        - button "Some of our members are older and don't use phones." [ref=e320] [cursor=pointer]
+        - button "Are we replacing our interpreter?" [ref=e325] [cursor=pointer]
+    - generic [ref=e330]:
+      - heading [level=2] [ref=e331]:
+        - text: This Sunday,
+        - emphasis [ref=e332]: everyone understands.
+      - link "Try it this Sunday" [ref=e333] [cursor=pointer]:
+        - /url: "#pricing"
+      - paragraph [ref=e334]: Set up in 10 minutes. First Sunday free. Cancel anytime.
+    - generic [ref=e336]:
+      - img "LiveTranslate" [ref=e337]
+      - paragraph [ref=e338]: Made for churches, by a church. · livetranslate.church
+      - generic [ref=e339]:
+        - link "Log in" [ref=e340] [cursor=pointer]:
+          - /url: /login
+        - link "hello@livetranslate.church" [ref=e341] [cursor=pointer]:
+          - /url: mailto:hello@livetranslate.church
+        - link "Privacy" [ref=e342] [cursor=pointer]:
+          - /url: "#"

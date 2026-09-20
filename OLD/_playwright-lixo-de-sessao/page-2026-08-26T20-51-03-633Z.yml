@@ -1,0 +1,24 @@
+- generic [ref=f4e4]:
+  - banner [ref=f4e5]:
+    - link "LiveTranslate" [ref=f4e6] [cursor=pointer]:
+      - /url: /
+      - img "LiveTranslate" [ref=f4e7]
+  - main [ref=f4e8]:
+    - generic [ref=f4e9]:
+      - heading [level=1] [ref=f4e10]:
+        - text: Welcome
+        - emphasis [ref=f4e11]: back.
+      - generic [ref=f4e12]:
+        - generic [ref=f4e13]:
+          - generic [ref=f4e14]: Email
+          - textbox "Email" [active] [ref=f4e15]
+        - generic [ref=f4e16]:
+          - generic [ref=f4e17]: Password
+          - textbox "Password" [ref=f4e18]
+        - button "Log in" [ref=f4e19] [cursor=pointer]
+        - link "Forgot your password?" [ref=f4e20] [cursor=pointer]:
+          - /url: /recover
+      - paragraph [ref=f4e21]:
+        - text: No account yet?
+        - link "Create account" [ref=f4e22] [cursor=pointer]:
+          - /url: /signup

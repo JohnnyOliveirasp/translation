@@ -1,0 +1,304 @@
+- generic [active] [ref=f2e1]:
+  - link "Skip to main content" [ref=f2e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f2e6]:
+    - generic:
+      - generic: translation - Reddit Search!
+      - banner [ref=f2e10]:
+        - navigation [ref=f2e11]:
+          - link "Home" [ref=f2e15] [cursor=pointer]:
+            - /url: https://www.reddit.com/
+          - search [ref=f2e34]:
+            - generic [ref=f2e36]:
+              - generic "Remove r/churchtech filter and expand search to all of Reddit" [ref=f2e42] [cursor=pointer]:
+                - button [pressed] [ref=f2e43]:
+                  - generic [ref=f2e46]: r/churchtech
+              - textbox "Remove r/churchtech filter and expand search to all of Reddit Clear search" [ref=f2e53]:
+                - /placeholder: Search in ⁨r/churchtech⁩
+                - text: translation
+              - button "Clear search" [ref=f2e55] [cursor=pointer]
+          - generic [ref=f2e61]:
+            - link "Sign Up" [ref=f2e67] [cursor=pointer]:
+              - /url: https://www.reddit.com/register/
+            - link "Log In" [ref=f2e73] [cursor=pointer]:
+              - /url: https://www.reddit.com/login/
+            - button "Expand user menu" [ref=f2e80] [cursor=pointer]
+      - generic "translation - Reddit Search!"
+      - generic [ref=f2e89]:
+        - generic [ref=f2e90]:
+          - generic [ref=f2e93]:
+            - generic [ref=f2e94]:
+              - generic [ref=f2e97]:
+                - tablist [ref=f2e98]:
+                  - tab [selected] [ref=f2e99]:
+                    - button "Posts" [ref=f2e100] [cursor=pointer]
+                  - tab [ref=f2e105]:
+                    - link "Comments" [ref=f2e106] [cursor=pointer]:
+                      - /url: /r/churchtech/search/?q=translation&type=comments
+                  - tab [ref=f2e112]:
+                    - link "Media" [ref=f2e113] [cursor=pointer]:
+                      - /url: /r/churchtech/search/?q=translation&type=media
+                - button "forward" [ref=f2e120] [cursor=pointer]
+                - button "back" [ref=f2e127] [cursor=pointer]
+              - generic:
+                - generic:
+                  - tabpanel
+            - generic [ref=f2e134]:
+              - button "Relevance" [ref=f2e138] [cursor=pointer]
+              - button "All time" [ref=f2e147] [cursor=pointer]
+          - generic [ref=f2e154]:
+            - generic:
+              - generic:
+                - link "Skip to Sign up" [ref=f2e155] [cursor=pointer]:
+                  - /url: "#left-sidebar-container"
+                - link "Skip to Right Sidebar" [ref=f2e156] [cursor=pointer]:
+                  - /url: "#right-sidebar-container"
+          - generic [ref=f2e157]:
+            - main [ref=f2e158]:
+              - generic [ref=f2e159]:
+                - paragraph [ref=f2e162]:
+                  - text: Show results from
+                  - link "all of Reddit" [ref=f2e164] [cursor=pointer]:
+                    - /url: /search/?q=translation
+                - generic [ref=f2e169]:
+                  - generic:
+                    - heading "Looking for Live Captioning in Presentation Software for our non-English speaking congregation members" [level=2]:
+                      - link "Looking for Live Captioning in Presentation Software for our non-English speaking congregation members" [ref=f2e170] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/14vusdt/looking_for_live_captioning_in_presentation/
+                  - generic [ref=f2e172]:
+                    - generic [ref=f2e175]:
+                      - link "r/churchtech" [ref=f2e178] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e183]: ·
+                      - time [ref=f2e185]: 3y ago
+                    - link "Looking for Live Captioning in Presentation Software for our non-English speaking congregation members" [ref=f2e186] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/14vusdt/looking_for_live_captioning_in_presentation/
+                    - generic [ref=f2e187]:
+                      - generic [ref=f2e188]:
+                        - generic [ref=f2e189]: "2"
+                        - text: votes
+                      - text: ·
+                      - generic [ref=f2e190]:
+                        - generic [ref=f2e191]: "2"
+                        - text: comments
+                - separator [ref=f2e192]
+                - generic [ref=f2e194]:
+                  - generic:
+                    - heading "Low cost Assisted Listening - Audio over Wifi" [level=2]:
+                      - link "Low cost Assisted Listening - Audio over Wifi" [ref=f2e195] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/1hw7v5l/low_cost_assisted_listening_audio_over_wifi/
+                  - generic [ref=f2e197]:
+                    - generic [ref=f2e200]:
+                      - link "r/churchtech" [ref=f2e203] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e208]: ·
+                      - time [ref=f2e210]: 2y ago
+                    - link "Low cost Assisted Listening - Audio over Wifi" [ref=f2e211] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/1hw7v5l/low_cost_assisted_listening_audio_over_wifi/
+                    - generic [ref=f2e212]:
+                      - generic [ref=f2e213]:
+                        - generic [ref=f2e214]: "12"
+                        - text: votes
+                      - text: ·
+                      - generic [ref=f2e215]:
+                        - generic [ref=f2e216]: "3"
+                        - text: comments
+                - separator [ref=f2e217]
+                - generic [ref=f2e219]:
+                  - generic:
+                    - heading "Resources to teach sound people" [level=2]:
+                      - link "Resources to teach sound people" [ref=f2e220] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/1qaea73/resources_to_teach_sound_people/
+                  - generic [ref=f2e222]:
+                    - generic [ref=f2e225]:
+                      - link "r/churchtech" [ref=f2e228] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e233]: ·
+                      - time [ref=f2e235]: 8mo ago
+                    - link "Resources to teach sound people" [ref=f2e236] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/1qaea73/resources_to_teach_sound_people/
+                    - generic [ref=f2e237]:
+                      - generic [ref=f2e238]:
+                        - generic [ref=f2e239]: "6"
+                        - text: votes
+                      - text: ·
+                      - generic [ref=f2e240]:
+                        - generic [ref=f2e241]: "19"
+                        - text: comments
+                - separator [ref=f2e242]
+                - generic [ref=f2e244]:
+                  - generic:
+                    - heading "Simultaneous interpretation and a mobile phone based solution" [level=2]:
+                      - link "Simultaneous interpretation and a mobile phone based solution" [ref=f2e245] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/1hvvo5c/simultaneous_interpretation_and_a_mobile_phone/
+                  - generic [ref=f2e247]:
+                    - generic [ref=f2e250]:
+                      - link "r/churchtech" [ref=f2e253] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e258]: ·
+                      - time [ref=f2e260]: 2y ago
+                    - link "Simultaneous interpretation and a mobile phone based solution" [ref=f2e261] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/1hvvo5c/simultaneous_interpretation_and_a_mobile_phone/
+                    - generic [ref=f2e262]:
+                      - generic [ref=f2e263]:
+                        - generic [ref=f2e264]: "2"
+                        - text: votes
+                      - text: ·
+                      - generic [ref=f2e265]:
+                        - generic [ref=f2e266]: "10"
+                        - text: comments
+                - separator [ref=f2e267]
+                - generic [ref=f2e269]:
+                  - generic:
+                    - heading "I need AI real time translater software in iOS for my church" [level=2]:
+                      - link "I need AI real time translater software in iOS for my church" [ref=f2e270] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/1fscq32/i_need_ai_real_time_translater_software_in_ios/
+                  - generic [ref=f2e272]:
+                    - generic [ref=f2e275]:
+                      - link "r/churchtech" [ref=f2e278] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e283]: ·
+                      - time [ref=f2e285]: 2y ago
+                    - link "I need AI real time translater software in iOS for my church" [ref=f2e286] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/1fscq32/i_need_ai_real_time_translater_software_in_ios/
+                    - generic [ref=f2e287]:
+                      - generic [ref=f2e288]:
+                        - generic [ref=f2e289]: "1"
+                        - text: vote
+                      - text: ·
+                      - generic [ref=f2e290]:
+                        - generic [ref=f2e291]: "5"
+                        - text: comments
+                - separator [ref=f2e292]
+                - generic [ref=f2e294]:
+                  - generic:
+                    - heading "I made a free, open-source, offline, live captions application for deaf and hard-of-hearing church members" [level=2]:
+                      - link "I made a free, open-source, offline, live captions application for deaf and hard-of-hearing church members" [ref=f2e295] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/1tqgu65/i_made_a_free_opensource_offline_live_captions/
+                  - generic [ref=f2e297]:
+                    - generic [ref=f2e300]:
+                      - link "r/churchtech" [ref=f2e303] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e308]: ·
+                      - time [ref=f2e310]: 3mo ago
+                    - link "I made a free, open-source, offline, live captions application for deaf and hard-of-hearing church members" [ref=f2e311] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/1tqgu65/i_made_a_free_opensource_offline_live_captions/
+                    - generic [ref=f2e312]:
+                      - generic [ref=f2e313]:
+                        - generic [ref=f2e314]: "32"
+                        - text: votes
+                      - text: ·
+                      - generic [ref=f2e315]:
+                        - generic [ref=f2e316]: "27"
+                        - text: comments
+                - separator [ref=f2e317]
+                - generic [ref=f2e319]:
+                  - generic:
+                    - heading "Tech overhaul quote" [level=2]:
+                      - link "Tech overhaul quote" [ref=f2e320] [cursor=pointer]:
+                        - /url: /r/churchtech/comments/1qmvadi/tech_overhaul_quote/
+                  - generic [ref=f2e322]:
+                    - generic [ref=f2e325]:
+                      - link "r/churchtech" [ref=f2e328] [cursor=pointer]:
+                        - /url: /r/churchtech/
+                      - generic [ref=f2e333]: ·
+                      - time [ref=f2e335]: 7mo ago
+                    - link "Tech overhaul quote" [ref=f2e336] [cursor=pointer]:
+                      - /url: /r/churchtech/comments/1qmvadi/tech_overhaul_quote/
+                    - generic [ref=f2e337]:
+                      - generic [ref=f2e338]:
+                        - generic [ref=f2e339]: "6"
+                        - text: votes
+                      - text: ·
+                      - generic [ref=f2e340]:
+                        - generic [ref=f2e341]: "10"
+                        - text: comments
+                  - link "Tech overhaul quote thumbnail image" [ref=f2e343] [cursor=pointer]:
+                    - /url: /r/churchtech/comments/1qmvadi/tech_overhaul_quote/
+                    - img "Tech overhaul quote" [ref=f2e348]
+                - separator [ref=f2e349]
+            - generic [ref=f2e353]:
+              - generic [ref=f2e358]:
+                - heading "Community Info Section" [level=1] [ref=f2e359]
+                - generic [ref=f2e360]:
+                  - generic [ref=f2e361]: Church Tech
+                  - generic [ref=f2e362]: This sub is a place to discuss anything and everything involving church tech and production. Everything from camera, lights and sound to IT and church management systems.
+                  - generic [ref=f2e363]:
+                    - generic [ref=f2e364]: Created Sep 11, 2012
+                    - generic [ref=f2e368]: Public
+                - generic [ref=f2e372]:
+                  - generic [ref=f2e373]:
+                    - strong [ref=f2e375]:
+                      - generic: 2.8K
+                    - generic [ref=f2e376]: Weekly visitors
+                  - generic [ref=f2e377]:
+                    - strong [ref=f2e379]:
+                      - generic: "202"
+                    - generic [ref=f2e380]: Weekly contributions
+              - list [ref=f2e382]:
+                - listitem [ref=f2e383]:
+                  - link "Home" [ref=f2e385] [cursor=pointer]:
+                    - /url: /?feed=home
+                - listitem [ref=f2e386]:
+                  - link "Popular" [ref=f2e388] [cursor=pointer]:
+                    - /url: /r/popular/
+                - listitem [ref=f2e389]:
+                  - link "News" [ref=f2e391] [cursor=pointer]:
+                    - /url: /news/
+                - listitem [ref=f2e392]:
+                  - link "Explore" [ref=f2e394] [cursor=pointer]:
+                    - /url: /explore/
+                - listitem [ref=f2e395]:
+                  - link "Best of Reddit" [ref=f2e397] [cursor=pointer]:
+                    - /url: https://www.reddit.com/posts/2026/global/
+                - listitem [ref=f2e398]:
+                  - link "Best of Reddit in Portuguese" [ref=f2e400] [cursor=pointer]:
+                    - /url: https://www.reddit.com/posts/2026/tl-pt-BR/
+                - listitem [ref=f2e401]:
+                  - link "Best of Reddit in German" [ref=f2e403] [cursor=pointer]:
+                    - /url: https://www.reddit.com/posts/2026/tl-de/
+                - listitem [ref=f2e404]:
+                  - link "Reddit Rules" [ref=f2e406] [cursor=pointer]:
+                    - /url: https://www.redditinc.com/policies/content-policy
+                - listitem [ref=f2e407]:
+                  - link "Privacy Policy" [ref=f2e409] [cursor=pointer]:
+                    - /url: https://www.reddit.com/policies/privacy-policy
+                - listitem [ref=f2e410]:
+                  - link "User Agreement" [ref=f2e412] [cursor=pointer]:
+                    - /url: https://www.redditinc.com/policies/user-agreement
+                - listitem [ref=f2e413]:
+                  - link "Your Privacy Choices" [ref=f2e415] [cursor=pointer]:
+                    - /url: https://support.reddithelp.com/hc/articles/43980704794004
+                - listitem [ref=f2e416]:
+                  - link "Accessibility" [ref=f2e418] [cursor=pointer]:
+                    - /url: https://support.reddithelp.com/hc/sections/38303584022676-Accessibility
+                - listitem [ref=f2e419]:
+                  - link "Reddit, Inc. © 2026. All rights reserved." [ref=f2e420] [cursor=pointer]:
+                    - /url: https://redditinc.com
+        - generic [ref=f2e423]:
+          - paragraph [ref=f2e424]: Join the most real place on the internet
+          - generic [ref=f2e426]:
+            - generic [ref=f2e429]:
+              - iframe [ref=f2e434]:
+                - button "Continue with Google. Opens in new tab" [ref=f5e3] [cursor=pointer]:
+                  - generic [ref=f5e5]: Continue with Google
+              - generic [ref=f2e436] [cursor=pointer]:
+                - generic [ref=f2e437]: Continue with Apple
+                - button "Sign in with Apple" [ref=f2e443]:
+                  - generic [ref=f2e444]:
+                    - img:
+                      - generic:
+                        - img:
+                          - generic:  Sign in with Apple
+            - link "Continue with Phone Number" [ref=f2e449] [cursor=pointer]:
+              - /url: https://www.reddit.com/login/
+            - link "Continue with Email" [ref=f2e458] [cursor=pointer]:
+              - /url: https://www.reddit.com/register/
+          - paragraph [ref=f2e465]:
+            - text: By continuing, you agree to our
+            - link "User Agreement" [ref=f2e466] [cursor=pointer]:
+              - /url: https://www.redditinc.com/policies/user-agreement
+            - text: and acknowledge that you understand the
+            - link "Privacy Policy" [ref=f2e467] [cursor=pointer]:
+              - /url: https://www.redditinc.com/policies/privacy-policy
+            - text: .

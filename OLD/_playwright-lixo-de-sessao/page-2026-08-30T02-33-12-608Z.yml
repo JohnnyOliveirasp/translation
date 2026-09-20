@@ -1,0 +1,9 @@
+- main [ref=f1e4]:
+  - generic [ref=f1e7]:
+    - img "Redeem Community Church" [ref=f1e9]
+    - paragraph [ref=f1e10]: Tradução ao vivo
+  - paragraph [ref=f1e13]: Conectando…
+  - link "Powered by LiveTranslate" [ref=f1e17] [cursor=pointer]:
+    - /url: /
+    - generic [ref=f1e18]: Powered by
+    - img "LiveTranslate" [ref=f1e19]

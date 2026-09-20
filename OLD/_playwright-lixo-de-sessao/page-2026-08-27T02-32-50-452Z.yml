@@ -1,0 +1,56 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e6]:
+    - navigation [ref=f6e8]:
+      - link [ref=f6e11] [cursor=pointer]:
+        - /url: https://supabase.com
+        - img "Supabase Logo" [ref=f6e12]
+      - link "Documentation" [ref=f6e14] [cursor=pointer]:
+        - /url: https://supabase.com/docs
+    - generic [ref=f6e20]:
+      - main [ref=f6e21]:
+        - generic [ref=f6e22]:
+          - generic [ref=f6e23]:
+            - heading "Welcome back" [level=1] [ref=f6e24]
+            - heading "Sign in to your account" [level=2] [ref=f6e25]
+          - generic [ref=f6e26]:
+            - button "Continue with GitHub" [ref=f6e29] [cursor=pointer]
+            - button "Continue with ChatGPT" [ref=f6e35] [cursor=pointer]
+            - link "Continue with SSO" [ref=f6e41] [cursor=pointer]:
+              - /url: /dashboard/sign-in-sso?returnTo=%2Fproject%2Fyrqtncjkwfrgwecyxkmc%2Fauth%2Ftemplates
+            - generic [ref=f6e47]: or
+            - generic [ref=f6e52]:
+              - generic [ref=f6e54]:
+                - generic [ref=f6e55]: Email
+                - textbox "Email" [ref=f6e60]:
+                  - /placeholder: you@example.com
+              - generic [ref=f6e61]:
+                - generic [ref=f6e63]:
+                  - generic [ref=f6e64]: Password
+                  - generic [ref=f6e69]:
+                    - textbox "Password" [ref=f6e70]:
+                      - /placeholder: ••••••••
+                    - button "Show password" [ref=f6e71] [cursor=pointer]
+                - link "Forgot password?" [ref=f6e76] [cursor=pointer]:
+                  - /url: /dashboard/forgot-password?returnTo=%2Fproject%2Fyrqtncjkwfrgwecyxkmc%2Fauth%2Ftemplates
+              - button "Sign in" [ref=f6e79] [cursor=pointer]
+          - generic [ref=f6e81]:
+            - text: Don’t have an account?
+            - link "Sign up" [ref=f6e82] [cursor=pointer]:
+              - /url: /dashboard/sign-up?returnTo=%2Fproject%2Fyrqtncjkwfrgwecyxkmc%2Fauth%2Ftemplates
+        - paragraph [ref=f6e84]:
+          - text: By continuing, you agree to Supabase’s
+          - link "Terms of Service" [ref=f6e85] [cursor=pointer]:
+            - /url: https://supabase.com/terms
+          - text: and
+          - link "Privacy Policy" [ref=f6e86] [cursor=pointer]:
+            - /url: https://supabase.com/privacy
+          - text: ", and to receive periodic emails with updates."
+      - complementary [ref=f6e87]:
+        - generic [ref=f6e88]:
+          - generic [ref=f6e89]: “
+          - blockquote [ref=f6e90]: "Okay, I finally tried Supabase today and wow... why did I wait so long? 😅 Went from 'how do I even start' to having auth + database + real-time updates working in like 20 minutes. Sometimes the hype is actually justified! #Supabase"
+          - link "Aliahsan_sfv @Aliahsan_sfv" [ref=f6e91] [cursor=pointer]:
+            - /url: https://x.com/Aliahsan_sfv/status/1967167095894098210
+            - img "Aliahsan_sfv" [ref=f6e92]
+            - generic [ref=f6e93]: "@Aliahsan_sfv"
+  - alert [ref=f6e95]: Supabase

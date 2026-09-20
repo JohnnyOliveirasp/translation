@@ -1,0 +1,18 @@
+- main [ref=e4]:
+  - generic [ref=e7]:
+    - img "Redeem Community Church" [ref=e9]
+    - paragraph [ref=e10]: Live translation
+  - generic [ref=e11]:
+    - paragraph [ref=e20]: Please use headphones
+    - paragraph [ref=e23]: Choose your language
+    - generic [ref=e24]:
+      - button "🇪🇸 Español" [ref=e25] [cursor=pointer]:
+        - generic [ref=e26]: 🇪🇸
+        - generic [ref=e27]: Español
+      - button "🇧🇷 Português" [ref=e28] [cursor=pointer]:
+        - generic [ref=e29]: 🇧🇷
+        - generic [ref=e30]: Português
+  - link "Powered by LiveTranslate" [ref=e17] [cursor=pointer]:
+    - /url: /
+    - generic [ref=e18]: Powered by
+    - img "LiveTranslate" [ref=e19]

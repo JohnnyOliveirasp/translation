@@ -1,0 +1,625 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "Higgsfield" [ref=e5]
+      - navigation "Main" [ref=e9]:
+        - list [ref=e12]:
+          - listitem [ref=e13]:
+            - link "Explore" [ref=e14] [cursor=pointer]:
+              - /url: /
+          - separator [ref=e15]
+          - listitem [ref=e16]:
+            - link "Image" [ref=e17] [cursor=pointer]:
+              - /url: /ai/image?model=nano-banana-pro
+          - listitem [ref=e18]:
+            - link "Video" [ref=e19] [cursor=pointer]:
+              - /url: /ai/video
+          - listitem [ref=e20]:
+            - link "Audio" [ref=e21] [cursor=pointer]:
+              - /url: /audio
+          - listitem [ref=e22]:
+            - link "Edit Layers" [ref=e23] [cursor=pointer]:
+              - /url: /layers
+              - text: Edit
+              - generic [ref=e24]: Layers
+          - listitem [ref=e25]:
+            - link "Cinema Studio New" [ref=e26] [cursor=pointer]:
+              - /url: /generate
+              - text: Cinema Studio
+              - generic [ref=e27]: New
+          - listitem [ref=e28]:
+            - link "Marketing Studio New" [ref=e29] [cursor=pointer]:
+              - /url: /marketing-studio
+              - text: Marketing Studio
+              - generic [ref=e30]: New
+          - listitem [ref=e31]:
+            - link "Viral Presets" [ref=e32] [cursor=pointer]:
+              - /url: /viral-presets
+          - separator [ref=e33]
+          - listitem [ref=e34]:
+            - link "MCP & CLI New" [ref=e35] [cursor=pointer]:
+              - /url: /mcp
+              - text: MCP & CLI
+              - generic [ref=e36]: New
+          - listitem [ref=e37]:
+            - link "Supercomputer" [ref=e38] [cursor=pointer]:
+              - /url: /supercomputer
+          - listitem [ref=e46]:
+            - link "Academy New" [ref=e47] [cursor=pointer]:
+              - /url: /academy
+              - text: Academy
+              - generic [ref=e48]: New
+          - listitem [ref=e49]:
+            - link "Community" [ref=e50] [cursor=pointer]:
+              - /url: /community
+          - listitem [ref=e51]:
+            - link "Contests New" [ref=e52] [cursor=pointer]:
+              - /url: /contests
+              - text: Contests
+              - generic [ref=e53]: New
+          - listitem [ref=e54]:
+            - link "Plugins" [ref=e55] [cursor=pointer]:
+              - /url: /plugins/after-effects
+          - listitem [ref=e56]:
+            - link "Canvas" [ref=e57] [cursor=pointer]:
+              - /url: /canvas
+          - listitem [ref=e58]:
+            - link "Originals" [ref=e59] [cursor=pointer]:
+              - /url: /original-series
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62] [cursor=pointer]
+          - link "Pricing" [ref=e63] [cursor=pointer]:
+            - /url: /pricing
+          - link "Enterprise" [ref=e66] [cursor=pointer]:
+            - /url: https://higgsfield.ai/enterprise
+          - button "Change language" [ref=e71] [cursor=pointer]
+        - generic [ref=e75]:
+          - button "Login" [ref=e76] [cursor=pointer]
+          - button "Sign up" [ref=e77] [cursor=pointer]
+  - main [ref=e78]:
+    - list [ref=e81]:
+      - listitem [ref=e82]:
+        - generic [ref=e83]:
+          - link "Open Ad Multiplier" [ref=e84] [cursor=pointer]:
+            - /url: https://higgsfield.ai/ad-multiplier
+          - 'figure "Ad Multiplier: Turn one ad into ten. Same creative, new settings." [ref=e86]':
+            - img "Loading the media file..."
+            - generic "Ad Multiplier - Turn one ad into ten. Same creative, new settings." [ref=e87]: Your browser does not support the video.
+          - generic [ref=e88]:
+            - heading "Ad Multiplier" [level=3] [ref=e89]
+            - paragraph [ref=e90]: Turn one ad into ten. Same creative, new settings.
+      - listitem [ref=e91]:
+        - generic [ref=e92]:
+          - link "Open IF YOU STOP LOVING ME, I'LL DIE — I DON'T LIKE DYING" [ref=e93] [cursor=pointer]:
+            - /url: https://higgsfield.ai/@higgsfield.studio/projects/if-you-stop-loving-me-ill-die?from=%2Fgenerate
+          - 'figure "IF YOU STOP LOVING ME, I''LL DIE — I DON''T LIKE DYING: Animated comedy short movie, fully open sourced." [ref=e95]':
+            - img "Loading the media file..."
+            - generic "IF YOU STOP LOVING ME, I'LL DIE — I DON'T LIKE DYING - Animated comedy short movie, fully open sourced." [ref=e96]: Your browser does not support the video.
+          - generic [ref=e97]:
+            - heading "IF YOU STOP LOVING ME, I'LL DIE — I DON'T LIKE DYING" [level=3] [ref=e98]
+            - paragraph [ref=e99]: Animated comedy short movie, fully open sourced.
+      - listitem [ref=e100]:
+        - generic [ref=e101]:
+          - link "Open Higgsfield x Grok Bot" [ref=e102] [cursor=pointer]:
+            - /url: https://higgsfield.ai/mcp?tab=grok-bot
+          - 'figure "Higgsfield x Grok Bot: Run your one-person marketing agency with a team of AI bots" [ref=e104]':
+            - img "Loading the media file..."
+            - generic "Higgsfield x Grok Bot - Run your one-person marketing agency with a team of AI bots" [ref=e105]: Your browser does not support the video.
+          - generic [ref=e106]:
+            - heading "Higgsfield x Grok Bot" [level=3] [ref=e107]
+            - paragraph [ref=e108]: Run your one-person marketing agency with a team of AI bots
+      - listitem [ref=e109]:
+        - generic [ref=e110]:
+          - link "Open Higgsfield in Blender" [ref=e111] [cursor=pointer]:
+            - /url: https://higgsfield.ai/plugins/blender
+          - 'figure "Higgsfield in Blender: Prompt the scene and build the blockout" [ref=e113]':
+            - img "Loading the media file..."
+            - generic "Higgsfield in Blender - Prompt the scene and build the blockout" [ref=e114]: Your browser does not support the video.
+          - generic [ref=e115]:
+            - heading "Higgsfield in Blender" [level=3] [ref=e116]
+            - paragraph [ref=e117]: Prompt the scene and build the blockout
+      - listitem [ref=e118]:
+        - generic [ref=e119]:
+          - link "Open FACELESS STUDIO" [ref=e120] [cursor=pointer]:
+            - /url: https://higgsfield.ai/faceless-studio
+          - 'figure "FACELESS STUDIO: A complete faceless channel from a single topic" [ref=e122]':
+            - img "Loading the media file..."
+            - generic "FACELESS STUDIO - A complete faceless channel from a single topic" [ref=e123]: Your browser does not support the video.
+          - generic [ref=e124]:
+            - heading "FACELESS STUDIO" [level=3] [ref=e125]
+            - paragraph [ref=e126]: A complete faceless channel from a single topic
+      - generic [ref=e127]:
+        - listitem [ref=e128]:
+          - heading [level=3] [ref=e130]
+        - listitem [ref=e131]:
+          - heading [level=3] [ref=e133]
+        - listitem [ref=e134]:
+          - heading [level=3] [ref=e136]
+        - listitem [ref=e137]:
+          - heading [level=3] [ref=e139]
+        - listitem [ref=e140]:
+          - heading [level=3] [ref=e142]
+    - generic [ref=e143]:
+      - generic [ref=e144]:
+        - button "Sign up and get your extra discount Get unlimited Nano Banana Pro Unlock your extra discount Access to Seedance 2.5 Sign up and get your discount" [ref=e146] [cursor=pointer]:
+          - generic: Your browser does not support the video.
+          - generic [ref=e147]:
+            - heading "Sign up and get your extra discount" [level=3] [ref=e148]:
+              - generic [ref=e149]: Sign up and get your
+              - generic [ref=e150]: extra discount
+            - list [ref=e152]:
+              - listitem [ref=e153]:
+                - generic [ref=e156]: Get unlimited Nano Banana Pro
+              - listitem [ref=e157]:
+                - generic [ref=e160]: Unlock your extra discount
+              - listitem [ref=e161]:
+                - generic [ref=e164]: Access to Seedance 2.5
+            - generic [ref=e165]: Sign up and get your discount
+        - generic [ref=e169]:
+          - link "Seedance 2.5 New The most advanced video model Video" [ref=e170] [cursor=pointer]:
+            - /url: /ai/video?model=seedance_2_5&resolution=1080p
+            - generic [ref=e174]:
+              - generic [ref=e175]:
+                - generic [ref=e176]: Seedance 2.5
+                - paragraph: New
+              - paragraph [ref=e177]: The most advanced video model
+            - generic [ref=e178]: Video
+          - link "Nano Banana Pro Generate high-quality visuals Image" [ref=e181] [cursor=pointer]:
+            - /url: /nano-banana-pro
+            - generic [ref=e187]:
+              - generic [ref=e188]: Nano Banana Pro
+              - paragraph [ref=e190]: Generate high-quality visuals
+            - generic [ref=e191]: Image
+          - link "Higgsfield Academy Learn how to use Higgsfield" [ref=e195] [cursor=pointer]:
+            - /url: /academy
+            - generic [ref=e200]:
+              - generic [ref=e201]: Higgsfield Academy
+              - paragraph [ref=e203]: Learn how to use Higgsfield
+          - link "MCP & CLI Turn Claude into a creative engine" [ref=e204] [cursor=pointer]:
+            - /url: /mcp
+            - generic [ref=e208]:
+              - generic [ref=e209]: MCP & CLI
+              - paragraph [ref=e211]: Turn Claude into a creative engine
+          - link "Cinema Studio 4.0 New Create cinematic scenes effortlessly" [ref=e212] [cursor=pointer]:
+            - /url: /generate
+            - generic [ref=e216]:
+              - generic [ref=e217]:
+                - generic [ref=e218]: Cinema Studio 4.0
+                - paragraph: New
+              - paragraph [ref=e219]: Create cinematic scenes effortlessly
+          - link "Supercomputer Automation, skills, apps and more" [ref=e220] [cursor=pointer]:
+            - /url: /supercomputer
+            - generic [ref=e224]:
+              - generic [ref=e225]: Supercomputer
+              - paragraph [ref=e227]: Automation, skills, apps and more
+      - region "Higgsfield Global Film Festival" [ref=e229]:
+        - generic [ref=e230]:
+          - generic [ref=e231]:
+            - generic [ref=e232]: Live now
+            - generic [ref=e240]:
+              - text: Deadline extended
+              - generic [ref=e241]: 20 days left
+          - generic [ref=e242]:
+            - heading "Higgsfield Global Film Festival $1,000,000" [level=2] [ref=e244]
+            - paragraph [ref=e245]: Make your film in Cinema Studio and submit by Sep 14.Any genre, solo or team.
+            - generic [ref=e246]:
+              - button "Start my film" [disabled]
+              - link "Learn more" [ref=e247] [cursor=pointer]:
+                - /url: /contests/higgsfield-global-film-festival
+        - separator [ref=e248]
+        - generic [ref=e249]:
+          - generic [ref=e250]:
+            - generic [ref=e251]:
+              - heading "Creating in public" [level=3] [ref=e252]
+              - generic [ref=e253]: 1,712 films right now
+            - paragraph [ref=e257]: "Some entries build in the open — everyone can watch. Optional, and it comes with extras: top 50 get shortlisted, public projects can win grant credits."
+          - generic [ref=e259]:
+            - article [ref=e260]:
+              - link "VIOLENCE MODE" [ref=e261] [cursor=pointer]:
+                - /url: /@promptedbyjason/projects/violence-mode
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e262] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: VIOLENCE MODE
+                    - generic: by @promptedbyjason
+            - article [ref=e266]:
+              - link "GO" [ref=e267] [cursor=pointer]:
+                - /url: /@mrdoitall/projects/go
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e268] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: GO
+                    - generic: by @mrdoitall
+            - article [ref=e272]:
+              - link "The Wrong Prompt" [ref=e273] [cursor=pointer]:
+                - /url: /@shihabsami22/projects/the-wrong-prompt
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e274] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: The Wrong Prompt
+                    - generic: by @shihabsami22
+            - article [ref=e278]:
+              - link "THE NEXT MODEL" [ref=e279] [cursor=pointer]:
+                - /url: /@riemannbeluga1279/projects/the-next-model
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e280] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: THE NEXT MODEL
+                    - generic: by @riemannbeluga1279
+            - article [ref=e284]:
+              - link "THE THREAD" [ref=e285] [cursor=pointer]:
+                - /url: /@stadolnikstudio/projects/the-thread
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e286] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: THE THREAD
+                    - generic: by @stadolnikstudio
+            - article [ref=e290]:
+              - link "CHROMA" [ref=e291] [cursor=pointer]:
+                - /url: /@kirin_studio/projects/chroma
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e292] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: CHROMA
+                    - generic: by @kirin_studio
+            - article [ref=e296]:
+              - link "Roswell Remnant" [ref=e297] [cursor=pointer]:
+                - /url: /@jaydennunn/projects/roswell-remnant
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e298] [cursor=pointer]
+                  - generic: Generating now
+                - generic:
+                  - paragraph:
+                    - text: Roswell Remnant
+                    - generic: by @jaydennunn
+            - article [ref=e302]:
+              - link "Hallucination of the Unknown" [ref=e303] [cursor=pointer]:
+                - /url: /@aether_cosmic_gate/projects/hallucination-of-the-unknown
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e304] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: Hallucination of the Unknown
+                    - generic: by @aether_cosmic_gate
+            - article [ref=e308]:
+              - link "THE LAST FRAME" [ref=e309] [cursor=pointer]:
+                - /url: /@veks/projects/the-last-frame
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e310] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: THE LAST FRAME
+                    - generic: by @veks
+            - article [ref=e314]:
+              - link "Kitty Trap (Heist)" [ref=e315] [cursor=pointer]:
+                - /url: /@prefab_walrus_beta/projects/kitty-trap-heist
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e316] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: Kitty Trap (Heist)
+                    - generic: by @prefab_walrus_beta
+            - article [ref=e320]:
+              - link "31 AUGUST" [ref=e321] [cursor=pointer]:
+                - /url: /@bucketlist_impossible/projects/31-august
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e322] [cursor=pointer]
+                - generic:
+                  - paragraph:
+                    - text: 31 AUGUST
+                    - generic: by @bucketlist_impossible
+            - article [ref=e326]:
+              - link "AI Film Festival-ICONIC-BETA" [ref=e327] [cursor=pointer]:
+                - /url: /@bedrotprod/projects/ai-film-festival-iconic-beta
+              - generic:
+                - generic:
+                  - figure:
+                    - button "Unmute video" [ref=e328] [cursor=pointer]
+                  - generic: Generating now
+                - generic:
+                  - paragraph:
+                    - text: AI Film Festival-ICONIC-BETA
+                    - generic: by @bedrotprod
+          - link "Explore all public projects" [ref=e332] [cursor=pointer]:
+            - /url: /contests/higgsfield-global-film-festival?tab=submissions
+    - generic [ref=e335]:
+      - generic [ref=e336]:
+        - link "Seedance 2.5" [ref=e337] [cursor=pointer]:
+          - /url: /seedance-2-5-community
+        - paragraph [ref=e338]: The most advanced AI video model
+      - link "View all of Seedance 2.5" [ref=e363] [cursor=pointer]:
+        - /url: /seedance-2-5-community
+    - generic [ref=e367]:
+      - generic [ref=e368]:
+        - heading "Explore the inside of every project" [level=2] [ref=e369]
+        - paragraph [ref=e370]: See all prompts, assets, and how each project was created
+      - generic [ref=e371]:
+        - generic [ref=e372]:
+          - link "Higgsfield Studio H If you stop loving me, I'll die — I don't like dying, but for our love I'm ready to go that far by Higgsfield Studio Public" [ref=e373] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/if-you-stop-loving-me-ill-die
+            - figure [ref=e375]
+            - generic [ref=e376]:
+              - generic [ref=e377]:
+                - generic [ref=e378]:
+                  - img "Higgsfield Studio"
+                  - generic [ref=e379]: H
+                - paragraph [ref=e382]: If you stop loving me, I'll die — I don't like dying, but for our love I'm ready to go that far by Higgsfield Studio
+              - paragraph [ref=e386]: Public
+          - link "Higgsfield Studio H Cully Hill Boys by Higgsfield Studio Public" [ref=e387] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/cully-hill-boys
+            - figure [ref=e389]
+            - generic [ref=e390]:
+              - generic [ref=e391]:
+                - generic [ref=e392]:
+                  - img "Higgsfield Studio"
+                  - generic [ref=e393]: H
+                - paragraph [ref=e396]: Cully Hill Boys by Higgsfield Studio
+              - paragraph [ref=e400]: Public
+          - link "higgsfield.studio H Red Flag by higgsfield.studio Public" [ref=e401] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/red-flag
+            - figure [ref=e403]
+            - generic [ref=e404]:
+              - generic [ref=e405]:
+                - generic [ref=e406]:
+                  - img "higgsfield.studio"
+                  - generic [ref=e407]: H
+                - paragraph [ref=e410]: Red Flag by higgsfield.studio
+              - paragraph [ref=e414]: Public
+          - link "Higgsfield Studio H Kok Boru by Higgsfield Studio Public" [ref=e415] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/kok-boru-film
+            - figure [ref=e417]
+            - generic [ref=e418]:
+              - generic [ref=e419]:
+                - generic [ref=e420]:
+                  - img "Higgsfield Studio"
+                  - generic [ref=e421]: H
+                - paragraph [ref=e424]: Kok Boru by Higgsfield Studio
+              - paragraph [ref=e428]: Public
+          - link "higgsfield.studio H Adiliada by higgsfield.studio Public" [ref=e429] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/adiliada
+            - figure [ref=e431]
+            - generic [ref=e432]:
+              - generic [ref=e433]:
+                - generic [ref=e434]:
+                  - img "higgsfield.studio"
+                  - generic [ref=e435]: H
+                - paragraph [ref=e438]: Adiliada by higgsfield.studio
+              - paragraph [ref=e442]: Public
+          - link "Higgsfield Studio H ONEIRIC by Higgsfield Studio Public" [ref=e443] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/oneiric
+            - figure [ref=e445]
+            - generic [ref=e446]:
+              - generic [ref=e447]:
+                - generic [ref=e448]:
+                  - img "Higgsfield Studio"
+                  - generic [ref=e449]: H
+                - paragraph [ref=e452]: ONEIRIC by Higgsfield Studio
+              - paragraph [ref=e456]: Public
+          - 'link "Higgsfield Studio H ZEPHYR: Special by Higgsfield Studio Public" [ref=e457] [cursor=pointer]':
+            - /url: /@higgsfield.studio/projects/zephyr-special
+            - figure [ref=e459]
+            - generic [ref=e460]:
+              - generic [ref=e461]:
+                - generic [ref=e462]:
+                  - img "Higgsfield Studio"
+                  - generic [ref=e463]: H
+                - paragraph [ref=e466]: "ZEPHYR: Special by Higgsfield Studio"
+              - paragraph [ref=e470]: Public
+          - link "Higgsfield Studio H HELL GRIND by Higgsfield Studio Public" [ref=e471] [cursor=pointer]:
+            - /url: /@higgsfield.studio/projects/hell-grind
+            - figure [ref=e473]
+            - generic [ref=e474]:
+              - generic [ref=e475]:
+                - generic [ref=e476]:
+                  - img "Higgsfield Studio"
+                  - generic [ref=e477]: H
+                - paragraph [ref=e480]: HELL GRIND by Higgsfield Studio
+              - paragraph [ref=e484]: Public
+        - link "Explore community" [ref=e485] [cursor=pointer]:
+          - /url: /community
+    - generic [ref=e488]:
+      - generic [ref=e490]:
+        - generic [ref=e491]:
+          - heading [level=2] [ref=e492]:
+            - link "Higgsfield Viral Presets" [ref=e493] [cursor=pointer]:
+              - /url: /viral-presets
+          - paragraph [ref=e494]: Big-budget visual effects, from explosions to surreal transformations.
+        - generic [ref=e495]:
+          - list [ref=e497]:
+            - listitem [ref=e498]:
+              - figure [ref=e499]:
+                - link "View Agamemnon" [ref=e501] [cursor=pointer]:
+                  - /url: /viral-presets/examples/agamemnon
+                - generic:
+                  - heading "Agamemnon" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/agamemnon
+            - listitem [ref=e502]:
+              - figure [ref=e503]:
+                - link "View Cold vision" [ref=e505] [cursor=pointer]:
+                  - /url: /viral-presets/examples/cold-vision
+                - generic:
+                  - heading "Cold vision" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/cold-vision
+            - listitem [ref=e506]:
+              - figure [ref=e507]:
+                - link "View Particles" [ref=e509] [cursor=pointer]:
+                  - /url: /viral-presets/examples/particles
+                - generic:
+                  - heading "Particles" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/particles
+            - listitem [ref=e510]:
+              - figure [ref=e511]:
+                - link "View Canvas" [ref=e513] [cursor=pointer]:
+                  - /url: /viral-presets/examples/canvas
+                - generic:
+                  - heading "Canvas" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/canvas
+            - listitem [ref=e514]:
+              - figure [ref=e515]:
+                - link "View EARTH ZOOM" [ref=e517] [cursor=pointer]:
+                  - /url: /viral-presets/examples/earth-zoom-exported
+                - generic:
+                  - heading "EARTH ZOOM" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/earth-zoom-exported
+            - listitem [ref=e518]:
+              - figure [ref=e519]:
+                - link "View MIGHTY FIGHTER" [ref=e521] [cursor=pointer]:
+                  - /url: /viral-presets/examples/mighty-fighter-exported
+                - generic:
+                  - heading "MIGHTY FIGHTER" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/mighty-fighter-exported
+            - listitem [ref=e522]:
+              - figure [ref=e523]:
+                - link "View Ink Riot" [ref=e525] [cursor=pointer]:
+                  - /url: /viral-presets/examples/ink-riot
+                - generic:
+                  - heading "Ink Riot" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/ink-riot
+            - listitem [ref=e526]:
+              - figure [ref=e527]:
+                - link "View FAIRYTALE CASTLE" [ref=e529] [cursor=pointer]:
+                  - /url: /viral-presets/examples/fairytale-castle-exported
+                - generic:
+                  - heading "FAIRYTALE CASTLE" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/fairytale-castle-exported
+            - listitem [ref=e530]:
+              - figure [ref=e531]:
+                - link "View Pigeons" [ref=e533] [cursor=pointer]:
+                  - /url: /viral-presets/examples/pigeons
+                - generic:
+                  - heading "Pigeons" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/pigeons
+            - listitem [ref=e534]:
+              - figure [ref=e535]:
+                - link "View Fallen Angel" [ref=e537] [cursor=pointer]:
+                  - /url: /viral-presets/examples/fallen-angel
+                - generic:
+                  - heading "Fallen Angel" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/fallen-angel
+            - listitem [ref=e538]:
+              - figure [ref=e539]:
+                - link "View Windows" [ref=e541] [cursor=pointer]:
+                  - /url: /viral-presets/examples/windows
+                - generic:
+                  - heading "Windows" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/windows
+            - listitem [ref=e542]:
+              - figure [ref=e543]:
+                - link "View Tracking" [ref=e545] [cursor=pointer]:
+                  - /url: /viral-presets/examples/tracking
+                - generic:
+                  - heading "Tracking" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/tracking
+            - listitem [ref=e546]:
+              - figure [ref=e547]:
+                - link "View Bullet time" [ref=e549] [cursor=pointer]:
+                  - /url: /viral-presets/examples/bullet-time
+                - generic:
+                  - heading "Bullet time" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/bullet-time
+            - listitem [ref=e550]:
+              - figure [ref=e551]:
+                - link "View Comic" [ref=e553] [cursor=pointer]:
+                  - /url: /viral-presets/examples/comic
+                - generic:
+                  - heading "Comic" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/comic
+            - listitem [ref=e554]:
+              - figure [ref=e555]:
+                - link "View Cyclope" [ref=e557] [cursor=pointer]:
+                  - /url: /viral-presets/examples/cyclope
+                - generic:
+                  - heading "Cyclope" [level=2]
+                  - generic:
+                    - link "Generate":
+                      - /url: /viral-presets/use/cyclope
+          - link "View all presets" [ref=e558] [cursor=pointer]:
+            - /url: /viral-presets
+      - link "Supercomputer One superagent for your entire creative stack Try Supercomputer" [ref=e561] [cursor=pointer]:
+        - /url: /supercomputer
+        - generic [ref=e563]:
+          - generic [ref=e566]:
+            - heading "Supercomputer" [level=2] [ref=e567]
+            - paragraph [ref=e568]: One superagent for your entire creative stack
+          - generic [ref=e569]: Try Supercomputer
+  - contentinfo [ref=e570]:
+    - navigation [ref=e571]:
+      - paragraph [ref=e572]:
+        - generic [ref=e573]: © 2026 Higgsfield, Inc.
+        - generic [ref=e574]: All rights reserved.
+      - list [ref=e575]:
+        - listitem [ref=e576]:
+          - button "Change language" [ref=e578] [cursor=pointer]:
+            - img "English flag" [ref=e580]
+            - generic [ref=e581]: English
+        - listitem [ref=e585]:
+          - link "Help center" [ref=e586] [cursor=pointer]:
+            - /url: /creator-hub/help-center
+        - listitem [ref=e587]:
+          - link "Cookie Notice" [ref=e588] [cursor=pointer]:
+            - /url: /cookie-notice
+        - listitem [ref=e589]:
+          - link "Terms" [ref=e590] [cursor=pointer]:
+            - /url: /terms-of-use-agreement
+        - listitem [ref=e591]:
+          - link "Privacy" [ref=e592] [cursor=pointer]:
+            - /url: /privacy-policy

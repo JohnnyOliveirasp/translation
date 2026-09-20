@@ -1,0 +1,128 @@
+- generic [active] [ref=f30e1]:
+  - generic [ref=f30e3]:
+    - generic [ref=f30e4]:
+      - link "Skip to content" [ref=f30e6] [cursor=pointer]:
+        - /url: "#main"
+      - banner [ref=f30e9]:
+        - generic [ref=f30e10]:
+          - link "Supabase Back to organization home" [ref=f30e12] [cursor=pointer]:
+            - /url: /dashboard/organizations
+            - img "Supabase" [ref=f30e13]
+            - generic [ref=f30e14]: Back to organization home
+          - generic [ref=f30e15]:
+            - button "Feedback" [ref=f30e16] [cursor=pointer]
+            - generic [ref=f30e18]:
+              - button [ref=f30e19] [cursor=pointer]:
+                - paragraph [ref=f30e24]: Search...
+                - generic [ref=f30e25]: Ctrl K
+              - button "Help" [ref=f30e27] [cursor=pointer]
+              - button "Advisor Center" [ref=f30e34] [cursor=pointer]
+            - button [ref=f30e39] [cursor=pointer]
+      - generic [ref=f30e44]:
+        - generic [ref=f30e48]:
+          - generic [ref=f30e49]:
+            - navigation
+          - button "Sidebar control" [ref=f30e52] [cursor=pointer]
+        - main [ref=f30e59]:
+          - generic [ref=f30e61]:
+            - generic [ref=f30e65]:
+              - heading "Authentication" [level=4] [ref=f30e68]
+              - menu "Sidebar" [disabled] [ref=f30e71]:
+                - list [ref=f30e72]:
+                  - generic [ref=f30e75]:
+                    - generic [ref=f30e76]: Manage
+                    - generic [ref=f30e80]:
+                      - link [disabled] [ref=f30e81] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/users
+                        - menuitem "Users" [disabled] [ref=f30e82]
+                      - link [disabled] [ref=f30e87] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/oauth-apps
+                        - menuitem "OAuth Apps" [disabled] [ref=f30e88]
+                  - generic [ref=f30e96]:
+                    - generic [ref=f30e97]: Notifications
+                    - link [disabled] [ref=f30e102] [cursor=pointer]:
+                      - /url: /dashboard/project/undefined/auth/templates
+                      - menuitem "Emails" [disabled] [ref=f30e103]
+                  - generic [ref=f30e111]:
+                    - generic [ref=f30e112]: Configuration
+                    - generic [ref=f30e116]:
+                      - link [disabled] [ref=f30e117] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/database/policies
+                        - menuitem "Policies" [disabled] [ref=f30e118]:
+                          - generic "Policies" [ref=f30e121]
+                      - link [disabled] [ref=f30e127] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/providers
+                        - menuitem "Sign In / Providers" [disabled] [ref=f30e128]
+                      - link [disabled] [ref=f30e133] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/oauth-server
+                        - menuitem "OAuth Server Beta" [disabled] [ref=f30e134]:
+                          - generic [ref=f30e137]:
+                            - generic [ref=f30e138]: OAuth Server
+                            - generic [ref=f30e139]: Beta
+                      - link [disabled] [ref=f30e140] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/sessions
+                        - menuitem "Sessions" [disabled] [ref=f30e141]
+                      - link [disabled] [ref=f30e146] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/rate-limits
+                        - menuitem "Rate Limits" [disabled] [ref=f30e147]
+                      - link [disabled] [ref=f30e152] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/mfa
+                        - menuitem "Multi-Factor" [disabled] [ref=f30e153]
+                      - link [disabled] [ref=f30e158] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/url-configuration
+                        - menuitem "URL Configuration" [disabled] [ref=f30e159]
+                      - link [disabled] [ref=f30e164] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/protection
+                        - menuitem "Attack Protection" [disabled] [ref=f30e165]
+                      - link [disabled] [ref=f30e170] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/hooks
+                        - menuitem "Auth Hooks Beta" [disabled] [ref=f30e171]:
+                          - generic [ref=f30e174]:
+                            - generic [ref=f30e175]: Auth Hooks
+                            - generic [ref=f30e176]: Beta
+                      - link [disabled] [ref=f30e177] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/audit-logs
+                        - menuitem "Audit Logs" [disabled] [ref=f30e178]
+                      - link [disabled] [ref=f30e183] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/performance
+                        - menuitem "Performance" [disabled] [ref=f30e184]
+            - separator [disabled] [ref=f30e189]
+            - main [ref=f30e200]:
+              - generic [ref=f30e201]:
+                - generic [ref=f30e202]:
+                  - generic [ref=f30e207]:
+                    - heading "Sign In / Providers" [level=1] [ref=f30e208]
+                    - paragraph [ref=f30e209]: Configure authentication providers and login methods for your users
+                  - navigation [ref=f30e210]:
+                    - menu [ref=f30e211]:
+                      - listitem [ref=f30e212]:
+                        - link "Supabase Auth" [ref=f30e213] [cursor=pointer]:
+                          - /url: /dashboard/project/undefined/auth/providers
+                      - listitem [ref=f30e214]:
+                        - link "Third-Party Auth" [ref=f30e215] [cursor=pointer]:
+                          - /url: /dashboard/project/undefined/auth/third-party
+                - generic [ref=f30e216]:
+                  - heading "User Signups" [level=2] [ref=f30e221]
+                  - generic [ref=f30e236]:
+                    - heading "Auth Providers" [level=2] [ref=f30e237]
+                    - generic [ref=f30e238]: Authenticate your users through a suite of providers and login methods
+                  - generic [ref=f30e394]:
+                    - generic [ref=f30e395]:
+                      - generic [ref=f30e396]:
+                        - heading "Custom Providers" [level=2] [ref=f30e397]
+                        - generic [ref=f30e398]: New
+                      - generic [ref=f30e399]: Configure OAuth/OIDC providers for this project using your own issuer or endpoints.
+                    - link "Docs" [ref=f30e401] [cursor=pointer]:
+                      - /url: https://supabase.com/docs/guides/auth/custom-oauth-providers
+    - generic [ref=f30e416]:
+      - generic:
+        - img "Background pattern"
+      - generic [ref=f30e417]:
+        - button "Close banner" [ref=f30e419] [cursor=pointer]
+        - generic [ref=f30e424]:
+          - generic [ref=f30e425]: Notice
+          - generic [ref=f30e426]:
+            - paragraph [ref=f30e427]: We're updating our Terms of Service
+            - paragraph [ref=f30e428]: Our Data Processing Addendum is now built into the Terms, effective August 1, 2026.
+          - button "Learn more" [ref=f30e429] [cursor=pointer]
+  - alert [ref=f30e431]

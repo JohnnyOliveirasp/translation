@@ -1,0 +1,102 @@
+- generic [active] [ref=f21e1]:
+  - generic [ref=f21e3]:
+    - generic [ref=f21e4]:
+      - link "Skip to content" [ref=f21e6] [cursor=pointer]:
+        - /url: "#main"
+      - banner [ref=f21e9]:
+        - generic [ref=f21e10]:
+          - link "Supabase Back to organization home" [ref=f21e12] [cursor=pointer]:
+            - /url: /dashboard/organizations
+            - img "Supabase" [ref=f21e13]
+            - generic [ref=f21e14]: Back to organization home
+          - generic [ref=f21e15]:
+            - button "Feedback" [ref=f21e16] [cursor=pointer]
+            - generic [ref=f21e18]:
+              - button [ref=f21e19] [cursor=pointer]:
+                - paragraph [ref=f21e24]: Search...
+                - generic [ref=f21e25]: Ctrl K
+              - button "Help" [ref=f21e27] [cursor=pointer]
+              - button "Advisor Center" [ref=f21e34] [cursor=pointer]
+            - button [ref=f21e39] [cursor=pointer]
+      - generic [ref=f21e44]:
+        - generic [ref=f21e48]:
+          - generic [ref=f21e49]:
+            - navigation
+          - button "Sidebar control" [ref=f21e52] [cursor=pointer]
+        - main [ref=f21e59]:
+          - generic [ref=f21e61]:
+            - generic [ref=f21e65]:
+              - heading "Authentication" [level=4] [ref=f21e68]
+              - menu "Sidebar" [disabled] [ref=f21e71]:
+                - list [ref=f21e72]:
+                  - generic [ref=f21e75]:
+                    - generic [ref=f21e76]: Manage
+                    - generic [ref=f21e80]:
+                      - link [disabled] [ref=f21e81] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/users
+                        - menuitem "Users" [disabled] [ref=f21e82]
+                      - link [disabled] [ref=f21e87] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/oauth-apps
+                        - menuitem "OAuth Apps" [disabled] [ref=f21e88]
+                  - generic [ref=f21e96]:
+                    - generic [ref=f21e97]: Notifications
+                    - link [disabled] [ref=f21e102] [cursor=pointer]:
+                      - /url: /dashboard/project/undefined/auth/templates
+                      - menuitem "Emails" [disabled] [ref=f21e103]
+                  - generic [ref=f21e111]:
+                    - generic [ref=f21e112]: Configuration
+                    - generic [ref=f21e116]:
+                      - link [disabled] [ref=f21e117] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/database/policies
+                        - menuitem "Policies" [disabled] [ref=f21e118]:
+                          - generic "Policies" [ref=f21e121]
+                      - link [disabled] [ref=f21e127] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/providers
+                        - menuitem "Sign In / Providers" [disabled] [ref=f21e128]
+                      - link [disabled] [ref=f21e133] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/oauth-server
+                        - menuitem "OAuth Server Beta" [disabled] [ref=f21e134]:
+                          - generic [ref=f21e137]:
+                            - generic [ref=f21e138]: OAuth Server
+                            - generic [ref=f21e139]: Beta
+                      - link [disabled] [ref=f21e140] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/sessions
+                        - menuitem "Sessions" [disabled] [ref=f21e141]
+                      - link [disabled] [ref=f21e146] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/rate-limits
+                        - menuitem "Rate Limits" [disabled] [ref=f21e147]
+                      - link [disabled] [ref=f21e152] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/mfa
+                        - menuitem "Multi-Factor" [disabled] [ref=f21e153]
+                      - link [disabled] [ref=f21e158] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/url-configuration
+                        - menuitem "URL Configuration" [disabled] [ref=f21e159]
+                      - link [disabled] [ref=f21e164] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/protection
+                        - menuitem "Attack Protection" [disabled] [ref=f21e165]
+                      - link [disabled] [ref=f21e170] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/hooks
+                        - menuitem "Auth Hooks Beta" [disabled] [ref=f21e171]:
+                          - generic [ref=f21e174]:
+                            - generic [ref=f21e175]: Auth Hooks
+                            - generic [ref=f21e176]: Beta
+                      - link [disabled] [ref=f21e177] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/audit-logs
+                        - menuitem "Audit Logs" [disabled] [ref=f21e178]
+                      - link [disabled] [ref=f21e183] [cursor=pointer]:
+                        - /url: /dashboard/project/undefined/auth/performance
+                        - menuitem "Performance" [disabled] [ref=f21e184]
+            - separator [disabled] [ref=f21e189]
+            - main [ref=f21e200]
+    - generic [ref=f21e205]:
+      - generic:
+        - img "Background pattern"
+      - generic [ref=f21e206]:
+        - button "Close banner" [ref=f21e208] [cursor=pointer]
+        - generic [ref=f21e213]:
+          - generic [ref=f21e214]: Notice
+          - generic [ref=f21e215]:
+            - paragraph [ref=f21e216]: We're updating our Terms of Service
+            - paragraph [ref=f21e217]: Our Data Processing Addendum is now built into the Terms, effective August 1, 2026.
+          - button "Learn more" [ref=f21e218] [cursor=pointer]
+  - alert [ref=f21e220]

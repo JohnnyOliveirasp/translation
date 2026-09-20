@@ -20,7 +20,9 @@ livetranslate/
 ├── brand/                ← logo vetorial (svg/), PNGs 4096 transparentes (png/), fontes; gerar-logo.js + render-png.sh
 └── docs/                 ← PLANEJAMENTO-produto.md, este HANDOFF, screenshots/, logos/ (rascunhos IA)
 ```
-Pesquisa de concorrentes: `_bugs/pesquisa-concorrentes-2026-08-25.md` (raiz do repo).
+Pesquisa de concorrentes: `livetranslate/docs/pesquisa-concorrentes-2026-08-25.md`.
+
+> **Reorganizacao de 20/09/2026:** o repo agora tem **so duas pastas na raiz** — `livetranslate/` (unica ativa) e `OLD/` (backup e aprendizado: v1, poc2, poc3, cartazes, _bugs, _sermoes). Caminhos antigos como `live-translate/...`, `poc2/...`, `poc3/...` viraram `OLD/v1-live-translate/...`, `OLD/poc2/...`, `OLD/poc3/...`. Ver `MAPA-DO-PROJETO.md` na raiz e `OLD/LEIA-ME.md`.
 
 ## 3. Como rodar
 ```
