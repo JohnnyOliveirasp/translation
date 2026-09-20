@@ -9,6 +9,14 @@ import {
 } from '@livekit/rtc-node';
 import { GoogleGenAI } from '@google/genai';
 import { AccessToken } from 'livekit-server-sdk';
+import { appendFileSync } from 'node:fs';
+
+// Forense persistente em logs/sessao.log — o console do PM2 é apagado todo dia às
+// 04:00 por um cron de limpeza de disco (pm2 flush); no culto de 16/08 isso deixou
+// trocas de voz e um pulo de conteúdo sem diagnóstico possível. Aqui fica em disco.
+export function logSessao(lang, line) {
+  try { appendFileSync('logs/sessao.log', `${new Date().toISOString()} [${lang}] ${line}\n`); } catch {}
+}
 
 const MODEL = 'gemini-3.5-live-translate-preview';
 const IN_RATE = 16000;
@@ -148,7 +156,9 @@ export class TranslationBridge {
     this.session = await this.abrirSessao();
     // o log reflete o modo REALMENTE usado (antes dizia "com handle" só porque o
     // handle existia — mesmo com NO_RESUME=1 enviando sessão limpa)
-    this.log('sessão Gemini aberta', this.usarHandle() ? '(retomada com handle)' : '(nova/limpa)');
+    const modo = this.usarHandle() ? '(retomada com handle)' : '(nova/limpa)';
+    this.log('sessão Gemini aberta', modo);
+    logSessao(this.lang, `sessão aberta ${modo}`);
   }
 
   usarHandle() { return process.env.NO_RESUME !== '1' && !!this.resumeHandle; }
@@ -164,8 +174,10 @@ export class TranslationBridge {
     try {
       this.sessaoNova = await this.abrirSessao();
       this.log('sessão nova pré-aberta (make-before-break) — aguardando pausa de fala para chavear');
+      logSessao(this.lang, 'sessão nova pré-aberta (make-before-break)');
     } catch (e) {
       this.log('pré-abertura falhou (cai na troca clássica):', e?.message ?? e);
+      logSessao(this.lang, `pré-abertura FALHOU: ${e?.message ?? e}`);
     } finally {
       this.preparandoNova = false;
     }
@@ -177,6 +189,7 @@ export class TranslationBridge {
     this.sessaoNova = null;
     this.stats.geminiReconnects++;
     this.log(`chaveado sem corte (${motivo}) — sessão antiga drena por 4s`);
+    logSessao(this.lang, `CHAVEADA sem corte (${motivo}) — antiga drena 4s`);
     // a antiga ainda entrega a tradução do que ouviu antes do chaveio
     this.drenando = velha;
     setTimeout(() => {
@@ -192,6 +205,7 @@ export class TranslationBridge {
       // temos ~50s de aviso: pré-abre a sessão nova JÁ e troca na próxima PAUSA DE
       // FALA (não corta palavra no meio); sem pausa em 25s, chaveia à força
       this.log(`goAway recebido (timeLeft=${msg.goAway.timeLeft}) → pré-abrindo sessão nova; troca na próxima pausa de fala`);
+      logSessao(this.lang, `goAway recebido (timeLeft=${msg.goAway.timeLeft})`);
       if (!this.swapPending && !this.reconnecting) {
         this.swapPending = true;
         this.prepararSessaoNova();
@@ -219,6 +233,7 @@ export class TranslationBridge {
     this.reconnecting = true;
     this.stats.geminiReconnects++;
     this.log(`reconectando Gemini (${reason})...`);
+    logSessao(this.lang, `RECONEXÃO clássica iniciada (${reason})`);
     try { this.session?.close?.(); } catch {}
     for (let tent = 1; tent <= 5 && this.running; tent++) {
       try {
@@ -231,6 +246,7 @@ export class TranslationBridge {
         this.pendingB64 = [];
         if (pend.length) {
           this.log(`retomado — reenviando ${(pend.length / 10).toFixed(1)}s de áudio da troca (ritmo 2×)`);
+          logSessao(this.lang, `reconectada — reenviando ${(pend.length / 10).toFixed(1)}s de áudio bufferizado`);
           (async () => {
             for (const b64 of pend) {
               if (!this.running || this.reconnecting) break;
@@ -251,6 +267,7 @@ export class TranslationBridge {
     // desiste: marca a ponte como morta para o manager recriá-la no próximo pedido
     this.running = false;
     this.log('ERRO: não conseguiu reconectar ao Gemini — ponte marcada como morta');
+    logSessao(this.lang, 'ERRO FATAL: reconexão esgotou as tentativas — ponte morta');
   }
 
   // áudio do orador → Gemini (fila serial; frames de 100 ms já saem do AudioStream)

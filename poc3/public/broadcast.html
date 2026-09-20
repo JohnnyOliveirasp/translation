@@ -101,21 +101,24 @@
 
     <details>
       <summary>⚙ Calibration</summary>
+      <!-- Defaults calibrados com o CSV do culto de 23/08 (mic na LAPELA do pastor:
+           música chega abafada, score ~0.15-0.4 — os limiares antigos de 0.5 nunca
+           disparavam). Regra RELATIVA: muta quando a música DOMINA a fala. -->
       <div class="ajuste"><label>Speech threshold (turn ON)</label>
-        <input type="range" id="cLimFala" min="0.1" max="0.9" step="0.05" value="0.5" oninput="oLimFala.value=this.value"><output id="oLimFala">0.5</output></div>
+        <input type="range" id="cLimFala" min="0.1" max="0.9" step="0.05" value="0.3" oninput="oLimFala.value=this.value"><output id="oLimFala">0.3</output></div>
       <div class="ajuste"><label>Speech windows to turn ON</label>
-        <input type="range" id="cJanFala" min="1" max="6" step="1" value="2" oninput="oJanFala.value=this.value"><output id="oJanFala">2</output></div>
+        <input type="range" id="cJanFala" min="1" max="15" step="1" value="8" oninput="oJanFala.value=this.value"><output id="oJanFala">8</output></div>
       <div class="ajuste"><label>Music threshold (turn OFF)</label>
-        <input type="range" id="cLimMus" min="0.1" max="0.9" step="0.05" value="0.5" oninput="oLimMus.value=this.value"><output id="oLimMus">0.5</output></div>
-      <div class="ajuste"><label>Max speech to allow OFF</label>
-        <input type="range" id="cTetoFala" min="0.05" max="0.6" step="0.05" value="0.3" oninput="oTetoFala.value=this.value"><output id="oTetoFala">0.3</output></div>
+        <input type="range" id="cLimMus" min="0.05" max="0.9" step="0.05" value="0.15" oninput="oLimMus.value=this.value"><output id="oLimMus">0.15</output></div>
+      <div class="ajuste"><label>Music dominance × speech (turn OFF)</label>
+        <input type="range" id="cMargem" min="1" max="3" step="0.1" value="2" oninput="oMargem.value=this.value"><output id="oMargem">2</output></div>
       <div class="ajuste"><label>Music windows to turn OFF</label>
         <input type="range" id="cJanMus" min="1" max="8" step="1" value="4" oninput="oJanMus.value=this.value"><output id="oJanMus">4</output></div>
     </details>
 
     <h2>Detector decisions <span class="badge" id="contadores"></span></h2>
     <div id="log" class="log"><p class="badge">waiting for first decision…</p></div>
-    <button onclick="baixarCsv()">⬇ Export session CSV</button>
+    <p class="badge">Detector data is saved on the server automatically (logs/detector-*.log).</p>
     <button class="perigo" onclick="encerrar()">End broadcast</button>
   </div>
 
@@ -131,12 +134,34 @@ let mutado = null;                                      // null = ainda não apl
 let ultimaTransicao = Date.now(), nTransicoes = 0, rel = 0;
 let catalogo = [], fonte = 'en';
 const FONTES = ['en', 'pt-BR', 'es'];                   // mesmas opções do v1
-let csv = [['hora','fala','musica','top1','estado','modo','mutado']];
+
+// Telemetria do detector → SERVIDOR (logs/detector-AAAAMMDD.log via /api/poc3-log).
+// Substitui o CSV baixado no aparelho: em 2 cultos seguidos o export se perdeu
+// (reload apagava a sessão da memória). Lote a cada 20s + sendBeacon no fechamento.
+let logBuf = [];
+function logRemoto(linha) {
+  logBuf.push(linha);
+  if (logBuf.length > 1800) logBuf.splice(0, logBuf.length - 1800); // ~30min de teto
+}
+async function enviarLog() {
+  if (!logBuf.length) return;
+  const rows = logBuf; logBuf = [];
+  try {
+    const r = await fetch('/api/poc3-log', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: senha, rows }) });
+    if (!r.ok) throw new Error(r.status);
+  } catch { logBuf = rows.concat(logBuf); } // falhou → devolve pro buffer, tenta no próximo lote
+}
+function despejarLog() { // página fechando/escondendo: beacon não espera resposta
+  if (!logBuf.length) return;
+  const blob = new Blob([JSON.stringify({ password: senha, rows: logBuf })], { type: 'application/json' });
+  if (navigator.sendBeacon?.('/api/poc3-log', blob)) logBuf = [];
+}
 
 const $ = id => document.getElementById(id);
 const cfg = () => ({
   limFala: +$('cLimFala').value, janFala: +$('cJanFala').value,
-  limMus: +$('cLimMus').value, tetoFala: +$('cTetoFala').value, janMus: +$('cJanMus').value,
+  limMus: +$('cLimMus').value, margem: +$('cMargem').value, janMus: +$('cJanMus').value,
 });
 
 // ── login (mesma API do v1) ─────────────────────────────────────────────────
@@ -224,6 +249,9 @@ window.iniciar = async function () {
       $('relogio').textContent = String(Math.floor(rel / 60)).padStart(2, '0') + ':' + String(rel % 60).padStart(2, '0');
     }, 1000);
     setInterval(atualizarOuvintes, 5000);
+    setInterval(enviarLog, 20000);
+    addEventListener('pagehide', despejarLog);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') despejarLog(); });
 
     wakeLock();
     troca('pronto', 'aovivo');
@@ -247,6 +275,14 @@ async function atualizarOuvintes() {
 }
 
 // ── classificação + máquina de estados ──────────────────────────────────────
+// REGRA RELATIVA (calibrada com o CSV do culto 23/08, mic na lapela do pastor):
+//   MUTAR:    música ≥ limMus  E  música > fala × margem   por janMus janelas (~4s)
+//   DESMUTAR: fala   ≥ limFala E  fala > música            por janFala janelas (~8s)
+// Ambas sobre MÉDIA MÓVEL de 5 janelas (~5s) — sem suavizar, um pico de voz
+// cantada desmutava no meio do louvor (simulação: 15 oscilações → 3 eventos).
+// Assimetria: desmutar exige o dobro de sustentação porque quem fala ENTRE os
+// versos do louvor (oração, líder) soltava a tradução por segundos.
+const histF = [], histM = [];
 function classificar(amostras) {
   if (!classificador) return;
   const resultados = classificador.classify(amostras, 16000);
@@ -261,16 +297,22 @@ function classificar(amostras) {
   const musica = Math.max(s('Music'), s('Singing'), s('Choir'), s('Musical instrument'));
   const top1 = Object.entries(soma).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
 
-  const c = cfg();
-  if (fala >= c.limFala) contFala++; else contFala = 0;
-  if (musica >= c.limMus && fala < c.tetoFala) contMusica++; else contMusica = 0;
+  histF.push(fala); histM.push(musica);
+  if (histF.length > 5) { histF.shift(); histM.shift(); }
+  const smF = histF.reduce((a, b) => a + b, 0) / histF.length;
+  const smM = histM.reduce((a, b) => a + b, 0) / histM.length;
 
-  if (contFala >= c.janFala && estado !== 'SPEECH') transicao('SPEECH', fala, musica);
-  else if (contMusica >= c.janMus && estado !== 'MUSIC') transicao('MUSIC', fala, musica);
+  const c = cfg();
+  if (smF >= c.limFala && smF > smM) contFala++; else contFala = 0;
+  if (smM >= c.limMus && smM > smF * c.margem) contMusica++; else contMusica = 0;
+
+  if (contFala >= c.janFala && estado !== 'SPEECH') transicao('SPEECH', smF, smM);
+  else if (contMusica >= c.janMus && estado !== 'MUSIC') transicao('MUSIC', smF, smM);
 
   decidir();
   põe('Fala', fala); põe('Musica', musica);
-  csv.push([new Date().toISOString(), fala.toFixed(3), musica.toFixed(3), top1, estado, modo, mutado]);
+  // scores CRUS no log do servidor (a suavização se refaz na análise offline)
+  logRemoto([new Date().toISOString(), fala.toFixed(3), musica.toFixed(3), top1, estado, modo, mutado].join(';'));
 }
 
 function transicao(novo, fala, musica) {
@@ -319,18 +361,12 @@ window.setModo = function (m) {
 
 window.encerrar = async function () {
   if (!confirm('End the broadcast for everyone?')) return;
+  await enviarLog().catch(() => {});  // último lote antes do reload apagar o buffer
+  despejarLog();
   await fetch('/api/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: 'stop-all', password: senha }) });
   try { await room?.disconnect(); } catch {}
   location.reload();
-};
-
-window.baixarCsv = function () {
-  const blob = new Blob([csv.map(l => l.join(';')).join('\n')], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `poc3-broadcast-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
-  a.click();
 };
 
 function logar(msg, classe) {

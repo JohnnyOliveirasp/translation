@@ -6,6 +6,7 @@
 
 import { NextResponse } from 'next/server';
 import { manager } from '@/lib/session-manager';
+import { logSessao } from '@/lib/translation-bridge';
 
 export async function GET() {
   return NextResponse.json({ ...manager.status(), publicUrl: process.env.PUBLIC_URL || null });
@@ -42,7 +43,10 @@ export async function POST(req) {
       if (password !== process.env.BROADCAST_PASSWORD) {
         return NextResponse.json({ error: 'wrong password' }, { status: 401 });
       }
-      manager.muted = !!body.muted;
+      const novoMute = !!body.muted;
+      // forense: linha do tempo dos mutes (culto 16/08 teve de ser reconstruída via nginx)
+      if (manager.muted !== novoMute) logSessao('*', novoMute ? 'MUTE (operador/detector)' : 'UNMUTE (operador/detector)');
+      manager.muted = novoMute;
       return NextResponse.json({ ok: true, muted: manager.muted });
     }
     if (action === 'stop-all') {
