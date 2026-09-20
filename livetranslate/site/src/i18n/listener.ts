@@ -78,6 +78,8 @@ const L: Record<string, ListenerStrings> = {
     mailPlaceholder: 'your@email.com', mailCta: '送信', mailDone: '完了 — 礼拝の後に届きます。',
     lyricsLive: 'その場で聞き取った歌詞 — 正確でない場合があります',
   },
+  // Kreyòl: traducao pronta, mas o Gemini Live Translate NAO suporta `ht`.
+  // Fica guardada aqui para o dia em que houver um caminho que suporte.
   'ht': {
     label: 'Tradiksyon an dirèk', headphones: 'Tanpri sèvi ak ekoutè', connecting: 'K ap konekte…', reconnecting: 'K ap rekonekte…',
     listening: 'N ap koute', pause: 'Kanpe', resume: 'Jwe', change: 'Chanje lang', tapSound: 'TOUCHE POU SON AN TOUNEN',
@@ -120,7 +122,14 @@ const L: Record<string, ListenerStrings> = {
     mailPlaceholder: 'email@cuaban.com', mailCta: 'Gửi', mailDone: 'Xong — sẽ đến sau buổi lễ.',
     lyricsLive: 'Lời hát nghe trực tiếp — có thể không chính xác',
   },
-  'tl': {
+  'nl': {
+    label: 'Live vertaling', headphones: 'Gebruik een koptelefoon', connecting: 'Verbinden…', reconnecting: 'Opnieuw verbinden…',
+    listening: 'Luisteren', pause: 'Pauzeren', resume: 'Afspelen', change: 'Taal wijzigen', tapSound: 'TIK OM HET GELUID TERUG TE ZETTEN',
+    mailTitle: 'Wilt u de preek van vandaag per e-mail ontvangen?', mailHint: 'We sturen de preek in uw taal na de dienst. Geen account nodig.',
+    mailPlaceholder: 'uw@email.com', mailCta: 'Versturen', mailDone: 'Klaar — het komt na de dienst.',
+    lyricsLive: 'Songtekst live meegeluisterd — kan onnauwkeurig zijn',
+  },
+  'fil': {
     label: 'Live na pagsasalin', headphones: 'Gumamit po ng headphones', connecting: 'Kumokonekta…', reconnecting: 'Muling kumokonekta…',
     listening: 'Nakikinig', pause: 'I-pause', resume: 'I-play', change: 'Palitan ang wika', tapSound: 'I-TAP PARA IBALIK ANG TUNOG',
     mailTitle: 'Gusto mo bang matanggap ang mensahe ngayon sa email?', mailHint: 'Ipapadala namin ang pangaral sa iyong wika pagkatapos ng serbisyo. Walang account na kailangan.',
