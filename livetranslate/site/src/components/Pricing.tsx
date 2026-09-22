@@ -5,11 +5,14 @@ import { WordsPullUpMultiStyle, Rise } from './TextEffects';
 type Plan = { name: string; price: string; per?: string; tag?: string; featured?: boolean; items: string[]; cta: string; href: string };
 
 export default function Pricing() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  // Preços decididos pelo Johnny em 22/09: site em português mostra o preço do Brasil (BRL); inglês/espanhol, o dos EUA (USD).
+  // Os valores cobrados de verdade vêm do Stripe/platform_settings (aba Assinatura); aqui é só a vitrine.
+  const br = lang === 'pt';
   const plans: Plan[] = [
-    { name: t('pr.starter'), price: '$79.90', per: t('pr.mo'), cta: t('pr.cta'), href: '/signup?plan=starter',
+    { name: t('pr.starter'), price: br ? 'R$ 249' : '$69.90', per: t('pr.mo'), cta: t('pr.cta'), href: '/signup?plan=starter',
       items: [t('pr.l2'), t('pr.f.listeners'), t('pr.f.sundays'), t('pr.f.ws'), t('pr.f.pdf'), t('pr.f.support')] },
-    { name: t('pr.growth'), price: '$139', per: t('pr.mo'), tag: t('pr.tag'), featured: true, cta: t('pr.cta'), href: '/signup?plan=growth',
+    { name: t('pr.growth'), price: br ? 'R$ 499' : '$119', per: t('pr.mo'), tag: t('pr.tag'), featured: true, cta: t('pr.cta'), href: '/signup?plan=growth',
       items: [t('pr.l5'), t('pr.f.listeners'), t('pr.f.sundays'), t('pr.f.ws'), t('pr.f.pdf'), t('pr.f.priority')] },
     { name: t('pr.cong'), price: t('pr.talk'), cta: t('pr.cta3'), href: 'mailto:hello@livetranslate.church',
       items: [t('pr.l6'), t('pr.f.campus'), t('pr.f.brand'), t('pr.f.listeners')] },

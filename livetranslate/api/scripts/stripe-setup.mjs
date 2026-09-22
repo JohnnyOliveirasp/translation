@@ -17,8 +17,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const ENV_FILE = process.argv[2] || '.env.local';
 const SITE = (process.env.PUBLIC_URL || 'https://livetranslate.church').replace(/\/$/, '');
 const CONTAS = [
-  { tag: 'US', moeda: 'usd', valores: { starter: 7990, growth: 13900 } },
-  { tag: 'BR', moeda: 'brl', valores: { starter: num(process.env.STRIPE_BR_AMOUNT_STARTER), growth: num(process.env.STRIPE_BR_AMOUNT_GROWTH) } },
+  // preços decididos pelo Johnny em 22/09 (baixou de 79,90/139): US$ 69,90 / 119 e R$ 249 / 499
+  { tag: 'US', moeda: 'usd', valores: { starter: num(process.env.STRIPE_US_AMOUNT_STARTER) ?? 6990, growth: num(process.env.STRIPE_US_AMOUNT_GROWTH) ?? 11900 } },
+  { tag: 'BR', moeda: 'brl', valores: { starter: num(process.env.STRIPE_BR_AMOUNT_STARTER) ?? 24900, growth: num(process.env.STRIPE_BR_AMOUNT_GROWTH) ?? 49900 } },
 ];
 const PLANOS = {
   starter: { nome: 'LiveTranslate Starter', desc: 'Live sermon translation — up to 2 languages, unlimited listeners.' },
