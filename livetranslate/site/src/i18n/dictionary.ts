@@ -13,7 +13,7 @@ const en: Record<string, string> = {
   'tv.label': 'Real stories', 'tv.title': 'Churches that *hear every word.*', 'tv.sub': 'Pastors, media teams and members using LiveTranslate every week — in their own words, on video.',
   'tv.soonTitle': 'The first videos are on their way.', 'tv.soonSub': 'We are recording with the churches that use LiveTranslate every Sunday. Check back soon.',
   'tv.shareTitle': 'Do you use LiveTranslate?', 'tv.shareSub': 'A 60-second video from your phone helps another church decide. We will add it here.',
-  'tv.google': 'Review us on Google', 'tv.send': 'Send your testimonial',
+  'tv.google': 'Review us on Google', 'tv.send': 'Send your testimonial', 'tv.play': 'Play',
 
   'hero.title': 'Every word, *in every language.*',
   'hero.desc': 'Live AI translation for churches, conferences and events. Your audience scans a QR code and hears the speaker in their own language, on their own phone — no app, no headsets, no operator. It even knows when the music starts.',
@@ -138,7 +138,7 @@ const es: Record<string, string> = {
   'tv.label': 'Historias reales', 'tv.title': 'Iglesias que *escuchan cada palabra.*', 'tv.sub': 'Pastores, equipos de media y miembros que usan LiveTranslate cada semana, con sus propias palabras, en video.',
   'tv.soonTitle': 'Los primeros videos están en camino.', 'tv.soonSub': 'Estamos grabando con las iglesias que usan LiveTranslate cada domingo. Vuelve pronto.',
   'tv.shareTitle': '¿Usas LiveTranslate?', 'tv.shareSub': 'Un video de 60 segundos desde tu celular ayuda a otra iglesia a decidir. Lo publicamos aquí.',
-  'tv.google': 'Califícanos en Google', 'tv.send': 'Enviar tu testimonio',
+  'tv.google': 'Califícanos en Google', 'tv.send': 'Enviar tu testimonio', 'tv.play': 'Reproducir',
 
   'hero.title': 'Cada palabra, *en cada idioma.*',
   'hero.desc': 'Traducción en vivo con IA para iglesias, conferencias y eventos. Tu público escanea un código QR y escucha al orador en su idioma, en su propio teléfono — sin app, sin auriculares, sin operador. Y sabe cuándo empieza la música.',
@@ -263,7 +263,7 @@ const pt: Record<string, string> = {
   'tv.label': 'Histórias reais', 'tv.title': 'Igrejas que *ouvem cada palavra.*', 'tv.sub': 'Pastores, equipes de mídia e membros que usam o LiveTranslate toda semana, com as próprias palavras, em vídeo.',
   'tv.soonTitle': 'Os primeiros vídeos estão a caminho.', 'tv.soonSub': 'Estamos gravando com as igrejas que usam o LiveTranslate todo domingo. Volte em breve.',
   'tv.shareTitle': 'Você usa o LiveTranslate?', 'tv.shareSub': 'Um vídeo de 60 segundos pelo celular ajuda outra igreja a decidir. A gente publica aqui.',
-  'tv.google': 'Avalie no Google', 'tv.send': 'Enviar seu depoimento',
+  'tv.google': 'Avalie no Google', 'tv.send': 'Enviar seu depoimento', 'tv.play': 'Reproduzir',
 
   'hero.title': 'Cada palavra, *em cada idioma.*',
   'hero.desc': 'Tradução ao vivo com IA para igrejas, conferências e eventos. Seu público escaneia um QR code e ouve o orador no próprio idioma, no próprio celular — sem app, sem fones, sem operador. E ele sabe quando a música começa.',
