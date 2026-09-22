@@ -8,12 +8,19 @@
 // e versículo citado vira parágrafo próprio (itálico, recuado, com filete) — pedido
 // do Johnny: destacar a Palavra do resto da pregação.
 //
+// 22/09: DOIS MOTORES. Os idiomas latinos seguem neste gerador à mão (intocado no
+// visual). Alfabetos que as fontes base do PDF não têm — chinês, coreano, japonês,
+// russo, ucraniano, árabe, hindi — e o vietnamita (acentos de tom fora do cp1252)
+// vão pelo Chromium do servidor (pdf-chromium.js), com um HTML que copia este layout.
+// Antes eles saíam "????".
+//
 // Entrada: logs/sermao-{slug}-AAAAMMDD.log        (fala do orador, idioma original)
 //          logs/traducao-{slug}-{lang}-AAAAMMDD.log (uma por idioma traduzido)
 // Saída:   sermons/{slug}/{AAAAMMDD}-{lang}.pdf
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { inflateSync, deflateSync } from 'node:zlib';
+import { htmlParaPdf } from './pdf-chromium.js';
 
 const LARGURA = 595.28, ALTURA = 841.89;
 const MARGEM_X = 56, MARGEM_TOPO = 72, MARGEM_BASE = 56;
@@ -25,12 +32,35 @@ const IDIOMA_NOME = {
   'en': 'English', 'es': 'Español', 'pt-BR': 'Português', 'fr': 'Français', 'de': 'Deutsch',
   'it': 'Italiano', 'zh-Hans': '中文', 'ko': '한국어', 'ja': '日本語', 'ht': 'Kreyòl ayisyen',
   'ru': 'Русский', 'uk': 'Українська', 'ar': 'العربية', 'hi': 'हिन्दी', 'vi': 'Tiếng Việt', 'tl': 'Filipino',
+  'nl': 'Nederlands', 'fil': 'Filipino',
 };
-const CABECALHO = { 'pt-BR': 'Culto de', 'es': 'Culto del', 'en': 'Service of' };
+// Cabeçalho ("Culto de {data}") e rodapé em cada idioma do catálogo. Até 22/09 só
+// havia pt/es/en — francês, alemão, italiano e holandês saíam com "Service of" em inglês.
+// {data} é a data por extenso no próprio idioma (Intl); a ordem da frase muda por língua.
+const CULTO_DE = {
+  'en': 'Service of {data}', 'pt-BR': 'Culto de {data}', 'es': 'Culto del {data}',
+  'fr': 'Culte du {data}', 'de': 'Gottesdienst vom {data}', 'it': 'Culto del {data}',
+  'nl': 'Dienst van {data}', 'fil': 'Serbisyo noong {data}', 'vi': 'Buổi lễ ngày {data}',
+  'zh-Hans': '{data} 礼拜', 'ko': '{data} 예배', 'ja': '{data} 礼拝',
+  'ru': 'Богослужение {data}', 'uk': 'Богослужіння {data}', 'ar': 'خدمة {data}', 'hi': '{data} की आराधना',
+};
 const RODAPE = {
   'pt-BR': 'Transcrição automática da tradução ao vivo — pode conter imprecisões.',
   'es': 'Transcripción automática de la traducción en vivo — puede contener imprecisiones.',
   'en': 'Automatic transcript of the live service — may contain inaccuracies.',
+  'fr': 'Transcription automatique de la traduction en direct — peut contenir des imprécisions.',
+  'de': 'Automatische Mitschrift der Live-Übersetzung — kann Ungenauigkeiten enthalten.',
+  'it': 'Trascrizione automatica della traduzione dal vivo — può contenere imprecisioni.',
+  'nl': 'Automatische transcriptie van de live vertaling — kan onnauwkeurigheden bevatten.',
+  'fil': 'Awtomatikong transkripsyon ng live na pagsasalin — maaaring may mga kamalian.',
+  'vi': 'Bản ghi tự động của bản dịch trực tiếp — có thể có sai sót.',
+  'zh-Hans': '现场翻译的自动转录，可能存在不准确之处。',
+  'ko': '실시간 통역의 자동 기록본으로, 부정확한 내용이 있을 수 있습니다.',
+  'ja': 'ライブ通訳の自動文字起こしです。不正確な箇所が含まれる場合があります。',
+  'ru': 'Автоматическая расшифровка синхронного перевода — возможны неточности.',
+  'uk': 'Автоматична розшифровка синхронного перекладу — можливі неточності.',
+  'ar': 'نص تلقائي للترجمة المباشرة — قد يحتوي على أخطاء.',
+  'hi': 'लाइव अनुवाद का स्वचालित प्रतिलेख — इसमें त्रुटियाँ हो सकती हैं।',
 };
 
 // Larguras da Helvetica (1/1000 em) — sem isso a quebra de linha erra feio.
@@ -77,9 +107,21 @@ const REF_VERSICULO = new RegExp(
 
 /** Fragmentos → parágrafos. Frase com referência bíblica vira parágrafo PRÓPRIO
  *  (com até 2 frases seguintes — o pastor costuma ler o versículo logo após citá-lo). */
-function paragrafos(linhas) {
-  const texto = linhas.join('').replace(/\s+/g, ' ').trim();
-  const frases = texto.match(/[^.!?…]+[.!?…]*/g) ?? [];
+// Fim de frase: além de . ! ? …, o 。！？ do chinês/japonês, o । ॥ do hindi e o ؟ do
+// árabe. Sem isso o sermão chinês inteiro virava UM parágrafo de 14 páginas.
+// (Para os idiomas latinos nada muda — esses sinais não aparecem no texto deles.)
+const FRASE = /[^.!?…。！？।॥؟]+[.!?…。！？।॥؟]*/g;
+const FIM_DE_FRASE = /[.!?…。！？।॥؟]\s*$/;
+const SEM_ESPACO = new Set(['zh-Hans', 'ja']);   // escrita sem espaço entre palavras
+const CJK = '　-鿿가-힯＀-￯';
+
+export function paragrafos(linhas, lang = 'en') {
+  let texto = linhas.join('').replace(/\s+/g, ' ').trim();
+  // lerLog cola cada fragmento com um espaço; em chinês/japonês isso abria buracos no texto
+  if (SEM_ESPACO.has(lang)) texto = texto.replace(new RegExp(`(?<=[${CJK}]) (?=[${CJK}])`, 'g'), '');
+  // parágrafo por número de caracteres: um ideograma carrega o que ~2,5 letras carregam
+  const limite = SEM_ESPACO.has(lang) || lang === 'ko' ? 170 : 420;
+  const frases = texto.match(FRASE) ?? [];
   const out = [];
   let atual = '';
   const solta = () => { if (atual.trim()) out.push({ texto: atual.trim(), verso: false }); atual = ''; };
@@ -99,7 +141,7 @@ function paragrafos(linhas) {
       continue;
     }
     atual += f;
-    if (atual.length > 420 && /[.!?…]\s*$/.test(atual)) solta();
+    if (atual.length > limite && FIM_DE_FRASE.test(atual)) solta();
   }
   solta();
   return out;
@@ -126,8 +168,17 @@ function quebrar(texto, tam, largura) {
 }
 
 /** WinAnsi (cp1252) + escapes do PDF. Fora da tabela vira '?' — as fontes base não têm. */
+// Faixa 0x80–0x9F do cp1252 (o resto até 0xFF é igual ao Latin-1). Antes só havia
+// travessões, aspas e reticências — "cœur" em francês perdia o œ.
+const CP1252 = {
+  '€': 0x80, '‚': 0x82, 'ƒ': 0x83, '„': 0x84, '…': 0x85, '†': 0x86, '‡': 0x87, 'ˆ': 0x88, '‰': 0x89,
+  'Š': 0x8a, '‹': 0x8b, 'Œ': 0x8c, 'Ž': 0x8e, '‘': 0x91, '’': 0x92, '“': 0x93, '”': 0x94, '•': 0x95,
+  '–': 0x96, '—': 0x97, '˜': 0x98, '™': 0x99, 'š': 0x9a, '›': 0x9b, 'œ': 0x9c, 'ž': 0x9e, 'Ÿ': 0x9f,
+};
+Object.assign(W, { 'œ': 944, 'Œ': 1000, '•': 350, '€': 556, '™': 1000, '„': 333, '‚': 222, '†': 556, '‡': 556, '‰': 1000 });
+
 function esc(texto) {
-  const mapa = { '—': 0x97, '–': 0x96, '“': 0x93, '”': 0x94, '‘': 0x91, '’': 0x92, '…': 0x85, '·': 0xb7, '€': 0x80 };
+  const mapa = CP1252;
   const bytes = [];
   for (const ch of texto) {
     if (ch === '\\') { bytes.push(0x5c, 0x5c); continue; }
@@ -150,6 +201,11 @@ function dataBonita(dia, lang) {
     return new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
       .format(new Date(`${dia}T12:00:00Z`));
   } catch { return dia; }
+}
+
+/** "Culto de 20 de setembro de 2026 · Português" — igual nos dois motores. */
+function subtituloDe(lang, dia) {
+  return `${(CULTO_DE[lang] ?? CULTO_DE.en).replace('{data}', dataBonita(dia, lang))} · ${IDIOMA_NOME[lang] ?? lang}`;
 }
 
 // ── Logo: decodifica PNG (inflate + desfiltro) ou mede JPEG, para embutir à mão ─────
@@ -247,7 +303,7 @@ function cartao(x, y, w, h, r, [cr, cg, cb]) {
 
 export function gerarPdf({ igreja, data, lang, paragrafos: pars, destino, logo = null }) {
   const larguraUtil = LARGURA - 2 * MARGEM_X;
-  const subtitulo = `${CABECALHO[lang] ?? 'Service of'} ${dataBonita(data, lang)} · ${IDIOMA_NOME[lang] ?? lang}`;
+  const subtitulo = subtituloDe(lang, data);
   const rodape = RODAPE[lang] ?? RODAPE['en'];
   const img = prepararLogo(logo);
 
@@ -395,9 +451,102 @@ export function gerarPdf({ igreja, data, lang, paragrafos: pars, destino, logo =
   };
 }
 
+// ── Motor 2: HTML → Chromium, para alfabetos fora do cp1252 ─────────────────────────
+// O HTML copia o layout do gerador à mão: A4, margens 72/56/56, corpo 11/16 justificado,
+// logo centrado (cartão escuro se o logo for claro), subtítulo cinza, régua fina,
+// versículo recuado com filete, rodapé centrado com página/total.
+
+// Sempre pelo Chromium: sem fonte base que desenhe essas letras. O vietnamita é latino,
+// mas os acentos de tom (ả, ự, ỗ…) não existem no cp1252 e o nativo os arrancava.
+const SEMPRE_CHROMIUM = new Set(['zh-Hans', 'ko', 'ja', 'ru', 'uk', 'ar', 'hi', 'vi']);
+
+// Fontes instaladas no servidor (fc-list, 22/09/2026). FONTE_BASE é a rede de segurança.
+const FONTES = {
+  'zh-Hans': "'WenQuanYi Zen Hei'", 'ko': "'WenQuanYi Zen Hei'", 'ja': "'IPAPGothic', 'IPAGothic'",
+  'hi': "'FreeSerif'", 'ar': "'DejaVu Sans'", 'ru': "'DejaVu Sans'", 'uk': "'DejaVu Sans'", 'vi': "'DejaVu Sans'",
+};
+const FONTE_BASE = "'DejaVu Sans', 'FreeSerif', 'WenQuanYi Zen Hei', 'IPAGothic', sans-serif";
+// itálico sintético (a fonte não tem) fica feio nesses alfabetos — versículo vai em cinza-escuro
+const SEM_ITALICO = new Set(['zh-Hans', 'ko', 'ja', 'hi', 'ar']);
+
+/** Idioma latino com letras fora do cp1252 em quantidade (> 1%) também vai pelo Chromium.
+ *  Um símbolo solto aqui e ali NÃO troca o motor — o visual do nativo fica estável. */
+function usarChromium(lang, pars) {
+  if (SEMPRE_CHROMIUM.has(lang)) return true;
+  let total = 0, fora = 0;
+  for (const p of pars) {
+    for (const ch of p.texto) {
+      total++;
+      if (ch.codePointAt(0) > 0xff && !CP1252[ch]) fora++;
+    }
+  }
+  return total > 0 && fora / total > 0.01;
+}
+
+const escHtml = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+function logoDataUri(logo) {
+  const b = logo?.buf;
+  if (!b?.length) return null;
+  const mime = b[0] === 0x89 && b[1] === 0x50 ? 'image/png' : b[0] === 0xff && b[1] === 0xd8 ? 'image/jpeg' : null;
+  return mime ? `data:${mime};base64,${b.toString('base64')}` : null;   // webp: sem logo, como no nativo
+}
+
+// exportada também para pré-visualização (teste visual em imagem)
+export function htmlSermao({ igreja, data, lang, pars, logo }) {
+  const rtl = lang === 'ar';
+  const fonte = FONTES[lang] ? `${FONTES[lang]}, ${FONTE_BASE}` : FONTE_BASE;
+  const uri = logoDataUri(logo);
+  const topo = uri
+    ? `<div class="logo${logo.isLight ? ' cartao' : ''}"><img src="${uri}" alt=""></div>`
+    : `<h1>${escHtml(igreja)}</h1>`;
+  const corpo = pars.map(p => `<p${p.verso ? ' class="verso"' : ''}>${escHtml(p.texto)}</p>`).join('\n');
+  return `<!doctype html>
+<html lang="${lang}" dir="${rtl ? 'rtl' : 'ltr'}"><head><meta charset="utf-8"><title>${escHtml(igreja)}</title><style>
+@page { size: A4; margin: 72pt 56pt 56pt 56pt; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: ${fonte}; font-size: 11pt; line-height: 16pt; color: #000; }
+header { text-align: center; }
+.logo { display: inline-block; }
+.logo img { display: block; max-width: 230pt; max-height: 40pt; }
+.logo.cartao { background: rgb(15, 23, 42); border-radius: 10pt; padding: 12pt 16pt; }
+h1 { font-size: 20pt; line-height: 24pt; margin: 0; font-weight: bold; }
+.sub { color: #6b6b6b; font-size: 10.5pt; line-height: 14pt; margin-top: ${uri ? (logo.isLight ? 10 : 22) : 12}pt; }
+.regua { border: 0; border-top: 0.6pt solid #c7c7c7; margin: 6pt 0 26pt; }
+p { margin: 0 0 8.8pt; text-align: justify; orphans: 2; widows: 2; }
+p.verso { margin: 3pt 24pt 12pt; position: relative; ${SEM_ITALICO.has(lang) ? 'color: #333;' : 'font-style: italic;'} }
+p.verso::before { content: ''; position: absolute; top: 3pt; bottom: 3pt; ${rtl ? 'right' : 'left'}: -15pt; width: 2pt; background: #b8b8b8; }
+</style></head><body>
+<header>${topo}<div class="sub">${escHtml(subtituloDe(lang, data))}</div></header>
+<hr class="regua">
+${corpo}
+</body></html>`;
+}
+
+function rodapeHtml(lang) {
+  const fonte = FONTES[lang] ? `${FONTES[lang]}, ${FONTE_BASE}` : FONTE_BASE;
+  return `<div style="width:100%;text-align:center;font-family:${fonte.replace(/"/g, "'")};font-size:8.5pt;color:#737373;padding:0 56pt 22pt;" dir="${lang === 'ar' ? 'rtl' : 'ltr'}">`
+    + `${escHtml(RODAPE[lang] ?? RODAPE.en)}&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;<span class="pageNumber"></span>/<span class="totalPages"></span></div>`;
+}
+
+async function gerarPdfChromium({ igreja, data, lang, paragrafos: pars, destino, logo = null }) {
+  const pdf = await htmlParaPdf(htmlSermao({ igreja, data, lang, pars, logo }), { rodape: rodapeHtml(lang) });
+  mkdirSync(destino.slice(0, destino.lastIndexOf('/')), { recursive: true });
+  writeFileSync(destino, pdf);
+  const contagens = [...pdf.toString('latin1').matchAll(/\/Count (\d+)/g)].map(m => +m[1]);
+  return {
+    paginas: contagens.length ? Math.max(...contagens) : null,
+    // chinês/japonês não têm espaço: conta ideogramas, senão o sermão "teria 1 palavra"
+    palavras: SEM_ESPACO.has(lang)
+      ? pars.reduce((n, p) => n + (p.texto.match(new RegExp(`[${CJK}]`, 'g'))?.length ?? 0), 0)
+      : pars.reduce((n, p) => n + p.texto.split(' ').length, 0),
+    versiculos: pars.filter(p => p.verso).length,
+  };
+}
+
 /** Gera todos os PDFs do culto de hoje desta igreja (original + cada idioma).
  *  `logo` (opcional) = { buf, isLight } — vem do bucket público via tenant.churchLogo. */
-export function gerarSermao(slug, igrejaNome, dia = new Date().toISOString().slice(0, 10), logo = null) {
+export async function gerarSermao(slug, igrejaNome, dia = new Date().toISOString().slice(0, 10), logo = null) {
   const chave = dia.replace(/-/g, '');
   const feitos = [];
 
@@ -413,12 +562,25 @@ export function gerarSermao(slug, igrejaNome, dia = new Date().toISOString().sli
   for (const [lang, caminho] of pares) {
     const linhas = lerLog(caminho);
     if (linhas.length < 20) continue;                 // trecho curto demais: não vira sermão
-    const pars = paragrafos(linhas);
+    const codigo = lang === '__orig__' ? 'en' : lang;
+    const pars = paragrafos(linhas, codigo);
     if (!pars.length) continue;
     const etiqueta = lang === '__orig__' ? 'original' : lang;
     const destino = `sermons/${slug}/${chave}-${etiqueta}.pdf`;
-    const info = gerarPdf({ igreja: igrejaNome || slug, data: dia, lang: lang === '__orig__' ? 'en' : lang, paragrafos: pars, destino, logo });
-    feitos.push({ lang: etiqueta, arquivo: destino, ...info });
+    const args = { igreja: igrejaNome || slug, data: dia, lang: codigo, paragrafos: pars, destino, logo };
+    let info;
+    if (usarChromium(codigo, pars)) {
+      try {
+        info = { ...(await gerarPdfChromium(args)), motor: 'chromium' };
+      } catch (e) {
+        // Sem Chromium o nativo ainda entrega um PDF — mas SABIDAMENTE quebrado ('?' no lugar
+        // das letras). Fica marcado: o e-mail NÃO envia PDF degradado (ver sermon-mail.js).
+        info = { ...gerarPdf(args), motor: 'nativo-degradado', erro: String(e?.message ?? e).slice(0, 200) };
+      }
+    } else {
+      info = { ...gerarPdf(args), motor: 'nativo' };
+    }
+    feitos.push({ lang: etiqueta, codigo, arquivo: destino, ...info });
   }
   return feitos;
 }

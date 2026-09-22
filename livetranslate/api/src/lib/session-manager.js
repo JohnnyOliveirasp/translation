@@ -195,8 +195,8 @@ class SessionManager {
     try {
       // logo no cabeçalho do PDF — se o bucket falhar, o PDF sai sem logo, nunca deixa de sair
       const logo = await churchLogo(c?.slug).catch(() => null);
-      const feitos = gerarSermao(c?.slug ?? String(churchId), nomeIgreja ?? c?.slug ?? '', undefined, logo);
-      for (const f of feitos) this.logCusto(c ?? { slug: churchId }, `PDF ${f.lang} paginas=${f.paginas} palavras=${f.palavras} -> ${f.arquivo}`);
+      const feitos = await gerarSermao(c?.slug ?? String(churchId), nomeIgreja ?? c?.slug ?? '', undefined, logo);
+      for (const f of feitos) this.logCusto(c ?? { slug: churchId }, `PDF ${f.lang} paginas=${f.paginas} palavras=${f.palavras} motor=${f.motor}${f.erro ? ` erro="${f.erro}"` : ''} -> ${f.arquivo}`);
       return feitos;
     } catch (e) {
       this.logCusto(c ?? { slug: churchId }, `PDF FALHOU: ${e?.message ?? e}`);
