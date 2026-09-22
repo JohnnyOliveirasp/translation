@@ -27,7 +27,7 @@ const en: Record<string, string> = {
   'pf.save': 'Save', 'pf.saved': 'Saved.',
   'pf.f.hetzner': 'Hetzner (server)', 'pf.f.supabase': 'Supabase', 'pf.f.livekit': 'LiveKit', 'pf.f.resend': 'Resend (email)', 'pf.f.cloudflare': 'Cloudflare / domain', 'pf.f.other': 'Other',
   'pf.status.trial': 'Free', 'pf.status.active': 'Paying', 'pf.status.past_due': 'Past due', 'pf.status.canceled': 'Canceled',
-  'pf.working': 'One moment…',
+  'pf.working': 'One moment…', 'pf.myChurch': 'Open my church panel',
 };
 
 const es: Record<string, string> = {
@@ -55,7 +55,7 @@ const es: Record<string, string> = {
   'pf.save': 'Guardar', 'pf.saved': 'Guardado.',
   'pf.f.hetzner': 'Hetzner (servidor)', 'pf.f.supabase': 'Supabase', 'pf.f.livekit': 'LiveKit', 'pf.f.resend': 'Resend (email)', 'pf.f.cloudflare': 'Cloudflare / dominio', 'pf.f.other': 'Otros',
   'pf.status.trial': 'Gratis', 'pf.status.active': 'Pagando', 'pf.status.past_due': 'Atrasada', 'pf.status.canceled': 'Cancelada',
-  'pf.working': 'Un momento…',
+  'pf.working': 'Un momento…', 'pf.myChurch': 'Abrir el panel de mi iglesia',
 };
 
 const pt: Record<string, string> = {
@@ -83,7 +83,7 @@ const pt: Record<string, string> = {
   'pf.save': 'Salvar', 'pf.saved': 'Salvo.',
   'pf.f.hetzner': 'Hetzner (servidor)', 'pf.f.supabase': 'Supabase', 'pf.f.livekit': 'LiveKit', 'pf.f.resend': 'Resend (e-mail)', 'pf.f.cloudflare': 'Cloudflare / domínio', 'pf.f.other': 'Outros',
   'pf.status.trial': 'De graça', 'pf.status.active': 'Pagando', 'pf.status.past_due': 'Atrasada', 'pf.status.canceled': 'Cancelada',
-  'pf.working': 'Um momento…',
+  'pf.working': 'Um momento…', 'pf.myChurch': 'Abrir o painel da minha igreja',
 };
 
 export const PLATFORM_DICT: Record<Lang, Record<string, string>> = { en, es, pt };

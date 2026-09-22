@@ -65,7 +65,7 @@ export default function Shell({
       ) : (
         <div className="rounded-2xl bg-ink px-3 py-3 text-white">
           <p className="text-sm font-medium">{t('pf.title')}</p>
-          <a href="/admin" className="mt-0.5 flex items-center gap-1 text-[11px] text-white/70 hover:text-white">/admin <ExternalLink className="h-3 w-3" /></a>
+          <a href="/admin?church=1" className="mt-0.5 flex items-center gap-1 text-[11px] text-white/70 hover:text-white">{t('pf.myChurch')} <ExternalLink className="h-3 w-3" /></a>
         </div>
       )}
 

@@ -58,7 +58,12 @@ export default function Admin() {
   const [tab, setTab] = useState<Tab>('overview');
 
   useEffect(() => { if (!loading && !user) navigate('/login'); }, [loading, user, navigate]);
-  if (loading || !user) return null;
+  // Admin da PLATAFORMA (Johnny) cai direto no /platform — pedido de 22/09 ("eu sou o administrador do
+  // site todo"). O painel da igreja dele (Redeem) continua acessível por /admin?church=1.
+  const querMinhaIgreja = new URLSearchParams(window.location.search).has('church');
+  const vaiParaPlataforma = !loading && !!user && isPlatformAdmin && !querMinhaIgreja;
+  useEffect(() => { if (vaiParaPlataforma) navigate('/platform'); }, [vaiParaPlataforma, navigate]);
+  if (loading || !user || vaiParaPlataforma) return null;
 
   const m = memberships[0];
   if (!m) return <SemIgreja />;
