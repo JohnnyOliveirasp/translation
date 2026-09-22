@@ -3,6 +3,7 @@ import { Menu, X, LogOut, ExternalLink } from 'lucide-react';
 import { type Church } from '../../lib/supabase';
 import ChurchLogo from '../../components/ChurchLogo';
 import { useLang } from '../../i18n';
+import { useRouter } from '../../router';
 
 /**
  * Casca do PAINEL (área logada) — separada da landing: fundo próprio, sem vídeo,
@@ -11,7 +12,7 @@ import { useLang } from '../../i18n';
 export type NavItem = { id: string; label: string; icon: React.ComponentType<{ className?: string }> };
 
 export default function Shell({
-  church, items, active, onSelect, user, onSignOut, children,
+  church, items, active, onSelect, user, onSignOut, children, churches,
 }: {
   church: Church | null;   // null = painel da PLATAFORMA (/platform), sem igreja no topo
   items: NavItem[];
@@ -20,8 +21,10 @@ export default function Shell({
   user: string;
   onSignOut: () => void;
   children: ReactNode;
+  churches?: { id: number; name: string; slug: string }[];   // /platform: seletor "abrir o painel de uma igreja" (22/09)
 }) {
   const { t } = useLang();
+  const { navigate } = useRouter();
   const [open, setOpen] = useState(false);
 
   const nav = (
@@ -65,7 +68,12 @@ export default function Shell({
       ) : (
         <div className="rounded-2xl bg-ink px-3 py-3 text-white">
           <p className="text-sm font-medium">{t('pf.title')}</p>
-          <a href="/admin?church=1" className="mt-0.5 flex items-center gap-1 text-[11px] text-white/70 hover:text-white">{t('pf.myChurch')} <ExternalLink className="h-3 w-3" /></a>
+          {/* Abre o /admin de QUALQUER igreja como se fosse o admin dela (pedido do Johnny, 22/09) */}
+          <select value="" onChange={e => { if (e.target.value) navigate(`/admin?church=${e.target.value}`); }}
+            className="mt-1.5 w-full rounded-lg border border-white/20 bg-white/10 px-2 py-1.5 text-[11px] text-white outline-none [&>option]:text-ink">
+            <option value="">{t('pf.myChurch')}</option>
+            {(churches ?? []).map(c => <option key={c.id} value={c.id}>{c.name} · /{c.slug}</option>)}
+          </select>
         </div>
       )}
 

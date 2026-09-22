@@ -132,7 +132,7 @@ export default function Platform() {
   const current = items.find(x => x.id === tab) ?? items[0];
 
   return (
-    <Shell church={null} items={items} active={current.id} onSelect={id => setTab(id as Tab)}
+    <Shell church={null} items={items} active={current.id} onSelect={id => setTab(id as Tab)} churches={data.churches}
       user={user.email ?? ''} onSignOut={() => signOut().then(() => navigate('/'))}>
       <PageHead title={current.label} sub={t('pf.sub')} />
       <ErrorMsg msg={data.err} />

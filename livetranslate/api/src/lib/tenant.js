@@ -57,7 +57,20 @@ export async function requireMember(req, slug) {
   const m = await fetch(q, { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
   if (!m.ok) return { error: 'membership lookup failed', status: 403 };
   const rows = await m.json();
-  const hit = (rows || []).find(r => r.churches?.slug === String(slug || '').toLowerCase());
+  let hit = (rows || []).find(r => r.churches?.slug === String(slug || '').toLowerCase());
+
+  // Admin da PLATAFORMA (Johnny) abre qualquer igreja pelo seletor do /platform como se fosse o admin dela
+  // (22/09). A RLS devolve `platform_admins` só para o próprio usuário e `churches` inteira para ele.
+  if (!hit) {
+    const pa = await fetch(`${SUPA_URL}/rest/v1/platform_admins?select=user_id&limit=1`, { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
+    const ehPlataforma = pa.ok && (await pa.json()).length > 0;
+    if (ehPlataforma) {
+      const c = await fetch(`${SUPA_URL}/rest/v1/churches?select=id,slug,name,livekit_room,speaker_lang,status&slug=eq.${encodeURIComponent(String(slug || '').toLowerCase())}&limit=1`,
+        { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
+      const igreja = c.ok ? (await c.json())[0] : null;
+      if (igreja) hit = { role: 'admin', churches: igreja };
+    }
+  }
   if (!hit) return { error: 'not a member of this church', status: 403 };
   if (!['trial', 'active'].includes(hit.churches.status)) return { error: 'subscription inactive', status: 402 };
 

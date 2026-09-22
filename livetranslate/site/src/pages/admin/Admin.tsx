@@ -60,16 +60,35 @@ export default function Admin() {
 
   useEffect(() => { if (!loading && !user) navigate('/login'); }, [loading, user, navigate]);
   // Admin da PLATAFORMA (Johnny) cai direto no /platform — pedido de 22/09 ("eu sou o administrador do
-  // site todo"). O painel da igreja dele (Redeem) continua acessível por /admin?church=1.
-  const querMinhaIgreja = new URLSearchParams(window.location.search).has('church');
-  const vaiParaPlataforma = !loading && !!user && isPlatformAdmin && !querMinhaIgreja;
+  // site todo"). Com `?church=<id>` ele fica aqui: se for membro, é a igreja dele; se não for, abre a
+  // igreja escolhida no seletor do /platform COMO SE fosse o admin dela (RLS já deixa a plataforma ler
+  // e escrever nas tabelas da igreja; a API aceita platform admin em requireMember).
+  const churchParam = new URLSearchParams(window.location.search).get('church');
+  const wantedId = Number(churchParam) || 0;
+  const vaiParaPlataforma = !loading && !!user && isPlatformAdmin && churchParam === null;
   useEffect(() => { if (vaiParaPlataforma) navigate('/platform'); }, [vaiParaPlataforma, navigate]);
-  if (loading || !user || vaiParaPlataforma) return null;
 
-  const m = memberships[0];
-  if (!m) return <SemIgreja />;
+  const own = memberships.find(x => x.church_id === wantedId) ?? null;
+  const [asPlatform, setAsPlatform] = useState<Church | null>(null);
+  const [asPlatformErr, setAsPlatformErr] = useState<string | null>(null);
+  const precisaCarregar = !loading && !!user && isPlatformAdmin && wantedId > 0 && !own;
+  useEffect(() => {
+    if (!precisaCarregar) { setAsPlatform(null); return; }
+    supabase.from('churches').select('*').eq('id', wantedId).maybeSingle()
+      .then(({ data, error }) => { if (error || !data) setAsPlatformErr(error?.message ?? 'church not found'); else setAsPlatform(data as Church); });
+  }, [precisaCarregar, wantedId]);
+
+  if (loading || !user || vaiParaPlataforma) return null;
+  if (precisaCarregar && !asPlatform && !asPlatformErr) {
+    return <AuthShell><p className="flex items-center gap-2 text-sm text-muted"><Loader2 className="h-4 w-4 animate-spin" /> {t('a.working')}</p></AuthShell>;
+  }
+
+  // id inexistente (ex.: link antigo ?church=1) → cai na própria igreja; sem igreja própria, mostra o erro
+  const m = own ?? (asPlatform ? { church_id: asPlatform.id, role: 'admin' as Role, churches: asPlatform } : memberships[0]);
+  if (!m) return asPlatformErr ? <AuthShell><ErrorMsg msg={asPlatformErr} /></AuthShell> : <SemIgreja />;
   const church = m.churches;
   const isAdmin = m.role === 'admin';
+  const vendoComoPlataforma = !!asPlatform && m.churches.id === asPlatform.id;
   const items: (NavItem & { admin?: boolean; sub?: string })[] = [
     { id: 'overview', label: t('ad.overview'), icon: LayoutDashboard },
     { id: 'languages', label: t('ad.languages'), icon: Languages2, admin: true },
@@ -93,6 +112,12 @@ export default function Admin() {
       user={user.email ?? ''}
       onSignOut={() => signOut().then(() => navigate('/'))}
     >
+      {vendoComoPlataforma && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <span><ShieldCheck className="mr-2 inline h-4 w-4" />{t('pf.viewingAs').replace('{c}', church.name)}</span>
+          <a href="/platform" className="rounded-full border border-amber-300 bg-white px-4 py-1.5 text-xs hover:border-amber-500">{t('pf.backToPlatform')}</a>
+        </div>
+      )}
       <PageHead
         title={current.label}
         sub={current.id === 'overview' ? `${SITE}/${church.slug} · ${t('ad.role.' + m.role)}` : undefined}
