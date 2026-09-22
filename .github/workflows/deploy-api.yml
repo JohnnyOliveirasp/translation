@@ -1,0 +1,86 @@
+# Deploy da API (Next.js em PM2 `livetranslate-api`, porta 4020) — roda no push em main que toque em livetranslate/api/**.
+# O build TEM que ser no servidor (binário ARM do @livekit/rtc-node) e o node_modules de lá NÃO é tocado
+# (protocolo de dependências do CLAUDE.md: nada se instala sem revisão). Este workflow só envia src/ e scripts/.
+# ⚠️ `pm2 restart` derruba as pontes de tradução ativas — por isso a trava de horário de culto é obrigatória aqui.
+# Segredos/variáveis: os mesmos do deploy-site.yml (DEPLOY_SSH_KEY, DEPLOY_HOST_KEY).
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths: ['livetranslate/api/src/**', 'livetranslate/api/scripts/**', 'livetranslate/api/next.config.*', '.github/workflows/deploy-api.yml']
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Ignorar a trava de horário de culto (reinicia a API mesmo com culto no ar!)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+env:
+  SERVER: root@91.99.15.213
+  API_DIR: /mnt/volume/livetranslate/api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Trava de horário de culto
+        id: guard
+        run: |
+          D=$(TZ=America/New_York date +%u); H=$(TZ=America/New_York date +%H); H=$((10#$H))
+          CULTO=false
+          if [ "$D" = 7 ] && [ $H -ge 7 ] && [ $H -lt 14 ]; then CULTO=true; fi
+          if [ "$D" = 1 ] && [ $H -ge 17 ] && [ $H -lt 21 ]; then CULTO=true; fi
+          if [ "$CULTO" = true ] && [ "${{ inputs.force }}" != "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Horário de culto em Nova York — deploy da API ADIADO (reiniciar agora cortaria o áudio dos ouvintes). Rode de novo depois."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.skip != 'true'
+
+      - name: Sintaxe (node --check)
+        if: steps.guard.outputs.skip != 'true'
+        working-directory: livetranslate/api
+        run: |
+          find src scripts -name '*.js' -o -name '*.mjs' | while read -r f; do node --check "$f" || exit 1; done
+          echo "sintaxe ok"
+
+      - name: Chave SSH de deploy
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ vars.DEPLOY_HOST_KEY }}" >> ~/.ssh/known_hosts
+
+      - name: Ponte ativa no servidor?
+        if: steps.guard.outputs.skip != 'true' && inputs.force != true
+        run: |
+          # último evento do custo.log: se for START sem STOP correspondente há menos de 3 h, alguém está traduzindo agora
+          ATIVO=$(ssh "$SERVER" "cd $API_DIR && tail -200 logs/custo.log 2>/dev/null | grep -E ' (START|STOP) ' | awk '{k=\$2\" \"\$4; if (\$3==\"START\") a[k]=\$1; else delete a[k]} END {n=0; for (k in a) n++; print n}'")
+          if [ "${ATIVO:-0}" -gt 0 ]; then echo "::error::Há $ATIVO ponte(s) de tradução ativa(s) agora — deploy da API abortado. Espere o culto acabar ou use force."; exit 1; fi
+          echo "nenhuma ponte ativa"
+
+      - name: Enviar código
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          rsync -az --delete -e ssh livetranslate/api/src/ "$SERVER:$API_DIR/src/"
+          rsync -az -e ssh livetranslate/api/scripts/ "$SERVER:$API_DIR/scripts/"
+          for f in livetranslate/api/next.config.*; do [ -f "$f" ] && scp -q "$f" "$SERVER:$API_DIR/"; done
+
+      - name: Build no servidor + restart
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          ssh "$SERVER" 'export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh" >/dev/null; nvm use 22 >/dev/null
+            cd '"$API_DIR"' && npm run build 2>&1 | tail -5 && pm2 restart livetranslate-api && sleep 5 && pm2 describe livetranslate-api | grep -E "status|restarts"'
+
+      - name: Verificar
+        if: steps.guard.outputs.skip != 'true'
+        run: curl -fsS -o /dev/null -w 'API HTTP %{http_code}\n' 'https://livetranslate.church/api/translate?slug=redeem-community-church'

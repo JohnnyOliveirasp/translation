@@ -1,0 +1,88 @@
+# Deploy do SITE (livetranslate.church, estático) — roda no push em main que toque em livetranslate/site/**.
+# Segredos/variáveis do repositório (Settings → Secrets and variables → Actions):
+#   secret  DEPLOY_SSH_KEY                 chave privada ed25519 só para deploy (pública está no authorized_keys do Hetzner)
+#   var     DEPLOY_HOST_KEY                linha do ssh-keyscan do servidor (evita "host key verification failed")
+#   var     VITE_SUPABASE_URL              https://auth.livetranslate.church
+#   var     VITE_SUPABASE_PUBLISHABLE_KEY  chave PUBLICÁVEL do Supabase (vai para o navegador por design)
+# Trava: nunca deploya em horário de culto da Redeem (NY: domingo 07–14h, segunda 17–21h). `force` ignora a trava.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths: ['livetranslate/site/**', '.github/workflows/deploy-site.yml']
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Ignorar a trava de horário de culto'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: false
+
+env:
+  SERVER: root@91.99.15.213
+  SITE_DIR: /mnt/volume/livetranslate/site
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Trava de horário de culto
+        id: guard
+        run: |
+          D=$(TZ=America/New_York date +%u); H=$(TZ=America/New_York date +%H); H=$((10#$H))
+          CULTO=false
+          if [ "$D" = 7 ] && [ $H -ge 7 ] && [ $H -lt 14 ]; then CULTO=true; fi
+          if [ "$D" = 1 ] && [ $H -ge 17 ] && [ $H -lt 21 ]; then CULTO=true; fi
+          if [ "$CULTO" = true ] && [ "${{ inputs.force }}" != "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::Horário de culto em Nova York — deploy do site ADIADO. Rode de novo depois (Actions → Run workflow) ou marque force."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.skip != 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: livetranslate/site/package-lock.json
+
+      - name: Build (Vite)
+        if: steps.guard.outputs.skip != 'true'
+        working-directory: livetranslate/site
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" || { echo "::error::Variáveis VITE_SUPABASE_* ausentes no repositório"; exit 1; }
+          npm ci
+          npx tsc --noEmit -p .
+          npm run build
+
+      - name: Chave SSH de deploy
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ vars.DEPLOY_HOST_KEY }}" >> ~/.ssh/known_hosts
+
+      - name: Publicar no Hetzner
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          tar czf /tmp/lt-dist.tgz -C livetranslate/site/dist .
+          scp -q /tmp/lt-dist.tgz "$SERVER:/tmp/lt-dist.tgz"
+          ssh "$SERVER" "tar xzf /tmp/lt-dist.tgz -C $SITE_DIR && rm -f /tmp/lt-dist.tgz"
+
+      - name: Verificar
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          JS=$(ls livetranslate/site/dist/assets | grep -E '^index-.*\.js$' | head -1)
+          curl -fsS https://livetranslate.church/ | grep -q "$JS" && echo "no ar: $JS"
