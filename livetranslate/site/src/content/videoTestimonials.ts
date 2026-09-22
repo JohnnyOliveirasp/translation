@@ -25,16 +25,16 @@ export const GOOGLE_REVIEW_URL = '';   // link "Escreva uma avaliação" do Perf
 
 export const VIDEO_TESTIMONIALS: VideoTestimonial[] = [
   // 1º depoimento real (gravado 22/09/2026, 1min28, vertical). O Johnny vai subir no YouTube:
-  // trocar youtube: '' pelo ID do vídeo e tirar o comentário.
-  // {
-  //   id: 'marcus-livoni', name: 'Pastor Marcus Livoni',
-  //   role: { en: 'Pastor', es: 'Pastor', pt: 'Pastor' },
-  //   org: 'Ministério Celebrando a Recuperação (Celebrate Recovery) · Orlando, FL', spoken: 'pt', langs: ['Português'], portrait: true, date: '2026-09-22',
-  //   quote: {
-  //     en: 'Two taps and you are already hearing the service in Portuguese — and reading it too. For us it was a fundamental tool.',
-  //     es: 'Dos toques y ya estás escuchando el culto en portugués, y leyéndolo también. Para nosotros fue una herramienta fundamental.',
-  //     pt: 'Dois cliques e você já começa a ouvir o culto em português, e ler também. Para a gente foi uma ferramenta fundamental.',
-  //   },
-  //   youtube: '',
-  // },
+  // Publicado no canal do site como Short.
+  {
+    id: 'marcus-livoni', name: 'Pastor Marcus Livoni',
+    role: { en: 'Pastor', es: 'Pastor', pt: 'Pastor' },
+    org: 'Ministério Celebrando a Recuperação (Celebrate Recovery) · Orlando, FL', spoken: 'pt', langs: ['Português'], portrait: true, date: '2026-09-22',
+    quote: {
+      en: 'Two taps and you are already hearing the service in Portuguese — and reading it too. For us it was a fundamental tool.',
+      es: 'Dos toques y ya estás escuchando el culto en portugués, y leyéndolo también. Para nosotros fue una herramienta fundamental.',
+      pt: 'Dois cliques e você já começa a ouvir o culto em português, e ler também. Para a gente foi uma ferramenta fundamental.',
+    },
+    youtube: 'DUv5XURmJGs',   // https://www.youtube.com/shorts/DUv5XURmJGs (22/09/2026)
+  },
 ];
