@@ -50,7 +50,8 @@ jobs:
         if: steps.guard.outputs.skip != 'true'
         working-directory: livetranslate/api
         run: |
-          find src scripts -name '*.js' -o -name '*.mjs' | while read -r f; do node --check "$f" || exit 1; done
+          # só o que é JS puro (src/app/page.js e layout.js são JSX e o Next compila; node --check não entende)
+          find src/lib src/app/api scripts \( -name '*.js' -o -name '*.mjs' \) | while read -r f; do node --check "$f" || exit 1; done
           echo "sintaxe ok"
 
       - name: Chave SSH de deploy
