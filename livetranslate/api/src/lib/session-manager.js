@@ -87,6 +87,11 @@ class SessionManager {
         speakerIdentity: `organizador-${c.slug}`,
         tag: c.slug,
       });
+      // A ponte NASCE sabendo se é louvor. Sem isto, quem escolhia um idioma com o louvor
+      // já mutado ganhava uma ponte achando que era pregação até a próxima virada do
+      // Worship Sense: ela falava a letra traduzida no fone e gravava a música no texto do
+      // sermão (PDF/e-mail de 20/09 saíram com letra — achado em 22/09).
+      bridge.worship = !!c.muted;
       e = { bridge, vazioDesde: null, startedAt: Date.now(), churchId: church.id, lang };
       this.entries.set(k, e);
       this.garantirEscriba(church.id);
