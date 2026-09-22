@@ -178,3 +178,42 @@ Copiar a integração de um projeto do Johnny (ele passa o caminho; provável Re
 - **PDF:** latinos no gerador à mão (inalterado byte a byte); zh/ko/ja/ru/uk/ar/hi/vi pelo Chromium do servidor (`pdf-chromium.js`, CDP via pipe, sem pacote).
 - **Bug corrigido:** ponte que nascia com o louvor já mutado achava que era pregação (falava e gravava a letra). Agora nasce com `worship = c.muted`.
 - **Pendências:** botão "reenviar sermão" no painel; subir o Resend para Pro quando houver 2–3 igrejas (limite de 100 e-mails/dia no Free); os idiomas novos ainda não rodaram num culto real.
+
+## 21. PRÓXIMO AGENTE — idiomas (resto) + STRIPE (22/09/2026)
+Pedido do Johnny: *"o site precisa estar em 3 idiomas, inglês default, espanhol e português… vou compartilhar com igrejas no Brasil"* + *"configurar o Stripe… dólar para os países de língua inglesa e espanhola, Real para os de língua portuguesa"*. Referência dele: **`C:\Users\johnn\Downloads\Desenvolvimento\Codigos\Python\ResumePro`**. O agente de 22/09 começou; você termina.
+
+### 21.1 Idiomas — o que JÁ FOI FEITO (commit 3d71482, no ar)
+- O site já tinha o sistema de 3 idiomas (`site/src/i18n/`: `dictionary.ts` landing, `auth.ts` login/painel, `listener.ts` ouvinte em 16 idiomas; `index.tsx` = contexto, EN padrão, escolha guardada em `localStorage` na chave `lt-lang`, seletor na Nav).
+- Fechados os buracos: `/privacy` e `/terms` em 3 idiomas (`i18n/legal.ts` + seletor EN·ES·PT próprio), "Sign out" do painel (estava fixo), depoimentos trilíngues (`content/testimonials.ts`, tipo `Txt`), rótulos de acessibilidade, aviso de louvor do ouvinte (filipino `tl` → `fil`; holandês faltava).
+- **Link com idioma:** `livetranslate.church/?lang=pt` (ou `es` / `en` / `pt-BR`) abre no idioma e guarda a escolha. É o link para mandar às igrejas do Brasil.
+- Auditoria: nenhum texto visível fixo fora do dicionário; en/es/pt com as MESMAS chaves (145 na landing, 138 no painel). Para refazer: regex de nó de texto JSX + atributos placeholder/title/aria-label/alt nos `.tsx`, e comparar o conjunto de chaves de cada idioma em `dictionary.ts` e `auth.ts`.
+
+### 21.2 Idiomas — o que FALTA
+1. **E-mails de login do Supabase só em inglês** (`db/auth-email-templates/`, assunto "Your LiveTranslate code"). Caminho: no signup gravar o idioma no metadata — `supabase.auth.signUp({ ..., options: { data: { full_name, lang } } })` em `Signup.tsx` e `Invite.tsx` — e trocar os templates Confirm signup / Reset password por Go template condicional (`{{ if eq .Data.lang "pt" }} ... {{ else if eq .Data.lang "es" }} ... {{ else }} ... {{ end }}`), inclusive o assunto. Aplicar no painel do Supabase (Auth → Emails → Templates; o editor é Monaco: `window.monaco.editor.getModels()[0].setValue(html)`) e salvar os arquivos em `db/auth-email-templates/`. Login com Google não tem `lang` → cai no inglês (aceitável).
+2. **DECISÃO DO JOHNNY — detectar o idioma do navegador?** O ResumePro detecta (`frontend/middleware.ts`: cookie → Accept-Language → `en`). O LiveTranslate NÃO detecta, por decisão dele de 26/08 ("inglês sempre"). Se ele quiser igual ao ResumePro: em `i18n/index.tsx`, depois do `?lang=` e do localStorage, olhar `navigator.languages` (pt* → pt, es* → es) antes de cair no `en`.
+3. Como o ResumePro faz (referência): **next-intl**, `frontend/messages/{en,es,pt-BR}.json` (~2.500 linhas cada, mesmas chaves), `frontend/i18n/request.ts`, cookie `NEXT_LOCALE`, `components/landing/LanguageSelector.tsx`. O site do LiveTranslate é Vite + React (não Next): copiamos o PADRÃO (dicionário por idioma, mesmas chaves, EN padrão, preferência guardada), não a biblioteca. Não instalar next-intl.
+
+### 21.3 STRIPE — o que existe e o que NÃO dá para copiar do ResumePro
+- ResumePro: **backend Python/Flask** — `services/payments/stripe_service.py` (138 linhas), `APIS/API_DASHBOARD/controllers/payments/stripe_controller.py` e `subscription_controller.py`. Faz **compra avulsa de créditos** via Checkout; webhook com verificação de assinatura; trata **só** `checkout.session.completed`; rota `/verify-payment`. **A assinatura mensal está comentada (não implementada) e não há multimoeda.** Envs: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
+- Então: copiar o PADRÃO (Checkout Session + webhook assinado + verificação) e implementar o que o LiveTranslate precisa e o ResumePro não tem: **assinatura mensal com trial, cancelar/reativar, USD e BRL**.
+- LiveTranslate hoje: `churches.plan` (starter | growth | congregation), `status` (trial | active | past_due | canceled), `trial_ends_at`, **`stripe_customer_id` já existe** (0001); RPCs `cancel_subscription()` / `resume_subscription()` (0004); aba **Subscription** no painel com cancelar/reativar. Preços: **US$ 79,90/mês (starter, 2 idiomas)**, **US$ 139/mês (growth, 5 idiomas)**, congregation (6+) = contato. Trial = 1 mês, sem cartão.
+
+### 21.4 STRIPE — plano recomendado
+- **Sem SDK** (padrão do projeto, igual ao Resend em `api/src/lib/email.js`): REST com `fetch` e corpo `application/x-www-form-urlencoded`. Assinatura do webhook: header `Stripe-Signature` (`t=...,v1=...`) = HMAC-SHA256 de `${t}.${corpoCru}` com `STRIPE_WEBHOOK_SECRET` via `node:crypto` (`timingSafeEqual`, tolerância de 5 min). Se preferir o pacote `stripe`, seguir o PROTOCOLO de dependências do `CLAUDE.md` (cooldown de 7 dias, osv, dry-run, OK explícito, versão pinada).
+- **Rotas na API** (`livetranslate/api`, route handlers do Next): `POST /api/billing/checkout` (só admin da igreja; cria o Customer se `stripe_customer_id` estiver vazio; Checkout Session `mode=subscription` com a `currency` escolhida; `subscription_data[trial_end]` = `trial_ends_at` se ainda estiver no trial; `client_reference_id` = id da igreja; success/cancel voltando para a aba de assinatura do painel), `POST /api/billing/portal` (Customer Portal do Stripe: trocar cartão, cancelar, faturas — pode substituir o cancelar/reativar caseiro), `POST /api/billing/webhook` (ler o corpo CRU; eventos mínimos: `checkout.session.completed`, `customer.subscription.created|updated|deleted`, `invoice.paid`, `invoice.payment_failed` → atualizar `plan` / `status` / `current_period_end`).
+- **Moeda:** regra do Johnny = idioma → `pt` paga em **BRL**, `en` / `es` pagam em **USD**. No Stripe: um Price por plano com `currency_options` (usd + brl) e a `currency` passada na Checkout Session — ou um Price por plano×moeda num mapa de env. Guardar `churches.billing_currency` (o Stripe trava a moeda do Customer depois da 1ª assinatura).
+- **Banco (migration 0009):** `churches.stripe_subscription_id`, `billing_currency`, `current_period_end`; tabela `billing_events` (id do evento do Stripe, unique) para o webhook ser idempotente.
+- ⚠️ **O servidor NÃO tem service_role** (decisão de arquitetura: a RLS autoriza com o token do usuário). O webhook vem do Stripe, sem usuário → precisa escrever no banco de outro jeito: (a) `SUPABASE_SERVICE_ROLE_KEY` no `.env.local` da API, usada SÓ no webhook; ou (b) uma RPC `security definer` que confere um segredo compartilhado. Decidir com o Johnny.
+
+### 21.5 DECISÕES PENDENTES DO JOHNNY (perguntar antes de codar o Stripe)
+1. **Preços em reais** dos 2 planos (não é conversão direta — ele define).
+2. **Moeda por idioma ou por país?** Pela regra dele, uma igreja brasileira nos EUA que use o site em português pagaria em BRL. Alternativa: moeda pelo país da igreja, ou a igreja escolhe no checkout.
+3. **Qual conta Stripe** (país da empresa — JC Solutions US?). Conta dos EUA cobra BRL no cartão (com conversão); Pix e Boleto dependem de entidade no Brasil — pesquisar antes de prometer.
+4. Webhook: (a) service_role só no webhook ou (b) RPC com segredo.
+5. Detectar o idioma do navegador (21.2, item 2).
+6. ⏰ **O trial da Redeem vence em 28/09/2026** (a aba Subscription mostra "7 days left"). Se o Stripe não estiver pronto até lá, estender o `trial_ends_at` — é a igreja piloto, `plan = congregation`.
+
+### 21.6 Outros fatos de 22/09 (para não repetir erros)
+- Segunda-feira à noite também é pregação (culto com tradução pt-BR, ~18h30 EDT) → o e-mail do sermão sai também às segundas. Não mudar nada.
+- Sermões por e-mail, PDF multialfabeto e aba Sermons por mês com filtros: seção 20 e commits 69cdfaf, 83b9c0b, 9d55bd0, 24b6e66.
+- Branches: trabalhar em `dev`, fast-forward para `main` no deploy, push das duas.
