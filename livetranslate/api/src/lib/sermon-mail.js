@@ -133,8 +133,11 @@ export async function agendarEnvioSermao({ slug, feitos, token, dia = new Date()
 }
 
 // ── Envio ─────────────────────────────────────────────────────────────────────────────
-export async function enviarSermao({ slug, dia, feitos, lista, pub }) {
-  const chaveDia = dia.replace(/-/g, '');
+// `rodada` (ex.: 'v2') = REENVIO do mesmo culto: registro e Idempotency-Key próprios — sem isso
+// o registro do 1º envio e o Resend (24h) barram tudo, que é justamente o trabalho deles.
+// `aviso` = { lang: 'texto' } — parágrafo no topo do e-mail explicando o reenvio.
+export async function enviarSermao({ slug, dia, feitos, lista, pub, rodada = '', aviso = {} }) {
+  const chaveDia = dia.replace(/-/g, '') + (rodada ? `-${rodada}` : '');
   const pasta = `sermons/${slug}`;
   const registroArq = `${pasta}/${chaveDia}-envio.json`;
   mkdirSync(pasta, { recursive: true });
@@ -173,7 +176,7 @@ export async function enviarSermao({ slug, dia, feitos, lista, pub }) {
     const v = { igreja, data: dataBonita(dia, o.lang) };
     const titulo = troca(t.titulo, v);
     const linkSair = `${SITE}/api/unsubscribe?t=${o.token}`;
-    const paragrafos = [troca(t.abre, v), troca(t.anexo, v)];
+    const paragrafos = [...(aviso[o.lang] ? [aviso[o.lang]] : []), troca(t.abre, v), troca(t.anexo, v)];
     const r = await enviarEmail({
       para: o.email,
       assunto: `${igreja} — ${titulo}`,
