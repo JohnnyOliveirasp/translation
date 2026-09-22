@@ -362,8 +362,9 @@ const pt: Record<string, string> = {
 };
 
 import { AUTH_DICT } from './auth';
+import { PLATFORM_DICT } from './platform';
 export const DICT: Record<Lang, Record<string, string>> = {
-  en: { ...en, ...AUTH_DICT.en },
-  es: { ...es, ...AUTH_DICT.es },
-  pt: { ...pt, ...AUTH_DICT.pt },
+  en: { ...en, ...AUTH_DICT.en, ...PLATFORM_DICT.en },
+  es: { ...es, ...AUTH_DICT.es, ...PLATFORM_DICT.es },
+  pt: { ...pt, ...AUTH_DICT.pt, ...PLATFORM_DICT.pt },
 };

@@ -13,7 +13,7 @@ export type NavItem = { id: string; label: string; icon: React.ComponentType<{ c
 export default function Shell({
   church, items, active, onSelect, user, onSignOut, children,
 }: {
-  church: Church;
+  church: Church | null;   // null = painel da PLATAFORMA (/platform), sem igreja no topo
   items: NavItem[];
   active: string;
   onSelect: (id: string) => void;
@@ -50,17 +50,24 @@ export default function Shell({
         <img src="/assets/lockup-horizontal-color.svg" alt="LiveTranslate" className="h-7 w-auto" />
       </a>
 
-      <div className="flex items-center gap-3 rounded-2xl bg-black/[0.03] px-3 py-3">
-        <ChurchLogo path={church.logo_path} light={church.logo_is_light} name={church.name}
-          className="h-9 shrink-0 overflow-hidden rounded-lg" imgClassName="h-full max-w-[5rem]"
-          fallbackClassName="h-9 w-9 shrink-0 rounded-lg bg-white text-lg" />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-ink">{church.name}</p>
-          <a href={`/${church.slug}`} target="_blank" rel="noopener" className="flex items-center gap-1 truncate text-[11px] text-muted hover:text-ink">
-            /{church.slug} <ExternalLink className="h-3 w-3" />
-          </a>
+      {church ? (
+        <div className="flex items-center gap-3 rounded-2xl bg-black/[0.03] px-3 py-3">
+          <ChurchLogo path={church.logo_path} light={church.logo_is_light} name={church.name}
+            className="h-9 shrink-0 overflow-hidden rounded-lg" imgClassName="h-full max-w-[5rem]"
+            fallbackClassName="h-9 w-9 shrink-0 rounded-lg bg-white text-lg" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-ink">{church.name}</p>
+            <a href={`/${church.slug}`} target="_blank" rel="noopener" className="flex items-center gap-1 truncate text-[11px] text-muted hover:text-ink">
+              /{church.slug} <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-2xl bg-ink px-3 py-3 text-white">
+          <p className="text-sm font-medium">{t('pf.title')}</p>
+          <a href="/admin" className="mt-0.5 flex items-center gap-1 text-[11px] text-white/70 hover:text-white">/admin <ExternalLink className="h-3 w-3" /></a>
+        </div>
+      )}
 
       {nav}
 

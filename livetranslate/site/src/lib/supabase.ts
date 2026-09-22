@@ -13,6 +13,7 @@ export type Church = {
   id: number; slug: string; name: string; logo_path: string | null; logo_is_light: boolean; speaker_lang: string;
   plan: 'starter' | 'growth' | 'congregation'; status: 'trial' | 'active' | 'past_due' | 'canceled';
   trial_ends_at: string | null; sermon_recipients: string[]; livekit_room: string;
+  country: string | null; billing_currency: 'usd' | 'brl';   // 0009: moeda decidida pelo país
 };
 export type Role = 'admin' | 'operator';
 

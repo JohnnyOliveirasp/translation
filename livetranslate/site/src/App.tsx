@@ -6,13 +6,14 @@ import Login from './pages/auth/Login';
 import Recover from './pages/auth/Recover';
 import Invite from './pages/auth/Invite';
 import Admin from './pages/admin/Admin';
+import Platform from './pages/admin/Platform';
 import Listen from './pages/Listen';
 import Broadcast from './pages/admin/Broadcast';
 import { useRouter, matchPath } from './router';
 import { Privacy, Terms } from './pages/Legal';
 
 /** Caminhos do produto — tudo que sobrar de 1 segmento é slug de igreja (/{slug}). */
-const RESERVED = new Set(['signup', 'login', 'recover', 'admin', 'invite', 'broadcast', 'assets', 'terms', 'privacy']);
+const RESERVED = new Set(['signup', 'login', 'recover', 'admin', 'platform', 'invite', 'broadcast', 'assets', 'terms', 'privacy']);
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,}$/;
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
   else if (path === '/login') page = <Login />;
   else if (path === '/recover') page = <Recover />;
   else if (path === '/admin') page = <Admin />;
+  else if (path === '/platform') page = <Platform />;
   else if (path === '/privacy') page = <Privacy />;
   else if (path === '/terms') page = <Terms />;
   else if (invite) page = <Invite token={invite.token} />;
@@ -36,7 +38,7 @@ export default function App() {
 
   // App logado: fundo ESTÁTICO (cruz de madeira) — o vídeo em loop piscava na tela
   // de trabalho (feedback do operador, culto de 06/09). A landing continua com vídeo.
-  const isApp = !!bc || path === '/admin';
+  const isApp = !!bc || path === '/admin' || path === '/platform';
   return (
     <div className="relative min-h-screen w-full">
       {isApp && <BackgroundStill src="/assets/cross-bg.jpg" srcPortrait="/assets/cross-bg-portrait.jpg" dim={0.5} />}

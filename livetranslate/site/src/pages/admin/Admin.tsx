@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { CalendarDays, Check, ChevronDown, Copy, CreditCard, Download, FileDown, Loader2, ExternalLink, LayoutDashboard, Languages as Languages2, Radio, Settings2, Trash2, Users } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, Copy, CreditCard, Download, FileDown, Loader2, ExternalLink, LayoutDashboard, Languages as Languages2, Lock, Radio, Settings2, ShieldCheck, Trash2, Users } from 'lucide-react';
 import { supabase, logoUrl, type Church, type Role } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
@@ -28,7 +28,7 @@ function SemIgreja() {
     setCriando(true);
     const defaults = pendente.lang === 'en' ? ['es', 'pt-BR'] : ['en'];
     supabase.rpc('create_church', {
-      p_name: pendente.name, p_slug: pendente.slug, p_speaker_lang: pendente.lang, p_languages: defaults,
+      p_name: pendente.name, p_slug: pendente.slug, p_speaker_lang: pendente.lang, p_languages: defaults, p_country: pendente.country ?? null,
     }).then(async ({ error }) => {
       sessionStorage.removeItem('lt-pending-church');
       if (error) { setErr(error.message); setCriando(false); return; }
@@ -54,7 +54,7 @@ function SemIgreja() {
 export default function Admin() {
   const { t } = useLang();
   const { navigate } = useRouter();
-  const { loading, user, memberships, signOut } = useAuth();
+  const { loading, user, memberships, isPlatformAdmin, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>('overview');
 
   useEffect(() => { if (!loading && !user) navigate('/login'); }, [loading, user, navigate]);
@@ -73,6 +73,8 @@ export default function Admin() {
     { id: 'settings', label: t('ad.settings'), icon: Settings2, admin: true },
     { id: 'billing', label: t('ad.billing'), icon: CreditCard, admin: true },
   ];
+  // painel da PLATAFORMA (só platform_admins): entra no menu como atalho para /platform
+  if (isPlatformAdmin) items.push({ id: 'platform', label: t('pf.nav'), icon: ShieldCheck });
   const visible = items.filter(x => !x.admin || isAdmin);
   const current = visible.find(x => x.id === tab) ?? visible[0];
 
@@ -81,7 +83,7 @@ export default function Admin() {
       church={church}
       items={visible}
       active={current.id}
-      onSelect={id => setTab(id as Tab)}
+      onSelect={id => id === 'platform' ? navigate('/platform') : setTab(id as Tab)}
       user={user.email ?? ''}
       onSignOut={() => signOut().then(() => navigate('/'))}
     >
@@ -197,7 +199,7 @@ function Overview({ church }: { church: Church }) {
   const [pdfBusy, setPdfBusy] = useState(false);
 
   useEffect(() => {
-    supabase.from('church_languages').select('lang_code').eq('church_id', church.id).eq('enabled', true)
+    supabase.from('church_languages').select('lang_code').eq('church_id', church.id).eq('enabled', true).eq('blocked_by_platform', false)
       .then(({ data }) => setLangs((data ?? []).map(r => r.lang_code)));
   }, [church.id]);
 
@@ -361,16 +363,21 @@ function Settings({ church }: { church: Church }) {
 function LanguagesTab({ church }: { church: Church }) {
   const { t } = useLang();
   const [enabled, setEnabled] = useState<string[]>([]);
+  const [blocked, setBlocked] = useState<string[]>([]);   // bloqueado pela PLATAFORMA (0009) — a igreja não destrava
   const [err, setErr] = useState<string | null>(null);
   const limit = PLAN_LIMITS[church.plan] ?? 2;
 
   useEffect(() => {
-    supabase.from('church_languages').select('lang_code').eq('church_id', church.id).eq('enabled', true)
-      .then(({ data }) => setEnabled((data ?? []).map(r => r.lang_code)));
+    supabase.from('church_languages').select('lang_code, blocked_by_platform').eq('church_id', church.id).eq('enabled', true)
+      .then(({ data }) => {
+        setEnabled((data ?? []).map(r => r.lang_code));
+        setBlocked((data ?? []).filter(r => r.blocked_by_platform).map(r => r.lang_code));
+      });
   }, [church.id]);
 
   async function toggle(code: string) {
     setErr(null);
+    if (blocked.includes(code)) return;
     if (enabled.includes(code)) {
       const { error } = await supabase.from('church_languages').delete().eq('church_id', church.id).eq('lang_code', code);
       if (error) { setErr(error.message); return; }
@@ -390,11 +397,12 @@ function LanguagesTab({ church }: { church: Church }) {
       <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
         {LANGUAGE_CATALOG.filter(l => l.code !== church.speaker_lang).map(l => {
           const on = enabled.includes(l.code);
+          const lock = blocked.includes(l.code);
           const full = !on && enabled.length >= limit;
           return (
-            <button key={l.code} onClick={() => toggle(l.code)} disabled={full}
-              className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-colors ${on ? 'border-ink bg-ink text-white' : 'border-black/10 bg-white hover:border-ink'} disabled:opacity-40`}>
-              <span>{l.flag} {l.label}</span>{on && <Check className="h-4 w-4" />}
+            <button key={l.code} onClick={() => toggle(l.code)} disabled={full || lock} title={lock ? t('ad.langBlocked') : undefined}
+              className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-colors ${lock ? 'border-red-200 bg-red-50 text-red-700' : on ? 'border-ink bg-ink text-white' : 'border-black/10 bg-white hover:border-ink'} disabled:opacity-60`}>
+              <span>{l.flag} {l.label}</span>{lock ? <Lock className="h-4 w-4" /> : on && <Check className="h-4 w-4" />}
             </button>
           );
         })}

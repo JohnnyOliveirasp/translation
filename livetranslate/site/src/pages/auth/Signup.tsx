@@ -4,15 +4,18 @@ import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
 import { LANGUAGE_CATALOG } from '../../lib/languages';
+import { countryOptions, defaultCountry } from '../../lib/countries';
 import { AuthShell, Title, Field, Select, Button, ErrorMsg, GoogleButton, OrDivider, slugify } from './ui';
 
 type Step = 'form' | 'verify';
 const PENDING_KEY = 'lt-pending-church';
 
 export default function Signup() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { navigate } = useRouter();
   const { refresh, user, memberships } = useAuth();
+  const loc = lang === 'pt' ? 'pt-BR' : lang;
+  const countries = countryOptions(loc);
   const [step, setStep] = useState<Step>('form');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -21,6 +24,7 @@ export default function Signup() {
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
   const [speakerLang, setSpeakerLang] = useState('en');
+  const [country, setCountry] = useState(() => defaultCountry(lang));   // 0009: o país decide a moeda
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -28,10 +32,10 @@ export default function Signup() {
   const onName = (v: string) => { setChurchName(v); if (!slugTouched) setSlug(slugify(v)); };
 
   async function createChurch() {
-    const pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null') || { name: churchName, slug, lang: speakerLang };
+    const pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null') || { name: churchName, slug, lang: speakerLang, country };
     const defaults = pending.lang === 'en' ? ['es', 'pt-BR'] : ['en'];
     const { error } = await supabase.rpc('create_church', {
-      p_name: pending.name, p_slug: pending.slug, p_speaker_lang: pending.lang, p_languages: defaults,
+      p_name: pending.name, p_slug: pending.slug, p_speaker_lang: pending.lang, p_languages: defaults, p_country: pending.country ?? null,
     });
     if (error) {
       if (error.code === '23505') { setErr(t('a.err.slug')); setStep('form'); return false; }
@@ -47,7 +51,7 @@ export default function Signup() {
     e.preventDefault(); setErr(null);
     if (password.length < 8) { setErr(t('a.err.weak')); return; }
     setBusy(true);
-    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang }));
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
     const { data, error } = await supabase.auth.signUp({
       email, password, options: { data: { full_name: fullName } },
     });
@@ -74,7 +78,7 @@ export default function Signup() {
   // A conta já existe — não pedimos nome/e-mail/senha de novo.
   async function submitLogado(e: FormEvent) {
     e.preventDefault(); setErr(null); setBusy(true);
-    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang }));
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
     await createChurch();
     setBusy(false);
   }
@@ -91,6 +95,10 @@ export default function Signup() {
           <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
             {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
           </Select>
+          <Select label={t('a.country')} value={country} onChange={e => setCountry(e.target.value)}>
+            {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+          </Select>
+          <p className="-mt-2 text-[11px] text-muted/80">{t('a.countryHint')}</p>
           <ErrorMsg msg={err} />
           <Button type="submit" loading={busy}>{busy ? t('a.working') : t('a.finish.cta')}</Button>
         </form>
@@ -120,7 +128,7 @@ export default function Signup() {
       <p className="mt-3 text-sm text-muted">{t('a.signup.sub')}</p>
       {/* Google: se a pessoa já preencheu a igreja, guardamos para criar sozinha na volta */}
       <div className="mt-8"><GoogleButton label={t('a.google')} onBefore={() => {
-        if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang }));
+        if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
       }} /></div>
       <OrDivider label={t('a.or')} />
       <form onSubmit={submit} className="space-y-4">
@@ -131,6 +139,10 @@ export default function Signup() {
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
           {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
         </Select>
+        <Select label={t('a.country')} value={country} onChange={e => setCountry(e.target.value)}>
+          {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
+        </Select>
+        <p className="-mt-2 text-[11px] text-muted/80">{t('a.countryHint')}</p>
         <Field label={t('a.email')} type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
         <Field label={t('a.password')} type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
         <ErrorMsg msg={err} />
