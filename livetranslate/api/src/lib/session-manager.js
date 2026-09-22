@@ -9,6 +9,10 @@ import { CATALOGO } from './languages.js';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { gerarSermao } from './sermon-pdf.js';
 import { churchLogo } from './tenant.js';
+import { churchIdBySlug, abrirCulto, fecharCulto, somarIdioma, tarifaPorMinuto, dbAdminConfigurado } from './db-admin.js';
+
+// Culto sem nenhuma ponte por este tempo = acabou sem "End broadcast" → fecha sozinho no banco.
+const CULTO_ABANDONADO_MS = 30 * 60 * 1000;
 
 class SessionManager {
   constructor() {
@@ -33,7 +37,11 @@ class SessionManager {
   igreja(church) {
     let c = this.churches.get(church.id);
     if (!c) {
-      c = { slug: church.slug, room: church.room, sourceLang: church.speakerLang || 'en', muted: false, eventStartedAt: null };
+      c = {
+        slug: church.slug, room: church.room, sourceLang: church.speakerLang || 'en', muted: false, eventStartedAt: null,
+        // registro do culto no banco (HANDOFF §22): id em `services`, promessa de abertura, último STOP
+        serviceId: null, cultoPromise: null, ultimoTeardown: 0,
+      };
       this.churches.set(church.id, c);
     } else {
       c.room = church.room || c.room;         // mantém em dia se o cadastro mudar
@@ -92,10 +100,11 @@ class SessionManager {
       // Worship Sense: ela falava a letra traduzida no fone e gravava a música no texto do
       // sermão (PDF/e-mail de 20/09 saíram com letra — achado em 22/09).
       bridge.worship = !!c.muted;
-      e = { bridge, vazioDesde: null, startedAt: Date.now(), churchId: church.id, lang };
+      e = { bridge, vazioDesde: null, startedAt: Date.now(), churchId: church.id, lang, pico: 0 };
       this.entries.set(k, e);
       this.garantirEscriba(church.id);
       c.eventStartedAt ??= Date.now();
+      this.abrirCultoSeNecessario(c);   // sem await: a ponte não espera o banco
       this.logCusto(c, `START ${lang}`);
       try {
         // teto de 20s: partida travada não pode prender o ouvinte em "Connecting..."
@@ -138,14 +147,62 @@ class SessionManager {
     const idleMs = (Number(process.env.IDLE_TIMEOUT_SECONDS) || 120) * 1000;
     for (const [k, e] of this.entries) {
       const c = this.churches.get(e.churchId);
+      const ouvintes = this.contar(e.churchId, e.lang);
+      if (ouvintes > e.pico) e.pico = ouvintes;   // pico de ouvintes do trecho (vai para service_languages)
       // MUTE (louvor) = ponte NÃO cai por ociosidade — agora por igreja: o louvor de
       // uma igreja não pode segurar (nem derrubar) as pontes de outra.
       if (c?.muted) { e.vazioDesde = null; continue; }
-      if (this.contar(e.churchId, e.lang) > 0) { e.vazioDesde = null; continue; }
+      if (ouvintes > 0) { e.vazioDesde = null; continue; }
       e.vazioDesde ??= agora;
       if (agora - e.vazioDesde > idleMs) this.teardown(e.churchId, e.lang, 'ocioso');
       void k;
     }
+    // culto aberto no banco, sem nenhuma ponte há 30 min e sem "End broadcast" → fecha sozinho
+    for (const [id, c] of this.churches) {
+      if (!c.serviceId && !c.cultoPromise) continue;
+      if ([...this.entries.values()].some(e => e.churchId === id)) continue;
+      if (c.ultimoTeardown && agora - c.ultimoTeardown > CULTO_ABANDONADO_MS) {
+        this.fecharCultoNoBanco(c, 'sem ponte há 30 min (sem End broadcast)');
+      }
+    }
+  }
+
+  // ── registro do culto no banco: services / service_languages / service_costs (HANDOFF §22) ──
+  // Antes só existia logs/custo.log; as tabelas ficaram vazias de 30/08 a 22/09.
+  abrirCultoSeNecessario(c) {
+    if (c.cultoPromise || !dbAdminConfigurado()) return c.cultoPromise;
+    c.cultoPromise = (async () => {
+      try {
+        const churchId = await churchIdBySlug(c.slug);
+        if (!churchId) { this.logCusto(c, 'DB igreja não encontrada pelo slug'); return null; }
+        const r = await abrirCulto(churchId);
+        if (r?.id) { c.serviceId = r.id; this.logCusto(c, `DB culto #${r.id} ${r.reaproveitado ? 'reaproveitado' : 'aberto'}`); }
+        return r?.id ?? null;
+      } catch (e) { this.logCusto(c, `DB abrir culto FALHOU: ${e.message}`); return null; }
+    })();
+    return c.cultoPromise;
+  }
+
+  async registrarTrecho(c, e, minutos) {
+    if (!dbAdminConfigurado()) return;
+    try {
+      const serviceId = c.serviceId ?? await this.abrirCultoSeNecessario(c);
+      if (!serviceId) return;
+      const tarifa = await tarifaPorMinuto();
+      const min = Number(minutos), custo = min * tarifa;
+      const st = e.bridge.stats || {};
+      await somarIdioma(serviceId, e.lang, { minutos: min, pico: e.pico, custoUsd: custo, tokensIn: st.tokensIn ?? 0, tokensOut: st.tokensOut ?? 0, tarifa });
+      this.logCusto(c, `DB culto #${serviceId} ${e.lang} +${min}min pico=${e.pico} custo≈$${custo.toFixed(3)} (tarifa ${tarifa}/min)`);
+    } catch (err) { this.logCusto(c, `DB somar ${e.lang} FALHOU: ${err.message}`); }
+  }
+
+  async fecharCultoNoBanco(c, motivo) {
+    if (!c) return;
+    const id = c.serviceId ?? (c.cultoPromise ? await c.cultoPromise : null);
+    c.serviceId = null; c.cultoPromise = null; c.eventStartedAt = null; c.ultimoTeardown = 0;
+    if (!id) return;
+    try { await fecharCulto(id, motivo); this.logCusto(c, `DB culto #${id} fechado (${motivo})`); }
+    catch (e) { this.logCusto(c, `DB fechar culto #${id} FALHOU: ${e.message}`); }
   }
 
   armarTravaDeGasto(churchId, lang, e) {
@@ -164,6 +221,10 @@ class SessionManager {
     this.logCusto(c, `STOP ${lang} minutos=${minutos} motivo="${motivo}"`);
     await e.bridge.stop();
     this.garantirEscriba(churchId);   // se a escriba caiu, outra ponte assume
+    if (this.churches.has(churchId)) {
+      c.ultimoTeardown = Date.now();
+      await this.registrarTrecho(c, e, minutos);   // minutos + pico + custo estimado deste trecho
+    }
   }
 
   status(church) {
@@ -195,6 +256,7 @@ class SessionManager {
     }
     const c = this.churches.get(churchId);
     if (c) { c.muted = false; c.eventStartedAt = null; }
+    await this.fecharCultoNoBanco(c, 'encerrado pelo operador');   // depois dos teardowns: todos os trechos já somados
 
     // Fim do culto: o PDF do sermão sai sozinho, do original e de cada idioma.
     try {

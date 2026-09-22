@@ -62,7 +62,7 @@ export class TranslationBridge {
     this.drenando = null;                 // sessão antiga terminando de falar após o chaveio
     this.recentesB64 = [];                // últimos ~2s da fala do orador (aquecimento da sessão nova)
     this.novaAquecidaEm = 0;              // quando o priming terminou — chaveio só depois do guard
-    this.stats = { startedAt: null, lastAudioOutAt: null, geminiReconnects: 0, firstLatencyMs: null, droppedSilenceMs: 0 };
+    this.stats = { startedAt: null, lastAudioOutAt: null, geminiReconnects: 0, firstLatencyMs: null, droppedSilenceMs: 0, tokensIn: 0, tokensOut: 0 };
     this._lastInputAt = null;
     // MODO LOUVOR: durante a música o áudio SEGUE indo ao Gemini (para transcrever o
     // que está sendo cantado), mas a voz traduzida NÃO é publicada — o ouvinte recebe
@@ -255,6 +255,12 @@ export class TranslationBridge {
 
   onGeminiMessage(msg, sess) {
     if (msg.sessionResumptionUpdate?.newHandle) this.resumeHandle = msg.sessionResumptionUpdate.newHandle;
+    // tokens que o Gemini informa (INFORMATIVO — vão para service_costs; a estimativa de custo
+    // do painel da plataforma usa minutos × tarifa, ver HANDOFF §22)
+    if (msg.usageMetadata) {
+      this.stats.tokensIn += Number(msg.usageMetadata.promptTokenCount) || 0;
+      this.stats.tokensOut += Number(msg.usageMetadata.responseTokenCount) || 0;
+    }
     if (msg.goAway) {
       if (sess && sess !== this.session) return; // goAway de sessão antiga/nova: ignora
       // temos ~50s de aviso: pré-abre a sessão nova JÁ e troca na próxima PAUSA DE
