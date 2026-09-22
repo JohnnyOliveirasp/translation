@@ -13,7 +13,7 @@ const PENDING_KEY = 'lt-pending-church';
 export default function Signup() {
   const { t, lang } = useLang();
   const { navigate } = useRouter();
-  const { refresh, user, memberships } = useAuth();
+  const { refresh, user, memberships, signOut } = useAuth();
   const loc = lang === 'pt' ? 'pt-BR' : lang;
   const countries = countryOptions(loc);
   const [step, setStep] = useState<Step>('form');
@@ -102,6 +102,8 @@ export default function Signup() {
           <ErrorMsg msg={err} />
           <Button type="submit" loading={busy}>{busy ? t('a.working') : t('a.finish.cta')}</Button>
         </form>
+        {/* Entrou com a conta Google errada? Sai e recomeça. */}
+        <button type="button" onClick={signOut} className="mt-6 block w-full text-center text-xs text-muted hover:text-ink">{t('ad.signout')}</button>
       </AuthShell>
     );
   }
@@ -126,14 +128,11 @@ export default function Signup() {
     <AuthShell>
       <Title text={t('a.signup.title')} />
       <p className="mt-3 text-sm text-muted">{t('a.signup.sub')}</p>
-      {/* Google: se a pessoa já preencheu a igreja, guardamos para criar sozinha na volta */}
-      <div className="mt-8"><GoogleButton label={t('a.google')} onBefore={() => {
-        if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
-      }} /></div>
-      <OrDivider label={t('a.or')} />
-      <form onSubmit={submit} className="space-y-4">
-        <Field label={t('a.fullName')} value={fullName} onChange={e => setFullName(e.target.value)} required autoComplete="name" />
-        <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required />
+      {/* 22/09: a igreja vem PRIMEIRO (é a base de tudo); só depois a pessoa escolhe como entrar.
+          Google: se a igreja já está preenchida, guardamos para criar sozinha na volta; se não,
+          o /admin manda de volta para cá e mostra só o formulário da igreja. */}
+      <form onSubmit={submit} className="mt-8 space-y-4">
+        <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required autoFocus />
         <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
           required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || 'your-church'}`} />
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
@@ -143,6 +142,12 @@ export default function Signup() {
           {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
         </Select>
         <p className="-mt-2 text-[11px] text-muted/80">{t('a.countryHint')}</p>
+        <p className="pt-4 text-sm font-medium text-ink">{t('a.signup.how')}</p>
+        <GoogleButton label={t('a.google')} onBefore={() => {
+          if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
+        }} />
+        <OrDivider label={t('a.or')} />
+        <Field label={t('a.fullName')} value={fullName} onChange={e => setFullName(e.target.value)} required autoComplete="name" />
         <Field label={t('a.email')} type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
         <Field label={t('a.password')} type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
         <ErrorMsg msg={err} />
