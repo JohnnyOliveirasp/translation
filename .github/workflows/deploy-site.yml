@@ -45,10 +45,10 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.guard.outputs.skip != 'true'
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.guard.outputs.skip != 'true'
         with:
           node-version: 22
