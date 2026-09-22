@@ -26,6 +26,13 @@ export const LANGUAGE_CATALOG: { code: string; label: string; flag: string }[] =
   { code: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
   { code: 'fil', label: 'Filipino', flag: '🇵🇭' },
 ];
+
+// Idiomas que o ORADOR pode falar (signup, Settings e tela de transmissão).
+// Lista restrita de propósito (decisão do Johnny, 22/09/2026): o Gemini detecta a origem sozinho,
+// mas só o inglês foi exercitado em culto real — os demais entram conforme forem testados.
+// ⚠️ Espelho de `ORADOR` em `api/src/lib/languages.js` — os dois têm que andar juntos.
+export const SPEAKER_CODES = ['en', 'pt-BR', 'es', 'it', 'fr', 'hi', 'zh-Hans'];
+export const SPEAKER_CATALOG = LANGUAGE_CATALOG.filter(l => SPEAKER_CODES.includes(l.code));
 export const PLAN_LIMITS: Record<string, number> = { starter: 2, growth: 5, congregation: 99 };
 export const langLabel = (code: string) => LANGUAGE_CATALOG.find(l => l.code === code)?.label ?? code;
 

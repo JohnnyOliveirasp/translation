@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
-import { LANGUAGE_CATALOG } from '../../lib/languages';
+import { SPEAKER_CATALOG } from '../../lib/languages';
 import { countryOptions, defaultCountry } from '../../lib/countries';
 import { AuthShell, Title, Field, Select, Button, ErrorMsg, GoogleButton, OrDivider, slugify } from './ui';
 
@@ -93,7 +93,7 @@ export default function Signup() {
           <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
             required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || 'your-church'}`} />
           <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
-            {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
+            {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
           </Select>
           <Select label={t('a.country')} value={country} onChange={e => setCountry(e.target.value)}>
             {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
@@ -136,7 +136,7 @@ export default function Signup() {
         <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
           required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || 'your-church'}`} />
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
-          {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
+          {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
         </Select>
         <Select label={t('a.country')} value={country} onChange={e => setCountry(e.target.value)}>
           {countries.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}

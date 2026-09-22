@@ -4,7 +4,7 @@ import { supabase, logoUrl, type Church, type Role } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
-import { LANGUAGE_CATALOG, PLAN_LIMITS, langLabel, posterHeadline } from '../../lib/languages';
+import { LANGUAGE_CATALOG, SPEAKER_CATALOG, PLAN_LIMITS, langLabel, posterHeadline } from '../../lib/languages';
 import { AuthShell, Field, Select, Button, ErrorMsg, Note } from '../auth/ui';
 import Shell, { PageHead, type NavItem } from './Shell';
 import QrCode, { downloadQrPng } from '../../components/QrCode';
@@ -219,6 +219,11 @@ function Settings({ church }: { church: Church }) {
     const { error } = await supabase.from('churches').update({
       name, speaker_lang: speakerLang, sermon_recipients: list,
     }).eq('id', church.id);
+    // Se o orador passou a falar um idioma que estava ligado para os ouvintes, desliga essa linha:
+    // ninguém pode "ouvir tradução" para o idioma que está sendo falado (a API recusa e o ouvinte veria erro).
+    if (!error && speakerLang !== church.speaker_lang) {
+      await supabase.from('church_languages').delete().eq('church_id', church.id).eq('lang_code', speakerLang);
+    }
     setBusy(false);
     if (error) { setErr(error.message); return; }
     setMsg(t('ad.saved')); await refresh();
@@ -245,7 +250,7 @@ function Settings({ church }: { church: Church }) {
       <div className="space-y-4">
         <Field label={t('a.churchName')} value={name} onChange={e => setName(e.target.value)} required />
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
-          {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
+          {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
         </Select>
         <Field label={t('ad.recipients')} hint={t('ad.recipientsHint')} value={recipients} onChange={e => setRecipients(e.target.value)} placeholder={t('ad.recipientsPh')} />
         <ErrorMsg msg={err} />

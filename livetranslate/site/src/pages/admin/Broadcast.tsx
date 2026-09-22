@@ -4,7 +4,7 @@ import { supabase, type Church } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
-import { LANGUAGE_CATALOG, langLabel } from '../../lib/languages';
+import { SPEAKER_CATALOG, langLabel } from '../../lib/languages';
 import ChurchLogo from '../../components/ChurchLogo';
 import { BroadcastEngine, CFG_PADRAO, type Cfg, type Janela, type Modo } from '../../lib/broadcast-engine';
 
@@ -13,7 +13,6 @@ import { BroadcastEngine, CFG_PADRAO, type Cfg, type Janela, type Modo } from '.
  * na sala LiveKit DESTA igreja e liga o Worship Sense (auto-mute do louvor), a mesma
  * lógica calibrada da POC3. Sem senha: quem chega aqui já entrou no painel da igreja.
  */
-const SOURCE_LANGS = ['en', 'pt-BR', 'es'];   // idiomas que o orador pode falar (como na POC3)
 
 export default function Broadcast({ slug }: { slug: string }) {
   const { t } = useLang();
@@ -146,7 +145,7 @@ export default function Broadcast({ slug }: { slug: string }) {
                 <span className="mb-1.5 block text-xs font-medium text-muted">{t('bc.speakerLang')}</span>
                 <select value={source} onChange={e => setSource(e.target.value)}
                   className="w-full rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-ink">
-                  {LANGUAGE_CATALOG.filter(l => SOURCE_LANGS.includes(l.code)).map(l => (
+                  {SPEAKER_CATALOG.map(l => (
                     <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
                   ))}
                 </select>

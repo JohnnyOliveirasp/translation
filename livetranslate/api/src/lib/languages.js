@@ -33,6 +33,11 @@ export const CATALOGO = [
   { code: 'fil', label: 'Filipino' },
 ].map(l => ({ ...l, flag: FLAGS[l.code] || '🌐' }));
 
+// Idiomas que o ORADOR pode falar (origem). Lista restrita de propósito (Johnny, 22/09/2026):
+// o Gemini detecta a origem sozinho, mas só o inglês foi exercitado em culto real.
+// ⚠️ Espelho de `SPEAKER_CODES` em `site/src/lib/languages.ts` — os dois têm que andar juntos.
+export const ORADOR = ['en', 'pt-BR', 'es', 'it', 'fr', 'hi', 'zh-Hans'];
+
 export function getLanguages() {
   const codes = (process.env.TARGET_LANGUAGES || 'en').split(',').map(s => s.trim()).filter(Boolean);
   const labels = Object.fromEntries(

@@ -5,7 +5,7 @@
 // Idioma sem ouvinte cai após IDLE_TIMEOUT_SECONDS (custo zero).
 
 import { TranslationBridge } from './translation-bridge.js';
-import { CATALOGO } from './languages.js';
+import { CATALOGO, ORADOR } from './languages.js';
 import { appendFileSync, mkdirSync } from 'node:fs';
 import { gerarSermao } from './sermon-pdf.js';
 import { churchLogo } from './tenant.js';
@@ -57,7 +57,7 @@ class SessionManager {
   }
 
   setSource(church, lang) {
-    if (!CATALOGO.some(l => l.code === lang)) throw new Error(`invalid language: ${lang}`);
+    if (!ORADOR.includes(lang)) throw new Error(`invalid speaker language: ${lang}`);
     const c = this.igreja(church);
     c.sourceLang = lang;
     // ninguém pode "ouvir tradução" para o idioma que já está sendo falado
