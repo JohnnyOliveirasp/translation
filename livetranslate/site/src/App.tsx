@@ -7,13 +7,14 @@ import Recover from './pages/auth/Recover';
 import Invite from './pages/auth/Invite';
 import Admin from './pages/admin/Admin';
 import Platform from './pages/admin/Platform';
+import Testimonials from './pages/Testimonials';
 import Listen from './pages/Listen';
 import Broadcast from './pages/admin/Broadcast';
 import { useRouter, matchPath } from './router';
 import { Privacy, Terms } from './pages/Legal';
 
 /** Caminhos do produto — tudo que sobrar de 1 segmento é slug de igreja (/{slug}). */
-const RESERVED = new Set(['signup', 'login', 'recover', 'admin', 'platform', 'invite', 'broadcast', 'assets', 'terms', 'privacy']);
+const RESERVED = new Set(['signup', 'login', 'recover', 'admin', 'platform', 'invite', 'broadcast', 'assets', 'terms', 'privacy', 'testimonials']);
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,}$/;
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
   else if (path === '/recover') page = <Recover />;
   else if (path === '/admin') page = <Admin />;
   else if (path === '/platform') page = <Platform />;
+  else if (path === '/testimonials') page = <Testimonials />;
   else if (path === '/privacy') page = <Privacy />;
   else if (path === '/terms') page = <Terms />;
   else if (invite) page = <Invite token={invite.token} />;

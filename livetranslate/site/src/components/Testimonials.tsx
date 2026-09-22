@@ -88,6 +88,12 @@ export default function Testimonials() {
                   className={'h-2 rounded-full transition-all ' + (k === i ? 'w-6 bg-black' : 'w-2 bg-black/20 hover:bg-black/40')} />
               ))}
             </div>
+            {/* página só com vídeos reais (22/09) */}
+            <div className="mt-8 text-center">
+              <a href="/testimonials" className="inline-flex items-center gap-2 rounded-full border border-ink px-6 py-3 text-sm text-ink transition-colors hover:bg-ink hover:text-white">
+                {t('tst.all')} →
+              </a>
+            </div>
           </div>
         </Rise>
       </div>
