@@ -18,7 +18,7 @@ function VideoCard({ v }: { v: VideoTestimonial }) {
   const loc = lang === 'pt' ? 'pt-BR' : lang;
   return (
     <figure className="surface overflow-hidden rounded-3xl shadow-[0_40px_120px_-60px_rgba(0,0,0,0.25)]">
-      <div className="relative aspect-video w-full bg-black">
+      <div className={`relative w-full bg-black ${v.portrait ? 'mx-auto aspect-[9/16] max-h-[640px]' : 'aspect-video'}`}>
         {v.youtube ? (
           <iframe
             className="absolute inset-0 h-full w-full"

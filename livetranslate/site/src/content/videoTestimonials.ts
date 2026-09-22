@@ -17,14 +17,24 @@ export type VideoTestimonial = {
   langs?: string[];           // idiomas que a igreja traduz (rótulos livres)
   quote?: Txt;                // uma frase do vídeo, opcional
   youtube?: string;           // se hospedado no YouTube, o ID (ex.: 'dQw4w9WgXcQ'); senão usa o .mp4 local
+  portrait?: boolean;         // vídeo em pé (celular): o card fica 9:16 em vez de 16:9
   date?: string;              // 'AAAA-MM-DD'
 };
 
 export const GOOGLE_REVIEW_URL = '';   // link "Escreva uma avaliação" do Perfil da Empresa no Google — o botão aparece quando preenchido
 
 export const VIDEO_TESTIMONIALS: VideoTestimonial[] = [
+  // 1º depoimento real (gravado 22/09/2026, 1min28, vertical). O Johnny vai subir no YouTube:
+  // trocar youtube: '' pelo ID do vídeo e tirar o comentário.
   // {
-  //   id: 'redeem-pastor', name: 'Pastor …', role: { en: 'Lead Pastor', es: 'Pastor principal', pt: 'Pastor titular' },
-  //   org: 'Redeem Community Church · …, FL', spoken: 'en', langs: ['Español', 'Português'], date: '2026-09-22',
+  //   id: 'marcos-livoni', name: 'Marcos Livoni',
+  //   role: { en: 'Ministry leader', es: 'Líder de ministerio', pt: 'Líder do ministério' },
+  //   org: 'Celebrate Recovery · Orlando, FL', spoken: 'pt', langs: ['Português'], portrait: true, date: '2026-09-22',
+  //   quote: {
+  //     en: 'Two taps and you are already hearing the service in Portuguese — and reading it too. For us it was a fundamental tool.',
+  //     es: 'Dos toques y ya estás escuchando el culto en portugués, y leyéndolo también. Para nosotros fue una herramienta fundamental.',
+  //     pt: 'Dois cliques e você já começa a ouvir o culto em português, e ler também. Para a gente foi uma ferramenta fundamental.',
+  //   },
+  //   youtube: '',
   // },
 ];
