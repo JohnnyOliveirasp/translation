@@ -170,3 +170,11 @@ Quando o operador clica em **Encerrar transmissão** (`stop-all`), o servidor ge
 
 ## 19. Próximo: Stripe
 Copiar a integração de um projeto do Johnny (ele passa o caminho; provável ResumePro). Schema já tem plan/status/trial; painel já tem a aba Subscription.
+
+## 20. Idiomas, e-mail do sermão e PDF multialfabeto (20–22/09/2026)
+- **Idiomas:** os catálogos do site (`site/src/lib/languages.ts`) e da API (`api/src/lib/languages.js`) TÊM que andar juntos — a API valida contra o dela. 16 idiomas; `ht` (Kreyòl) não existe no Gemini, Filipino é `fil`. Redeem com 9 ativos e `plan = congregation` (a trava de plano da aba Languages recusava calada).
+- **E-mail (Resend, conta própria do LiveTranslate, domínio verificado):** `api/src/lib/email.js` + `sermon-mail.js` + `/api/unsubscribe` + migration `0008`. Todo inscrito recebe todo culto, 10 min após o End broadcast; cancelado se o operador voltar ao ar (`set-source`). Log em `logs/email.log`; registro por culto em `sermons/{slug}/{dia}-envio.json`. Reenvio manual: `enviarSermao({ ..., rodada: 'v2', aviso })`.
+- **SMTP do login no Supabase** também pelo Resend (`no-reply@livetranslate.church`).
+- **PDF:** latinos no gerador à mão (inalterado byte a byte); zh/ko/ja/ru/uk/ar/hi/vi pelo Chromium do servidor (`pdf-chromium.js`, CDP via pipe, sem pacote).
+- **Bug corrigido:** ponte que nascia com o louvor já mutado achava que era pregação (falava e gravava a letra). Agora nasce com `worship = c.muted`.
+- **Pendências:** botão "reenviar sermão" no painel; subir o Resend para Pro quando houver 2–3 igrejas (limite de 100 e-mails/dia no Free); os idiomas novos ainda não rodaram num culto real.
