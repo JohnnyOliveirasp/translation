@@ -217,3 +217,25 @@ Pedido do Johnny: *"o site precisa estar em 3 idiomas, inglês default, espanhol
 - Segunda-feira à noite também é pregação (culto com tradução pt-BR, ~18h30 EDT) → o e-mail do sermão sai também às segundas. Não mudar nada.
 - Sermões por e-mail, PDF multialfabeto e aba Sermons por mês com filtros: seção 20 e commits 69cdfaf, 83b9c0b, 9d55bd0, 24b6e66.
 - Branches: trabalhar em `dev`, fast-forward para `main` no deploy, push das duas.
+
+## 22. PAINEL DA PLATAFORMA + registro de cultos/custo → depois STRIPE (22/09/2026, em andamento)
+Decisões do Johnny em 22/09 (conversa com o agente desta seção):
+- **Moeda por PAÍS da igreja** (não por idioma): Brasil paga em BRL, todo o resto em USD. O cadastro passa a pedir o país.
+- **Duas contas Stripe**: a americana (JC Solutions US, a mesma do ResumePro, `acct_…11QUWJj3aj`) para USD e uma **brasileira** (empresa dele no Brasil) para BRL — Pix/boleto só existem na conta BR.
+- **Preços em BRL: ainda não definidos** ("vamos negociar"). USD seguem 79,90 / 139.
+- **Webhook grava com `SUPABASE_SERVICE_ROLE_KEY`** (padrão dos dois projetos dele: ResumePro `get_admin_client()`, PlatformLucasArrial `getAdmin()`), com tabela de eventos idempotente (`payment_events` do PlatformLucasArrial). A chave fica SÓ em `api/src/lib/db-admin.js`.
+- **Período grátis**: toda igreja entra com 30 dias; o Johnny dá mais dias a quem quiser pelo painel da plataforma. Durante o grátis a igreja usa **livre**, e ele pode **bloquear um idioma** de uma igreja se ficar caro (`church_languages.blocked_by_platform`).
+- Idioma do site: inglês padrão, a pessoa muda (sem detectar navegador) — item encerrado.
+- **Painel da plataforma** (`/platform`, só `platform_admins` = johnny.oliveirasp@gmail.com): igrejas cadastradas com e-mail do admin, quem paga e quem está de graça, quanto entrou (Stripe, quando existir), quanto saiu (Gemini ESTIMADO + custos fixos editáveis), gráfico mensal, dar dias grátis, bloquear idioma, mudar plano. Referência de layout: PlatformLucasArrial `frontend/src/components/admin/*` (KPIs + donut/barras em SVG à mão, sem lib de gráfico).
+- **"Saldo do Google" não existe** (pós-pago — ver memória `custo-gemini`). O painel mostra gasto estimado = minutos de ponte × tarifa por idioma-minuto (`platform_settings.cost_per_lang_minute_usd`, calibrada em **US$0,05/min**: 06/09 = 118,6 min → US$6,70; 13/09 = 143,4 min → US$5,70), com link para a página real de gasto. Fatura real do Google exigiria export para BigQuery — fica para depois se a estimativa não bastar.
+
+### 22.1 Ordem de trabalho
+1. **API grava cultos** (`services` / `service_languages` / `service_costs` estavam VAZIAS — a API nunca escreveu, só `logs/custo.log`). Migration `0009`, `api/src/lib/db-admin.js` (service_role), `session-manager.js` abre o culto na 1ª ponte, soma minutos/pico/custo a cada teardown, fecha no `stop-all` (ou sozinho após 30 min sem ponte). Sem a chave no `.env.local`, vira no-op com aviso — o culto nunca para por causa disso.
+2. **Painel `/platform`** no site (Vite/React, mesmos padrões do `/admin`).
+3. **Stripe** (seção 21.4 continua valendo; agora com 2 contas → `STRIPE_US_*` e `STRIPE_BR_*`, webhook por conta, país da igreja decide a conta).
+
+### 22.2 Pendências do Johnny para esta seção
+- Colar/colocar `SUPABASE_SERVICE_ROLE_KEY` no `/mnt/volume/livetranslate/api/.env.local` (Supabase → Project Settings → API Keys → service_role). Sem isso, o item 1 não grava.
+- Criar uma chave Gemini SÓ do LiveTranslate (hoje a chave é compartilhada com o n8n — o gasto do painel nunca vai bater com a fatura enquanto for assim).
+- Valores mensais dos custos fixos (Hetzner, Supabase, LiveKit, Resend, Cloudflare) — ou digitar direto na aba Settings do `/platform`.
+- Preços em BRL e a conta Stripe BR (chaves) quando for começar o item 3.
