@@ -33,7 +33,11 @@ type Settings = {
   fixed_costs_usd_month: Record<string, number>;
   usd_brl: number;
   plan_prices: Record<string, { usd: number | null; brl: number | null }>;
+  plan_hours: Record<string, number | null>;                                   // teto de horas-idioma/mês (null = sem teto)
+  hour_pack: { hours: number; usd: number | null; brl: number | null; valid_months: number };
+  overage_tolerance: number;
 };
+type Pack = { id: number; church_id: number; hours: number; hours_used: number; source: string; expires_at: string; note: string | null; created_at: string };
 type Grant = { id: number; church_id: number; days: number; until_at: string; note: string | null; created_at: string };
 type Payment = { id: number; church_id: number; provider: string; amount_cents: number; currency: 'usd' | 'brl'; paid_at: string };
 
@@ -44,6 +48,9 @@ const DEFAULTS: Settings = {
   fixed_costs_usd_month: { hetzner: 0, supabase: 0, livekit: 0, resend: 0, cloudflare: 0, other: 0 },
   usd_brl: 5.5,
   plan_prices: { starter: { usd: 7990, brl: null }, growth: { usd: 13900, brl: null } },
+  plan_hours: { starter: 12, growth: 30, congregation: null },
+  hour_pack: { hours: 10, usd: 3900, brl: 19900, valid_months: 3 },
+  overage_tolerance: 0.2,
 };
 
 const monthKey = (d: Date | string) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}`; };
@@ -61,6 +68,7 @@ function usePlatformData() {
   const [services, setServices] = useState<ServiceRow[]>([]);
   const [grants, setGrants] = useState<Grant[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [packs, setPacks] = useState<Pack[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -68,19 +76,21 @@ function usePlatformData() {
   const reload = useCallback(async () => {
     setErr(null);
     const since = new Date(); since.setMonth(since.getMonth() - 12); since.setDate(1);
-    const [c, s, g, p, st] = await Promise.all([
+    const [c, s, g, p, hp, st] = await Promise.all([
       supabase.from('churches').select('*, memberships(role, profiles(email, full_name)), church_languages(lang_code, enabled, blocked_by_platform)').order('created_at', { ascending: false }),
       supabase.from('services').select('id, church_id, started_at, ended_at, service_languages(lang_code, minutes, peak_listeners), service_costs(lang_code, cost_usd)').gte('started_at', since.toISOString()).order('started_at', { ascending: false }),
       supabase.from('platform_grants').select('id, church_id, days, until_at, note, created_at').order('created_at', { ascending: false }).limit(200),
       supabase.from('payments').select('id, church_id, provider, amount_cents, currency, paid_at').gte('paid_at', since.toISOString()).order('paid_at', { ascending: false }),
+      supabase.from('hour_packs').select('id, church_id, hours, hours_used, source, expires_at, note, created_at').order('created_at', { ascending: false }).limit(500),
       supabase.from('platform_settings').select('key, value'),
     ]);
-    const e = c.error ?? s.error ?? g.error ?? p.error ?? st.error;
+    const e = c.error ?? s.error ?? g.error ?? p.error ?? hp.error ?? st.error;
     if (e) { setErr(e.message); setLoading(false); return; }
     setChurches((c.data ?? []) as unknown as ChurchRow[]);
     setServices((s.data ?? []) as unknown as ServiceRow[]);
     setGrants((g.data ?? []) as Grant[]);
     setPayments((p.data ?? []) as Payment[]);
+    setPacks(((hp.data ?? []) as Pack[]).map(x => ({ ...x, hours: Number(x.hours), hours_used: Number(x.hours_used) })));
     const merged: Settings = { ...DEFAULTS };
     for (const row of st.data ?? []) {
       const r = row as { key: string; value: unknown };
@@ -88,13 +98,16 @@ function usePlatformData() {
       else if (r.key === 'usd_brl') merged.usd_brl = Number(r.value) || DEFAULTS.usd_brl;
       else if (r.key === 'fixed_costs_usd_month') merged.fixed_costs_usd_month = { ...DEFAULTS.fixed_costs_usd_month, ...(r.value as Record<string, number>) };
       else if (r.key === 'plan_prices') merged.plan_prices = { ...DEFAULTS.plan_prices, ...(r.value as Settings['plan_prices']) };
+      else if (r.key === 'plan_hours') merged.plan_hours = { ...DEFAULTS.plan_hours, ...(r.value as Settings['plan_hours']) };
+      else if (r.key === 'hour_pack') merged.hour_pack = { ...DEFAULTS.hour_pack, ...(r.value as Settings['hour_pack']) };
+      else if (r.key === 'overage_tolerance') merged.overage_tolerance = Number(r.value) >= 0 ? Number(r.value) : DEFAULTS.overage_tolerance;
     }
     setSettings(merged);
     setLoading(false);
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
-  return { churches, services, grants, payments, settings, loading, err, reload };
+  return { churches, services, grants, payments, packs, settings, loading, err, reload };
 }
 
 export default function Platform() {
@@ -297,7 +310,7 @@ function Bars({ data, labelIn, labelOut, fmt, month }: {
 }
 
 /* ── Igrejas ─────────────────────────────────────────────────────────────── */
-function Churches({ churches, services, grants, reload }: Data) {
+function Churches({ churches, services, grants, packs, settings, reload }: Data) {
   const { t } = useLang();
   const f = useFmt();
   const [q, setQ] = useState('');
@@ -322,7 +335,7 @@ function Churches({ churches, services, grants, reload }: Data) {
               <th className="px-4 py-3 font-medium">{t('pf.church')}</th><th className="px-4 py-3 font-medium">{t('pf.admin')}</th>
               <th className="px-4 py-3 font-medium">{t('pf.country')}</th><th className="px-4 py-3 font-medium">{t('pf.plan')}</th>
               <th className="px-4 py-3 font-medium">{t('pf.status')}</th><th className="px-4 py-3 font-medium">{t('pf.until')}</th>
-              <th className="px-4 py-3 font-medium">{t('pf.lastService')}</th><th className="px-4 py-3 text-right font-medium">{t('pf.monthCost')}</th>
+              <th className="px-4 py-3 font-medium">{t('pf.lastService')}</th><th className="px-4 py-3 font-medium">{t('pf.hours')}</th><th className="px-4 py-3 text-right font-medium">{t('pf.monthCost')}</th>
             </tr></thead>
             <tbody className="divide-y divide-black/[0.06]">
               {rows.map(c => {
@@ -330,6 +343,10 @@ function Churches({ churches, services, grants, reload }: Data) {
                 const mine = services.filter(s => s.church_id === c.id);
                 const last = mine[0]?.started_at ?? null;
                 const cost = sum(mine.filter(s => monthKey(s.started_at) === thisMonth).map(serviceCost));
+                const hoursUsed = sum(mine.filter(s => monthKey(s.started_at) === thisMonth).map(serviceMinutes)) / 60;
+                const cap = settings.plan_hours[c.plan] ?? null;
+                const packsLeft = sum(packs.filter(p => p.church_id === c.id && new Date(p.expires_at) > new Date()).map(p => Math.max(0, p.hours - p.hours_used)));
+                const over = cap !== null && hoursUsed >= cap;
                 const ends = c.trial_ends_at ? new Date(c.trial_ends_at) : null;
                 const days = ends ? Math.ceil((ends.getTime() - Date.now()) / 86400000) : null;
                 const isOpen = open === c.id;
@@ -345,11 +362,16 @@ function Churches({ churches, services, grants, reload }: Data) {
                         <p className={`text-[11px] ${days <= 7 ? 'text-red-600' : 'text-muted'}`}>{days > 0 ? t('pf.daysLeft').replace('{n}', String(days)) : t('pf.expired')}</p>
                       )}</td>
                       <td className="px-4 py-3">{last ? f.date(last) : t('pf.never')}</td>
+                      <td className="px-4 py-3">
+                        <span className={over ? 'font-medium text-red-600' : hoursUsed >= (cap ?? Infinity) * 0.8 ? 'text-amber-700' : ''}>{hoursUsed.toFixed(1)} h</span>
+                        <span className="text-muted">{cap !== null ? ` / ${cap} h` : ''}</span>
+                        {packsLeft > 0 && <p className="text-[11px] text-muted">+{packsLeft.toFixed(1)} h {t('pf.packs')}</p>}
+                      </td>
                       <td className="px-4 py-3 text-right">{f.usd(cost)}</td>
                     </tr>
                     {isOpen && (
-                      <tr><td colSpan={8} className="bg-black/[0.02] px-4 py-5">
-                        <ChurchDetail church={c} grants={grants.filter(g => g.church_id === c.id)} reload={reload} />
+                      <tr><td colSpan={9} className="bg-black/[0.02] px-4 py-5">
+                        <ChurchDetail church={c} grants={grants.filter(g => g.church_id === c.id)} packs={packs.filter(p => p.church_id === c.id)} reload={reload} />
                       </td></tr>
                     )}
                   </Fragment>
@@ -369,11 +391,13 @@ function StatusPill({ status, label }: { status: string; label: string }) {
   return <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${cls}`}>{label}</span>;
 }
 
-function ChurchDetail({ church, grants, reload }: { church: ChurchRow; grants: Grant[]; reload: () => Promise<void> }) {
+function ChurchDetail({ church, grants, packs, reload }: { church: ChurchRow; grants: Grant[]; packs: Pack[]; reload: () => Promise<void> }) {
   const { t } = useLang();
   const f = useFmt();
   const [days, setDays] = useState('30');
   const [note, setNote] = useState('');
+  const [hours, setHours] = useState('10');
+  const [hnote, setHnote] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -385,6 +409,16 @@ function ChurchDetail({ church, grants, reload }: { church: ChurchRow; grants: G
     if (error) { setErr(error.message); return; }
     setMsg(t('pf.given').replace('{d}', f.date(data as string)));
     setNote('');
+    await reload();
+  }
+
+  async function giveHours(e: FormEvent) {
+    e.preventDefault(); setErr(null); setMsg(null); setBusy(true);
+    const { error } = await supabase.rpc('platform_grant_hours', { p_church: church.id, p_hours: Number(hours) || 0, p_note: hnote || null, p_months: 3 });
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    setMsg(t('pf.hoursGiven').replace('{n}', hours));
+    setHnote('');
     await reload();
   }
 
@@ -405,7 +439,7 @@ function ChurchDetail({ church, grants, reload }: { church: ChurchRow; grants: G
   const langs = church.church_languages.filter(l => l.enabled);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid gap-6 lg:grid-cols-4">
       <ErrorMsg msg={err} />
       <div>
         <p className="text-xs font-medium text-muted">{t('pf.plan')}</p>
@@ -456,6 +490,33 @@ function ChurchDetail({ church, grants, reload }: { church: ChurchRow; grants: G
           </ul>
         )}
       </div>
+
+      <div>
+        <form onSubmit={giveHours}>
+          <p className="text-xs font-medium text-muted">{t('pf.giveHours')}</p>
+          <label className="mt-2 block">
+            <span className="mb-1 block text-[11px] text-muted">{t('pf.hoursLabel')}</span>
+            <input type="number" min="1" step="1" value={hours} onChange={e => setHours(e.target.value)} className="w-32 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" />
+          </label>
+          <label className="mt-3 block">
+            <span className="mb-1 block text-[11px] text-muted">{t('pf.note')}</span>
+            <input value={hnote} onChange={e => setHnote(e.target.value)} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" />
+          </label>
+          <button type="submit" disabled={busy} className="mt-4 rounded-full bg-ink px-5 py-2.5 text-sm text-white disabled:opacity-60">{busy ? t('pf.working') : t('pf.give')}</button>
+        </form>
+        <p className="mt-5 text-xs font-medium text-muted">{t('pf.packsTitle')}</p>
+        {packs.length === 0 ? <p className="mt-2 text-sm text-muted">{t('pf.noPacks')}</p> : (
+          <ul className="mt-2 space-y-2 text-sm">
+            {packs.map(p => (
+              <li key={p.id} className="rounded-xl bg-white px-3 py-2">
+                <span className="font-medium">{(p.hours - p.hours_used).toFixed(1)} / {p.hours} h</span>
+                <span className="ml-2 text-[11px] uppercase text-muted">{p.source === 'platform' ? t('pf.courtesy') : p.source.replace('stripe_', 'stripe ')}</span>
+                <span className="block text-[11px] text-muted">{t('pf.expires')} {f.date(p.expires_at)}{p.note ? ` · ${p.note}` : ''}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
@@ -473,6 +534,9 @@ function Costs({ settings, reload }: { settings: Settings; reload: () => Promise
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [planHours, setPlanHours] = useState({ starter: String(settings.plan_hours.starter ?? ''), growth: String(settings.plan_hours.growth ?? ''), congregation: String(settings.plan_hours.congregation ?? '') });
+  const [pack, setPack] = useState({ hours: String(settings.hour_pack.hours), usd: String(settings.hour_pack.usd ?? ''), brl: String(settings.hour_pack.brl ?? ''), valid_months: String(settings.hour_pack.valid_months) });
+  const [tol, setTol] = useState(String(Math.round(settings.overage_tolerance * 100)));
 
   async function save(e: FormEvent) {
     e.preventDefault(); setErr(null); setMsg(null); setBusy(true);
@@ -482,6 +546,9 @@ function Costs({ settings, reload }: { settings: Settings; reload: () => Promise
       { key: 'fixed_costs_usd_month', value: Object.fromEntries(FIXED_KEYS.map(k => [k, Number(fixed[k]) || 0])) },
       { key: 'usd_brl', value: Number(usdBrl) || 0 },
       { key: 'plan_prices', value: { starter: { usd: cents(prices.starter.usd), brl: cents(prices.starter.brl) }, growth: { usd: cents(prices.growth.usd), brl: cents(prices.growth.brl) } } },
+      { key: 'plan_hours', value: { starter: planHours.starter.trim() === '' ? null : Number(planHours.starter), growth: planHours.growth.trim() === '' ? null : Number(planHours.growth), congregation: planHours.congregation.trim() === '' ? null : Number(planHours.congregation) } },
+      { key: 'hour_pack', value: { hours: Number(pack.hours) || 10, usd: cents(pack.usd), brl: cents(pack.brl), valid_months: Number(pack.valid_months) || 3 } },
+      { key: 'overage_tolerance', value: Math.max(0, Number(tol) || 0) / 100 },
     ];
     const { error } = await supabase.from('platform_settings').upsert(rows, { onConflict: 'key' });
     setBusy(false);
@@ -532,6 +599,37 @@ function Costs({ settings, reload }: { settings: Settings; reload: () => Promise
         <label className="mt-4 block text-[11px] text-muted">{t('pf.usdBrl')}
           <input type="number" step="0.01" min="0" value={usdBrl} onChange={e => setUsdBrl(e.target.value)} className={`${input} max-w-[10rem]`} />
         </label>
+      </section>
+
+      <section className="rounded-2xl border border-black/[0.08] bg-white p-6">
+        <p className="text-xs font-medium text-muted">{t('pf.capTitle')}</p>
+        <p className="mt-1 text-[11px] text-muted">{t('pf.capHint')}</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {(['starter', 'growth', 'congregation'] as const).map(p => (
+            <label key={p} className="block text-[11px] capitalize text-muted">{p}
+              <input type="number" min="0" step="1" value={planHours[p]} onChange={e => setPlanHours({ ...planHours, [p]: e.target.value })} placeholder="∞" className={input} />
+            </label>
+          ))}
+        </div>
+        <label className="mt-4 block text-[11px] text-muted">{t('pf.tolerance')}
+          <input type="number" min="0" max="100" step="5" value={tol} onChange={e => setTol(e.target.value)} className={`${input} max-w-[8rem]`} />
+        </label>
+        <p className="mt-5 text-xs font-medium text-muted">{t('pf.packTitle')}</p>
+        <p className="mt-1 text-[11px] text-muted">{t('pf.packHint')}</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-4">
+          <label className="block text-[11px] text-muted">{t('pf.packHours')}
+            <input type="number" min="1" step="1" value={pack.hours} onChange={e => setPack({ ...pack, hours: e.target.value })} className={input} />
+          </label>
+          <label className="block text-[11px] text-muted">USD
+            <input type="number" min="0" value={pack.usd} onChange={e => setPack({ ...pack, usd: e.target.value })} className={input} />
+          </label>
+          <label className="block text-[11px] text-muted">BRL
+            <input type="number" min="0" value={pack.brl} onChange={e => setPack({ ...pack, brl: e.target.value })} className={input} />
+          </label>
+          <label className="block text-[11px] text-muted">{t('pf.packMonths')}
+            <input type="number" min="1" step="1" value={pack.valid_months} onChange={e => setPack({ ...pack, valid_months: e.target.value })} className={input} />
+          </label>
+        </div>
       </section>
 
       <div className="flex items-center gap-4">

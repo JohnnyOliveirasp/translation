@@ -28,6 +28,11 @@ const en: Record<string, string> = {
   'pf.f.hetzner': 'Hetzner (server)', 'pf.f.supabase': 'Supabase', 'pf.f.livekit': 'LiveKit', 'pf.f.resend': 'Resend (email)', 'pf.f.cloudflare': 'Cloudflare / domain', 'pf.f.other': 'Other',
   'pf.status.trial': 'Free', 'pf.status.active': 'Paying', 'pf.status.past_due': 'Past due', 'pf.status.canceled': 'Canceled',
   'pf.working': 'One moment…', 'pf.myChurch': 'Open my church panel',
+  'pf.hours': 'Hours this month', 'pf.packs': 'in packs', 'pf.giveHours': 'Give extra hours', 'pf.hoursLabel': 'Hours (valid 3 months)',
+  'pf.hoursGiven': '{n} extra hours added.', 'pf.packsTitle': 'Hour packs', 'pf.noPacks': 'No hour pack.', 'pf.courtesy': 'courtesy', 'pf.expires': 'Expires',
+  'pf.capTitle': 'Included translation hours per plan (per month)', 'pf.capHint': '1 hour of 1 language = 1 hour. Empty = no limit. Beyond the limit the church uses packs; without packs it still passes up to the tolerance, then new languages stop opening until next month.',
+  'pf.tolerance': 'Tolerance beyond the limit (%)', 'pf.packTitle': 'Extra hour pack (one-time purchase)', 'pf.packHint': 'Prices in cents. Empty currency = not for sale in that country.',
+  'pf.packHours': 'Hours per pack', 'pf.packMonths': 'Valid (months)',
 };
 
 const es: Record<string, string> = {
@@ -56,6 +61,11 @@ const es: Record<string, string> = {
   'pf.f.hetzner': 'Hetzner (servidor)', 'pf.f.supabase': 'Supabase', 'pf.f.livekit': 'LiveKit', 'pf.f.resend': 'Resend (email)', 'pf.f.cloudflare': 'Cloudflare / dominio', 'pf.f.other': 'Otros',
   'pf.status.trial': 'Gratis', 'pf.status.active': 'Pagando', 'pf.status.past_due': 'Atrasada', 'pf.status.canceled': 'Cancelada',
   'pf.working': 'Un momento…', 'pf.myChurch': 'Abrir el panel de mi iglesia',
+  'pf.hours': 'Horas este mes', 'pf.packs': 'en paquetes', 'pf.giveHours': 'Dar horas extra', 'pf.hoursLabel': 'Horas (válidas 3 meses)',
+  'pf.hoursGiven': '{n} horas extra agregadas.', 'pf.packsTitle': 'Paquetes de horas', 'pf.noPacks': 'Ningún paquete de horas.', 'pf.courtesy': 'cortesía', 'pf.expires': 'Vence',
+  'pf.capTitle': 'Horas de traducción incluidas por plan (por mes)', 'pf.capHint': '1 hora de 1 idioma = 1 hora. Vacío = sin límite. Más allá del límite la iglesia usa paquetes; sin paquetes aún pasa hasta la tolerancia, y después no se abren idiomas nuevos hasta el mes siguiente.',
+  'pf.tolerance': 'Tolerancia más allá del límite (%)', 'pf.packTitle': 'Paquete de horas extra (compra única)', 'pf.packHint': 'Precios en centavos. Moneda vacía = no se vende en ese país.',
+  'pf.packHours': 'Horas por paquete', 'pf.packMonths': 'Validez (meses)',
 };
 
 const pt: Record<string, string> = {
@@ -84,6 +94,11 @@ const pt: Record<string, string> = {
   'pf.f.hetzner': 'Hetzner (servidor)', 'pf.f.supabase': 'Supabase', 'pf.f.livekit': 'LiveKit', 'pf.f.resend': 'Resend (e-mail)', 'pf.f.cloudflare': 'Cloudflare / domínio', 'pf.f.other': 'Outros',
   'pf.status.trial': 'De graça', 'pf.status.active': 'Pagando', 'pf.status.past_due': 'Atrasada', 'pf.status.canceled': 'Cancelada',
   'pf.working': 'Um momento…', 'pf.myChurch': 'Abrir o painel da minha igreja',
+  'pf.hours': 'Horas neste mês', 'pf.packs': 'em pacotes', 'pf.giveHours': 'Dar horas extras', 'pf.hoursLabel': 'Horas (valem 3 meses)',
+  'pf.hoursGiven': '{n} horas extras adicionadas.', 'pf.packsTitle': 'Pacotes de horas', 'pf.noPacks': 'Nenhum pacote de horas.', 'pf.courtesy': 'cortesia', 'pf.expires': 'Vence em',
+  'pf.capTitle': 'Horas de tradução incluídas por plano (por mês)', 'pf.capHint': '1 hora de 1 idioma = 1 hora. Vazio = sem limite. Acima do limite a igreja usa pacotes; sem pacote ainda passa até a tolerância, e depois idiomas novos não abrem até o mês seguinte.',
+  'pf.tolerance': 'Tolerância acima do limite (%)', 'pf.packTitle': 'Pacote de horas extras (compra única)', 'pf.packHint': 'Preços em centavos. Moeda vazia = não vende naquele país.',
+  'pf.packHours': 'Horas por pacote', 'pf.packMonths': 'Validade (meses)',
 };
 
 export const PLATFORM_DICT: Record<Lang, Record<string, string>> = { en, es, pt };

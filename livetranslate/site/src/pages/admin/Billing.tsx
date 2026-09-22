@@ -15,6 +15,8 @@ import { ErrorMsg } from '../auth/ui';
 
 type Payment = { id: number; amount_cents: number; currency: string; paid_at: string; hosted_url: string | null };
 type Prices = Record<string, { usd: number | null; brl: number | null }>;
+type Usage = { plan: string; cap_hours: number | null; used_hours: number; pack_hours_left: number; tolerance: number; blocked: boolean };
+type PackCfg = { hours: number; usd: number | null; brl: number | null; valid_months: number };
 const CONTACT = 'mailto:johnny.oliveira@jcsolutionsus.com?subject=LiveTranslate';
 
 async function authHeaders(): Promise<Record<string, string>> {
@@ -28,6 +30,8 @@ export default function Billing({ church }: { church: Church }) {
   const { refresh } = useAuth();
   const [prices, setPrices] = useState<Prices>({});
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [pack, setPack] = useState<PackCfg | null>(null);
   const [plan, setPlan] = useState<'starter' | 'growth'>(church.plan === 'growth' ? 'growth' : 'starter');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -41,6 +45,8 @@ export default function Billing({ church }: { church: Church }) {
 
   useEffect(() => {
     supabase.rpc('plan_prices').then(({ data }) => setPrices((data ?? {}) as Prices));
+    supabase.rpc('usage_summary', { p_church: church.id }).then(({ data }) => setUsage((data ?? null) as Usage | null));
+    supabase.rpc('hour_pack_config').then(({ data }) => setPack((data ?? null) as PackCfg | null));
     supabase.from('payments').select('id, amount_cents, currency, paid_at, hosted_url').eq('church_id', church.id).order('paid_at', { ascending: false }).limit(24)
       .then(({ data }) => setPayments((data ?? []) as Payment[]));
   }, [church.id]);
@@ -53,10 +59,10 @@ export default function Billing({ church }: { church: Church }) {
     return () => clearInterval(id);
   }, [banner, refresh]);
 
-  async function go(path: 'checkout' | 'portal') {
+  async function go(path: 'checkout' | 'portal', kind: 'subscription' | 'hour_pack' = 'subscription') {
     setErr(null); setBusy(true);
     try {
-      const r = await fetch(`/api/billing/${path}`, { method: 'POST', headers: await authHeaders(), body: JSON.stringify({ slug: church.slug, plan }) });
+      const r = await fetch(`/api/billing/${path}`, { method: 'POST', headers: await authHeaders(), body: JSON.stringify({ slug: church.slug, plan, kind }) });
       const j = await r.json();
       if (!r.ok || !j.url) { setErr(j.code === 'price_pending' ? t('ad.priceSoon') : (j.error || t('a.err.generic'))); setBusy(false); return; }
       window.location.href = j.url;
@@ -86,6 +92,7 @@ export default function Billing({ church }: { church: Church }) {
     <div className="space-y-6">
       {banner === 'success' && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{t('ad.paySuccess')}</p>}
       {banner === 'cancel' && <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{t('ad.payCancel')}</p>}
+      {banner === 'pack' && <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{t('ad.packSuccess')}</p>}
       {church.status === 'past_due' && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{t('ad.pastDue')}</p>}
       <ErrorMsg msg={err} />
 
@@ -162,6 +169,41 @@ export default function Billing({ church }: { church: Church }) {
           )}
         </div>
       </div>
+
+      {/* horas de tradução do mês (teto do plano + pacotes) — HANDOFF §24 */}
+      {usage && (
+        <section className="rounded-2xl border border-black/[0.08] bg-white p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-muted">{t('ad.hoursTitle')}</p>
+              <p className="mt-1 font-serif text-2xl">
+                {usage.used_hours.toFixed(1)} h{usage.cap_hours !== null && <span className="text-base text-muted"> / {usage.cap_hours} h</span>}
+              </p>
+              <p className="mt-1 text-[11px] text-muted">{t('ad.hoursHint')}</p>
+            </div>
+            {usage.pack_hours_left > 0 && <p className="text-sm text-muted">{t('ad.packLeft').replace('{n}', usage.pack_hours_left.toFixed(1))}</p>}
+          </div>
+          {usage.cap_hours !== null && (() => {
+            const pct = Math.min(1, usage.used_hours / usage.cap_hours);
+            const tone = usage.blocked ? 'bg-red-500' : pct >= 0.8 ? 'bg-amber-500' : 'bg-emerald-600';
+            return (
+              <>
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/[0.06]"><div className={`h-full ${tone}`} style={{ width: `${pct * 100}%` }} /></div>
+                {usage.blocked ? <p className="mt-3 text-sm text-red-700">{t('ad.hoursBlocked')}</p>
+                  : pct >= 0.8 ? <p className="mt-3 text-sm text-amber-700">{t('ad.hoursWarn')}</p> : null}
+              </>
+            );
+          })()}
+          {pack && pack[cur as 'usd' | 'brl'] != null && (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button onClick={() => go('checkout', 'hour_pack')} disabled={busy} className="rounded-full border border-ink px-5 py-2.5 text-sm text-ink hover:bg-ink hover:text-white disabled:opacity-60">
+                {t('ad.buyPack').replace('{n}', String(pack.hours)).replace('{price}', money(pack[cur as 'usd' | 'brl'] as number))}
+              </button>
+              <span className="text-[11px] text-muted">{t('ad.packHint').replace('{m}', String(pack.valid_months))}</span>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* pagamentos */}
       <section className="rounded-2xl border border-black/[0.08] bg-white">

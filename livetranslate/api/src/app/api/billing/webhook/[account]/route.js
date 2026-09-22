@@ -79,6 +79,26 @@ async function tratar(account, prov, evento) {
     case 'checkout.session.completed': {
       const igreja = await acharIgreja(obj);
       if (!igreja) throw new Error('igreja não encontrada para a sessão');
+      // pacote de horas (pagamento avulso, HANDOFF §24): crédito + registro do pagamento
+      if (obj.mode === 'payment' && obj.metadata?.kind === 'hour_pack' && obj.payment_status === 'paid') {
+        const horas = Number(obj.metadata.hours) || 10;
+        const meses = Math.max(1, Number(obj.metadata.valid_months) || 3);
+        const expira = new Date(); expira.setMonth(expira.getMonth() + meses);
+        await rest('hour_packs?on_conflict=reference', {
+          method: 'POST', prefer: 'resolution=ignore-duplicates,return=minimal',
+          body: { church_id: igreja.id, hours: horas, source: prov, reference: obj.id, expires_at: expira.toISOString(), note: `Stripe ${obj.id}` },
+        });
+        if ((obj.amount_total ?? 0) > 0) {
+          await rest('payments?on_conflict=invoice_id', {
+            method: 'POST', prefer: 'resolution=ignore-duplicates,return=minimal',
+            body: {
+              church_id: igreja.id, provider: prov, invoice_id: typeof obj.invoice === 'string' ? obj.invoice : obj.id,
+              amount_cents: obj.amount_total, currency: String(obj.currency || '').toLowerCase(), paid_at: new Date().toISOString(),
+            },
+          });
+        }
+        return igreja.id;
+      }
       if (obj.mode === 'subscription' && typeof obj.subscription === 'string') {
         const sub = await stripe(account, 'GET', `subscriptions/${obj.subscription}`);
         await aplicarAssinatura(account, igreja, sub);

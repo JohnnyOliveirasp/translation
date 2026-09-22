@@ -10,6 +10,7 @@ import { appendFileSync, mkdirSync } from 'node:fs';
 import { gerarSermao } from './sermon-pdf.js';
 import { churchLogo } from './tenant.js';
 import { churchIdBySlug, abrirCulto, fecharCulto, somarIdioma, tarifaPorMinuto, dbAdminConfigurado } from './db-admin.js';
+import { podeAbrirIdioma, aposTrecho } from './usage.js';
 
 // Culto sem nenhuma ponte por este tempo = acabou sem "End broadcast" → fecha sozinho no banco.
 const CULTO_ABANDONADO_MS = 30 * 60 * 1000;
@@ -90,6 +91,13 @@ class SessionManager {
       e = null;
     }
     if (!e) {
+      // teto de horas-idioma do plano (HANDOFF §24): sem horas e sem pacote → não abre idioma novo
+      const numericId = await churchIdBySlug(c.slug).catch(() => null);
+      const teto = await podeAbrirIdioma(numericId);
+      if (!teto.ok) {
+        this.logCusto(c, `BLOQUEADO ${lang}: horas do mês esgotadas (usadas=${teto.uso?.used?.toFixed(1)} teto=${teto.uso?.cap} pacote=${teto.uso?.packsLeft?.toFixed(1)})`);
+        throw new Error('monthly translation hours used up — the church needs to add hours or upgrade its plan');
+      }
       const bridge = new TranslationBridge(lang, {
         room: c.room,
         speakerIdentity: `organizador-${c.slug}`,
@@ -193,6 +201,8 @@ class SessionManager {
       const st = e.bridge.stats || {};
       await somarIdioma(serviceId, e.lang, { minutos: min, pico: e.pico, custoUsd: custo, tokensIn: st.tokensIn ?? 0, tokensOut: st.tokensOut ?? 0, tarifa });
       this.logCusto(c, `DB culto #${serviceId} ${e.lang} +${min}min pico=${e.pico} custo≈$${custo.toFixed(3)} (tarifa ${tarifa}/min)`);
+      // teto/pacotes/avisos — sem await: contabilidade nunca segura a ponte
+      churchIdBySlug(c.slug).then(id => aposTrecho(id)).catch(() => {});
     } catch (err) { this.logCusto(c, `DB somar ${e.lang} FALHOU: ${err.message}`); }
   }
 
