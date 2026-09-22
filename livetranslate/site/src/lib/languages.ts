@@ -34,6 +34,8 @@ export const LANGUAGE_CATALOG: { code: string; label: string; flag: string }[] =
 export const SPEAKER_CODES = ['en', 'pt-BR', 'es', 'it', 'fr', 'hi', 'zh-Hans'];
 export const SPEAKER_CATALOG = LANGUAGE_CATALOG.filter(l => SPEAKER_CODES.includes(l.code));
 export const PLAN_LIMITS: Record<string, number> = { starter: 2, growth: 5, congregation: 99 };
+/** Limite de idiomas da igreja: override da plataforma (0012) ou o do plano. */
+export const languageLimit = (c: { plan: string; language_limit?: number | null }) => c.language_limit ?? PLAN_LIMITS[c.plan] ?? 2;
 export const langLabel = (code: string) => LANGUAGE_CATALOG.find(l => l.code === code)?.label ?? code;
 
 /** Frase do cartaz na língua do ouvinte — vai abaixo do QR, para quem não lê inglês. */

@@ -4,7 +4,7 @@ import { supabase, logoUrl, type Church, type Role } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
-import { LANGUAGE_CATALOG, SPEAKER_CATALOG, PLAN_LIMITS, langLabel, posterHeadline } from '../../lib/languages';
+import { LANGUAGE_CATALOG, SPEAKER_CATALOG, languageLimit, langLabel, posterHeadline } from '../../lib/languages';
 import { AuthShell, Field, Select, Button, ErrorMsg, Note } from '../auth/ui';
 import Shell, { PageHead, type NavItem } from './Shell';
 import QrCode, { downloadQrPng } from '../../components/QrCode';
@@ -160,7 +160,7 @@ function Overview({ church }: { church: Church }) {
       </div>
       <div className="rounded-2xl border border-black/[0.08] bg-white p-6 text-sm">
         <dl className="grid grid-cols-2 gap-y-3">
-          <dt className="text-muted">{t('ad.plan')}</dt><dd className="capitalize">{church.plan}</dd>
+          <dt className="text-muted">{t('ad.plan')}</dt><dd className="capitalize">{church.status === 'trial' ? t('ad.planTrial') : church.plan}</dd>
           <dt className="text-muted">{t('ad.status')}</dt><dd>{t('ad.status.' + church.status)}</dd>
           <dt className="text-muted">{t('ad.trialEnds')}</dt><dd>{fmt(church.trial_ends_at)}</dd>
         </dl>
@@ -292,7 +292,7 @@ function LanguagesTab({ church }: { church: Church }) {
   const [enabled, setEnabled] = useState<string[]>([]);
   const [blocked, setBlocked] = useState<string[]>([]);   // bloqueado pela PLATAFORMA (0009) — a igreja não destrava
   const [err, setErr] = useState<string | null>(null);
-  const limit = PLAN_LIMITS[church.plan] ?? 2;
+  const limit = languageLimit(church);   // 0012: override do /platform ou o do plano
 
   useEffect(() => {
     supabase.from('church_languages').select('lang_code, blocked_by_platform').eq('church_id', church.id).eq('enabled', true)
@@ -310,7 +310,8 @@ function LanguagesTab({ church }: { church: Church }) {
       if (error) { setErr(error.message); return; }
       setEnabled(enabled.filter(c => c !== code));
     } else {
-      if (enabled.length >= limit) return;
+      // antes saía calado (parecia bug: "o botão só desliga") — agora explica o limite
+      if (enabled.length >= limit) { setErr(t('ad.langLimit').replace('{n}', String(limit))); return; }
       const { error } = await supabase.from('church_languages').insert({ church_id: church.id, lang_code: code });
       if (error) { setErr(error.message); return; }
       setEnabled([...enabled, code]);
@@ -327,7 +328,7 @@ function LanguagesTab({ church }: { church: Church }) {
           const lock = blocked.includes(l.code);
           const full = !on && enabled.length >= limit;
           return (
-            <button key={l.code} onClick={() => toggle(l.code)} disabled={full || lock} title={lock ? t('ad.langBlocked') : undefined}
+            <button key={l.code} onClick={() => toggle(l.code)} disabled={lock} title={lock ? t('ad.langBlocked') : full ? t('ad.langLimit').replace('{n}', String(limit)) : undefined}
               className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-colors ${lock ? 'border-red-200 bg-red-50 text-red-700' : on ? 'border-ink bg-ink text-white' : 'border-black/10 bg-white hover:border-ink'} disabled:opacity-60`}>
               <span>{l.flag} {l.label}</span>{lock ? <Lock className="h-4 w-4" /> : on && <Check className="h-4 w-4" />}
             </button>

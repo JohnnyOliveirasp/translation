@@ -100,7 +100,7 @@ export default function Billing({ church }: { church: Church }) {
         {/* situação atual */}
         <div className="rounded-2xl border border-black/[0.08] bg-white p-6">
           <p className="text-xs font-medium text-muted">{t('ad.plan')}</p>
-          <p className="mt-1 font-serif text-2xl capitalize">{church.plan}</p>
+          <p className="mt-1 font-serif text-2xl capitalize">{church.status === 'trial' ? t('ad.planTrial') : church.plan}</p>
           <dl className="mt-5 grid grid-cols-2 gap-y-3 text-sm">
             <dt className="text-muted">{t('ad.status')}</dt><dd>{t('ad.status.' + church.status)}</dd>
             <dt className="text-muted">{church.status === 'active' ? (church.cancel_at_period_end ? t('ad.endsOn') : t('ad.renewsOn')) : church.status === 'trial' ? t('ad.trialEnds') : t('ad.accessUntil')}</dt>

@@ -4,7 +4,7 @@ import { supabase, type Church } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
-import { langLabel, LANGUAGE_CATALOG } from '../../lib/languages';
+import { langLabel, LANGUAGE_CATALOG, PLAN_LIMITS, languageLimit } from '../../lib/languages';
 import { ErrorMsg } from '../auth/ui';
 import Shell, { PageHead, type NavItem } from './Shell';
 
@@ -436,28 +436,72 @@ function ChurchDetail({ church, grants, packs, reload }: { church: ChurchRow; gr
     await reload();
   }
 
-  const langs = church.church_languages.filter(l => l.enabled);
+  // 0012: a plataforma liga/desliga qualquer idioma da igreja (mesma tabela que a aba Languages da igreja usa)
+  async function toggleEnable(code: string, on: boolean) {
+    setErr(null);
+    const q = on
+      ? supabase.from('church_languages').delete().eq('church_id', church.id).eq('lang_code', code)
+      : supabase.from('church_languages').insert({ church_id: church.id, lang_code: code });
+    const { error } = await q;
+    if (error) { setErr(error.message); return; }
+    await reload();
+  }
+
+  // 0012: limite de idiomas da igreja — vazio = limite do plano
+  const [limit, setLimit] = useState(church.language_limit == null ? '' : String(church.language_limit));
+  async function saveLimit(e: FormEvent) {
+    e.preventDefault(); setErr(null);
+    const v = limit.trim() === '' ? null : Math.max(0, Math.min(99, Math.round(Number(limit))));
+    const { error } = await supabase.from('churches').update({ language_limit: v }).eq('id', church.id);
+    if (error) { setErr(error.message); return; }
+    await reload();
+  }
+
+  const enabled = church.church_languages.filter(l => l.enabled);
+  const planLimit = PLAN_LIMITS[church.plan] ?? 2;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-4">
+    <div className="grid gap-6 lg:grid-cols-5">
       <ErrorMsg msg={err} />
-      <div>
-        <p className="text-xs font-medium text-muted">{t('pf.plan')}</p>
-        <select value={church.plan} onChange={e => setPlan(e.target.value)} className="mt-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm capitalize">
-          {['starter', 'growth', 'congregation'].map(p => <option key={p} value={p}>{p}</option>)}
-        </select>
+      <div className="lg:col-span-2">
+        <div className="flex flex-wrap items-end gap-4">
+          <label className="block">
+            <span className="block text-xs font-medium text-muted">{t('pf.plan')}</span>
+            <select value={church.plan} onChange={e => setPlan(e.target.value)} className="mt-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm capitalize">
+              {['starter', 'growth', 'congregation'].map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </label>
+          <form onSubmit={saveLimit} className="flex items-end gap-2">
+            <label className="block">
+              <span className="block text-xs font-medium text-muted">{t('pf.langLimit')}</span>
+              <input type="number" min={0} max={99} value={limit} onChange={e => setLimit(e.target.value)} placeholder={String(planLimit)}
+                className="mt-2 w-24 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm" />
+            </label>
+            <button type="submit" className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs hover:border-ink">{t('pf.give')}</button>
+          </form>
+        </div>
+        <p className="mt-1 text-[11px] text-muted">{t('pf.langLimitHint').replace('{n}', String(planLimit))}</p>
 
-        <p className="mt-5 text-xs font-medium text-muted">{t('pf.langs')}</p>
-        <p className="mt-1 text-[11px] text-muted">{t('pf.blockHint')}</p>
+        <p className="mt-5 text-xs font-medium text-muted">{t('pf.langs')} · {enabled.length}/{languageLimit(church)}</p>
+        <p className="mt-1 text-[11px] text-muted">{t('pf.langsHint')}</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {langs.length === 0 && <span className="text-sm text-muted">—</span>}
-          {langs.map(l => (
-            <button key={l.lang_code} onClick={() => toggleBlock(l.lang_code, l.blocked_by_platform)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${l.blocked_by_platform ? 'border-red-200 bg-red-50 text-red-700 line-through' : 'border-black/10 bg-white hover:border-ink'}`}>
-              {l.blocked_by_platform && <Lock className="h-3 w-3" />}
-              {LANGUAGE_CATALOG.find(x => x.code === l.lang_code)?.flag} {langLabel(l.lang_code)}
-            </button>
-          ))}
+          {LANGUAGE_CATALOG.filter(l => l.code !== church.speaker_lang).map(l => {
+            const row = church.church_languages.find(x => x.lang_code === l.code && x.enabled);
+            const on = !!row, blocked = !!row?.blocked_by_platform;
+            return (
+              <span key={l.code} className={`inline-flex items-center overflow-hidden rounded-full border text-xs transition-colors ${blocked ? 'border-red-200 bg-red-50 text-red-700' : on ? 'border-ink bg-ink text-white' : 'border-black/10 bg-white text-muted hover:border-ink'}`}>
+                <button onClick={() => toggleEnable(l.code, on)} className={`px-3 py-1.5 ${blocked ? 'line-through' : ''}`} title={on ? t('pf.turnOff') : t('pf.turnOn')}>
+                  {l.flag} {l.label}
+                </button>
+                {on && (
+                  <button onClick={() => toggleBlock(l.code, blocked)} title={blocked ? t('pf.unblock') : t('pf.block')}
+                    className={`border-l px-2 py-1.5 ${blocked ? 'border-red-200' : 'border-white/20'}`}>
+                    <Lock className="h-3 w-3" />
+                  </button>
+                )}
+              </span>
+            );
+          })}
         </div>
       </div>
 

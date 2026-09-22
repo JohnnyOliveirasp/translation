@@ -64,7 +64,8 @@ async function aplicarAssinatura(account, igreja, sub) {
     current_period_end: iso(item?.current_period_end ?? sub.current_period_end),
     cancel_at_period_end: !!sub.cancel_at_period_end,
   };
-  if (plano && plano !== 'congregation') campos.plan = plano;
+  // 0012: assinatura paga → o limite de idiomas volta a ser o do plano (override do /platform some)
+  if (plano && plano !== 'congregation') { campos.plan = plano; campos.language_limit = null; }
   if (status) campos.status = status;
   // trial da assinatura no Stripe = acesso garantido até lá
   if (sub.status === 'trialing' && sub.trial_end) campos.trial_ends_at = iso(sub.trial_end);

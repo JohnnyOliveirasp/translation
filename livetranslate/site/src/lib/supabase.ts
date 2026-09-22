@@ -17,6 +17,7 @@ export type Church = {
   // 0010: assinatura no Stripe (us | br)
   stripe_account: 'us' | 'br' | null; stripe_subscription_id: string | null;
   current_period_end: string | null; cancel_at_period_end: boolean;
+  language_limit: number | null;   // 0012: override da plataforma (null = limite do plano)
 };
 export type Role = 'admin' | 'operator';
 
