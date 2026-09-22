@@ -1,4 +1,7 @@
 # HANDOFF — LiveTranslate (para o próximo agente)
+
+> **ÚLTIMO ESTADO (22/09/2026, noite):** leia as seções **§22 a §26** — painel da plataforma, Stripe com 2 contas e preços novos, teto de horas + pacotes, deploy por GitHub Actions, /testimonials e Perfil do Google. Pendências que esperam terceiros estão em §23.2, §25 e §26. A memória `livetranslate-handoff` tem o resumo.
+
 *Escrito em 27/08/2026. Leia isto antes de qualquer coisa. Complementa `PLANEJAMENTO-produto.md` (decisões) e a memória do projeto.*
 
 ## 1. Estado em uma frase
