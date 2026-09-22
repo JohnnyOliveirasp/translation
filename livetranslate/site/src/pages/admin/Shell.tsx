@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Menu, X, LogOut, ExternalLink } from 'lucide-react';
 import { type Church } from '../../lib/supabase';
 import ChurchLogo from '../../components/ChurchLogo';
+import { useLang } from '../../i18n';
 
 /**
  * Casca do PAINEL (área logada) — separada da landing: fundo próprio, sem vídeo,
@@ -20,6 +21,7 @@ export default function Shell({
   onSignOut: () => void;
   children: ReactNode;
 }) {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
 
   const nav = (
@@ -65,7 +67,7 @@ export default function Shell({
       <div className="border-t border-black/[0.06] pt-4">
         <p className="truncate px-3 text-[11px] text-muted">{user}</p>
         <button onClick={onSignOut} className="mt-2 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition-colors hover:bg-black/[0.04] hover:text-ink">
-          <LogOut className="h-4 w-4" /> Sign out
+          <LogOut className="h-4 w-4" /> {t('ad.signout')}
         </button>
       </div>
     </div>
@@ -76,7 +78,7 @@ export default function Shell({
       {/* Topo (celular) */}
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-black/[0.06] bg-white/90 px-4 py-3 backdrop-blur md:hidden">
         <img src="/assets/lockup-horizontal-color.svg" alt="LiveTranslate" className="h-6 w-auto" />
-        <button onClick={() => setOpen(true)} aria-label="Menu" className="rounded-lg border border-black/10 p-2">
+        <button onClick={() => setOpen(true)} aria-label={t('a11y.menu')} className="rounded-lg border border-black/10 p-2">
           <Menu className="h-5 w-5" />
         </button>
       </div>
@@ -86,7 +88,7 @@ export default function Shell({
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/30" onClick={() => setOpen(false)} />
           <aside className="absolute left-0 top-0 h-full w-72 bg-white shadow-2xl">
-            <button onClick={() => setOpen(false)} aria-label="Close" className="absolute right-3 top-3 rounded-lg p-2 text-muted hover:bg-black/[0.04]">
+            <button onClick={() => setOpen(false)} aria-label={t('a11y.close')} className="absolute right-3 top-3 rounded-lg p-2 text-muted hover:bg-black/[0.04]">
               <X className="h-5 w-5" />
             </button>
             {aside}

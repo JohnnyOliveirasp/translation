@@ -6,8 +6,18 @@ export const LANGS: Lang[] = ['en', 'es', 'pt'];
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (key: string) => string };
 const LangContext = createContext<Ctx | null>(null);
 
-// Idioma principal do site é INGLÊS (decisão de 26/08). Só muda se o visitante escolher no seletor.
+// Idioma principal do site é INGLÊS (decisão de 26/08). Só muda se o visitante escolher no seletor
+// — ou se vier por um LINK COM IDIOMA (22/09): livetranslate.church/?lang=pt abre em português e
+// guarda a escolha. É o link para compartilhar com igrejas no Brasil (aceita pt, pt-BR, es, en).
 function detectLang(): Lang {
+  try {
+    const q = new URLSearchParams(window.location.search).get('lang')?.toLowerCase();
+    const daUrl = q === 'pt-br' ? 'pt' : (q as Lang | undefined);
+    if (daUrl && LANGS.includes(daUrl)) {
+      try { localStorage.setItem('lt-lang', daUrl); } catch {}
+      return daUrl;
+    }
+  } catch {}
   try {
     const saved = localStorage.getItem('lt-lang') as Lang | null;
     if (saved && LANGS.includes(saved)) return saved;

@@ -22,7 +22,7 @@ const en: Record<string, string> = {
   'a.err.notConfirmed': 'Please confirm your email first.',
 
   'ad.title': 'Dashboard', 'ad.overview': 'Overview', 'ad.settings': 'Settings', 'ad.languages': 'Languages',
-  'ad.team': 'Team', 'ad.services': 'Services', 'ad.signout': 'Sign out',
+  'ad.team': 'Team', 'ad.services': 'Services', 'ad.signout': 'Sign out', 'a11y.language': 'Language', 'a11y.menu': 'Menu', 'a11y.close': 'Close', 'a11y.main': 'Main', 'a11y.mobile': 'Mobile menu', 'a11y.prev': 'Previous', 'a11y.next': 'Next', 'a11y.stars': '5 stars', 'ad.recipientsPh': 'pastor@church.org, office@church.org',
   'ad.noChurch': 'You are not part of any church yet.', 'ad.createChurch': 'Create your church',
   'ad.qr': 'Your church QR code', 'ad.qrHint': 'Print it on seats, screen and bulletin. It opens your church page — with your logo on top.', 'ad.qrLogoOn': 'Opens with your logo', 'ad.qrLogoOff': 'No logo yet — it opens with your church name. Add one under Settings.', 'ad.qrDownload': 'Download PNG', 'ad.qrPreview': 'Preview listener page',
   'ad.listenerLink': 'Listener link', 'ad.listenerHint': 'Put this link (or its QR code) on seats, screen and bulletin.',
@@ -70,7 +70,7 @@ const es: Record<string, string> = {
   'a.err.notConfirmed': 'Confirma tu email primero.',
 
   'ad.title': 'Panel', 'ad.overview': 'Resumen', 'ad.settings': 'Ajustes', 'ad.languages': 'Idiomas',
-  'ad.team': 'Equipo', 'ad.services': 'Cultos', 'ad.signout': 'Salir',
+  'ad.team': 'Equipo', 'ad.services': 'Cultos', 'ad.signout': 'Salir', 'a11y.language': 'Idioma', 'a11y.menu': 'Menú', 'a11y.close': 'Cerrar', 'a11y.main': 'Principal', 'a11y.mobile': 'Menú móvil', 'a11y.prev': 'Anterior', 'a11y.next': 'Siguiente', 'a11y.stars': '5 estrellas', 'ad.recipientsPh': 'pastor@iglesia.org, oficina@iglesia.org',
   'ad.noChurch': 'Todavía no perteneces a ninguna iglesia.', 'ad.createChurch': 'Crear tu iglesia',
   'ad.qr': 'Código QR de tu iglesia', 'ad.qrHint': 'Imprímelo en los asientos, la pantalla y el boletín. Abre la página de tu iglesia — con tu logo arriba.', 'ad.qrLogoOn': 'Abre con tu logo', 'ad.qrLogoOff': 'Aún sin logo — abre con el nombre de la iglesia. Súbelo en Ajustes.', 'ad.qrDownload': 'Descargar PNG', 'ad.qrPreview': 'Ver página del oyente',
   'ad.listenerLink': 'Enlace para oyentes', 'ad.listenerHint': 'Pon este enlace (o su código QR) en los asientos, la pantalla y el boletín.',
@@ -118,7 +118,7 @@ const pt: Record<string, string> = {
   'a.err.notConfirmed': 'Confirme seu e-mail primeiro.',
 
   'ad.title': 'Painel', 'ad.overview': 'Visão geral', 'ad.settings': 'Configurações', 'ad.languages': 'Idiomas',
-  'ad.team': 'Equipe', 'ad.services': 'Cultos', 'ad.signout': 'Sair',
+  'ad.team': 'Equipe', 'ad.services': 'Cultos', 'ad.signout': 'Sair', 'a11y.language': 'Idioma', 'a11y.menu': 'Menu', 'a11y.close': 'Fechar', 'a11y.main': 'Principal', 'a11y.mobile': 'Menu do celular', 'a11y.prev': 'Anterior', 'a11y.next': 'Próximo', 'a11y.stars': '5 estrelas', 'ad.recipientsPh': 'pastor@igreja.org, secretaria@igreja.org',
   'ad.noChurch': 'Você ainda não faz parte de nenhuma igreja.', 'ad.createChurch': 'Criar sua igreja',
   'ad.qr': 'QR code da sua igreja', 'ad.qrHint': 'Imprima nos bancos, no telão e no boletim. Ele abre a página da sua igreja — com o seu logo no topo.', 'ad.qrLogoOn': 'Abre com o seu logo', 'ad.qrLogoOff': 'Sem logo ainda — abre com o nome da igreja. Envie um em Configurações.', 'ad.qrDownload': 'Baixar PNG', 'ad.qrPreview': 'Ver página do ouvinte',
   'ad.listenerLink': 'Link dos ouvintes', 'ad.listenerHint': 'Coloque este link (ou o QR dele) nos bancos, no telão e no boletim.',

@@ -188,5 +188,6 @@ export const AVISO_LOUVOR: Record<string, { titulo: string; texto: string }> = {
   'ar': { titulo: '🎵 وقت التسبيح', texto: 'ستُستأنف الترجمة تلقائيًا عند بدء العظة. يمكنك إبقاء سماعاتك.' },
   'hi': { titulo: '🎵 आराधना का समय', texto: 'प्रवचन शुरू होते ही अनुवाद अपने आप फिर से शुरू हो जाएगा।' },
   'vi': { titulo: '🎵 Giờ thờ phượng', texto: 'Bản dịch sẽ tự động tiếp tục khi bài giảng bắt đầu.' },
-  'tl': { titulo: '🎵 Oras ng pagsamba', texto: 'Awtomatikong babalik ang pagsasalin kapag nagsimula ang pangaral.' },
+  'nl': { titulo: '🎵 Aanbidding', texto: 'De vertaling gaat automatisch verder zodra de preek begint. U kunt uw koptelefoon ophouden.' },
+  'fil': { titulo: '🎵 Oras ng pagsamba', texto: 'Awtomatikong babalik ang pagsasalin kapag nagsimula ang pangaral.' },
 };

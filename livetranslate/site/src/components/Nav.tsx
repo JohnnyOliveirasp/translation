@@ -36,7 +36,7 @@ export default function Nav() {
           <img src="/assets/lockup-horizontal-color.svg" alt="LiveTranslate" className="h-7 w-auto sm:h-8" />
         </a>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
+        <nav className="hidden items-center gap-8 md:flex" aria-label={t('a11y.main')}>
           {ITEMS.map((it, i) => (
             <a
               key={it.key}
@@ -50,7 +50,7 @@ export default function Nav() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden rounded-full border border-black/10 p-[2px] sm:flex" role="group" aria-label="Language">
+          <div className="hidden rounded-full border border-black/10 p-[2px] sm:flex" role="group" aria-label={t('a11y.language')}>
             {LANGS.map(l => (
               <button
                 key={l}
@@ -80,7 +80,7 @@ export default function Nav() {
 
           <button
             onClick={() => setOpen(o => !o)}
-            aria-label="Menu"
+            aria-label={t('a11y.menu')}
             aria-expanded={open}
             className="rounded-full border border-black/10 p-2 md:hidden"
           >
@@ -92,7 +92,7 @@ export default function Nav() {
       {/* Menu do celular */}
       {open && (
         <div className="border-t border-black/[0.06] bg-white px-5 pb-6 pt-2 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.25)] md:hidden">
-          <nav className="flex flex-col" aria-label="Mobile">
+          <nav className="flex flex-col" aria-label={t('a11y.mobile')}>
             {ITEMS.map(it => (
               <a key={it.key} href={it.href} onClick={() => setOpen(false)} className="border-b border-black/[0.04] py-3 text-sm text-ink">
                 {t(it.key)}
@@ -100,7 +100,7 @@ export default function Nav() {
             ))}
           </nav>
           <div className="mt-5 flex items-center justify-between gap-3">
-            <div className="flex rounded-full border border-black/10 p-[2px]" role="group" aria-label="Language">
+            <div className="flex rounded-full border border-black/10 p-[2px]" role="group" aria-label={t('a11y.language')}>
               {LANGS.map(l => (
                 <button
                   key={l}

@@ -1,65 +1,48 @@
 /**
  * Páginas legais /privacy e /terms — exigidas pelo Google OAuth (a publicação do app
- * pede a URL da política de privacidade) e pendência antiga do produto. Texto padrão
- * de SaaS em inglês; o Johnny revisa/ajusta os dados legais quando tiver.
+ * pede a URL da política de privacidade) e pendência antiga do produto.
+ * 22/09: nos 3 idiomas do site (texto em i18n/legal.ts) e com seletor próprio — quem
+ * chega aqui por um link não passa pela barra da landing. O Johnny ainda revisa os
+ * dados legais.
  */
-const ATUALIZADO = 'September 7, 2026';
+import { LANGS, useLang } from '../i18n';
+import { LEGAL, type Doc } from '../i18n/legal';
+
+const ATUALIZADO = '2026-09-22';
 const CONTATO = 'johnny.oliveira@jcsolutionsus.com';
 
-function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+function Shell({ doc }: { doc: 'privacidade' | 'termos' }) {
+  const { lang, setLang, t } = useLang();
+  const L = LEGAL[lang];
+  const d: Doc = L[doc];
+  const data = new Date(`${ATUALIZADO}T12:00:00`).toLocaleDateString(lang === 'pt' ? 'pt-BR' : lang, { dateStyle: 'long' });
   return (
     <div className="relative z-10 mx-auto max-w-3xl px-6 py-16">
-      <a href="/" aria-label="LiveTranslate"><img src="/assets/lockup-horizontal-color.svg" alt="LiveTranslate" className="h-8 w-auto" /></a>
-      <h1 className="display mt-10 text-4xl sm:text-5xl">{title}</h1>
-      <p className="mt-2 text-sm text-muted">Last updated: {ATUALIZADO}</p>
-      <div className="prose-legal mt-8 space-y-6 text-[15px] leading-relaxed text-ink/90">{children}</div>
-      <p className="mt-12 text-sm text-muted">Questions? Contact us at <a className="underline" href={`mailto:${CONTATO}`}>{CONTATO}</a>.</p>
+      <div className="flex items-center justify-between gap-4">
+        <a href="/" aria-label="LiveTranslate"><img src="/assets/lockup-horizontal-color.svg" alt="LiveTranslate" className="h-8 w-auto" /></a>
+        <div className="flex gap-1 rounded-full border border-black/10 p-1 text-xs" role="group" aria-label={t('a11y.language')}>
+          {LANGS.map(l => (
+            <button key={l} onClick={() => setLang(l)} aria-pressed={l === lang}
+              className={`rounded-full px-3 py-1 uppercase ${l === lang ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+      <h1 className="display mt-10 text-4xl sm:text-5xl">{d.titulo}</h1>
+      <p className="mt-2 text-sm text-muted">{L.atualizado} {data}</p>
+      <div className="prose-legal mt-8 space-y-6 text-[15px] leading-relaxed text-ink/90">
+        {d.blocos.map((b, i) => (
+          <div key={i} className="space-y-6">
+            {b.h && <h2 className="pt-2 font-serif text-2xl">{b.h}</h2>}
+            <p>{b.b && <b>{b.b} </b>}{b.p}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-12 text-sm text-muted">{L.duvidas} <a className="underline" href={`mailto:${CONTATO}`}>{CONTATO}</a>.</p>
     </div>
   );
 }
 
-const H = ({ children }: { children: React.ReactNode }) => <h2 className="pt-2 font-serif text-2xl">{children}</h2>;
-
-export function Privacy() {
-  return (
-    <Shell title="Privacy Policy">
-      <p>LiveTranslate (“we”, “us”) provides live translation for churches and events at livetranslate.church. This policy explains what we collect and how we use it.</p>
-      <H>What we collect</H>
-      <p><b>Account data.</b> When a church creates an account we collect a name, email address and password — or, if you sign in with Google, the name and email address Google shares with us. We never see your Google password.</p>
-      <p><b>Church data.</b> Church name, public page address, logo, languages offered, and team member emails invited by the church admin.</p>
-      <p><b>Listener emails (optional).</b> Listeners may opt in with their email to receive the sermon transcript. We use it only for that purpose, and only for the church the listener subscribed to.</p>
-      <p><b>Service audio and transcripts.</b> During a live service, the speaker’s audio is processed in real time to produce translated audio and captions, and transcripts are stored so the church can download sermon PDFs. Audio is not kept after processing; transcripts belong to the church.</p>
-      <p><b>Technical data.</b> Basic logs (timestamps, connection counts, errors) needed to operate and improve the service. We do not sell data or run third-party advertising.</p>
-      <H>How we use it</H>
-      <p>To provide live translation, generate sermon transcripts, let churches manage their team, send service-related email (such as the sermon PDF), and keep the service secure and billed correctly.</p>
-      <H>Who we share it with</H>
-      <p>Only the processors needed to run the service: hosting, database and authentication (Supabase), real-time audio (LiveKit), speech translation (Google), and payments when applicable (Stripe). Each receives only what it needs.</p>
-      <H>Your choices</H>
-      <p>Church admins can edit or delete their church data in the dashboard. Listeners can unsubscribe from sermon emails at any time. To delete your account or request your data, email us.</p>
-      <H>Security & retention</H>
-      <p>Data is stored with encryption in transit and at rest by our providers. We keep data while the account is active; deleted accounts are removed within a reasonable period, except where the law requires otherwise.</p>
-      <H>Changes</H>
-      <p>If this policy changes materially, we will note it here with a new date.</p>
-    </Shell>
-  );
-}
-
-export function Terms() {
-  return (
-    <Shell title="Terms of Service">
-      <p>By using LiveTranslate (livetranslate.church) you agree to these terms.</p>
-      <H>The service</H>
-      <p>LiveTranslate provides real-time translation of live speech for churches and events, plus automatic transcripts. Translations are generated by machine and may contain inaccuracies; they are an aid, not a certified translation.</p>
-      <H>Accounts & subscriptions</H>
-      <p>The church admin is responsible for the account, its team members and its content. Paid plans renew monthly and can be cancelled anytime from the dashboard; the trial period is free and requires no card.</p>
-      <H>Acceptable use</H>
-      <p>Use the service only for lawful purposes and content you have the right to broadcast. We may suspend accounts that abuse the platform or put its operation at risk.</p>
-      <H>Content</H>
-      <p>Your sermons, transcripts and logo remain yours. You grant us only the license needed to process and deliver them through the service.</p>
-      <H>Liability</H>
-      <p>The service is provided “as is”. To the extent permitted by law, we are not liable for indirect damages or for inaccuracies in machine translation.</p>
-      <H>Changes</H>
-      <p>We may update these terms; continued use after an update means acceptance. Material changes will be noted here with a new date.</p>
-    </Shell>
-  );
-}
+export function Privacy() { return <Shell doc="privacidade" />; }
+export function Terms() { return <Shell doc="termos" />; }

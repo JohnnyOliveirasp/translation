@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useLang } from '../i18n';
-import { TESTIMONIALS } from '../content/testimonials';
+import { TESTIMONIALS, txt } from '../content/testimonials';
 import { WordsPullUpMultiStyle, Rise } from './TextEffects';
 
 const AUTOPLAY_MS = 6500;
 
 /** Carrossel de depoimentos: um card por vez, estrelas, avatar, nome/cargo/igreja, setas, bolinhas e autoplay. */
 export default function Testimonials() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [i, setI] = useState(0);
   const [dir, setDir] = useState(1);
   const n = TESTIMONIALS.length;
@@ -33,10 +33,10 @@ export default function Testimonials() {
 
         <Rise>
           <div className="relative">
-            <button onClick={() => go(-1)} aria-label="Previous" className="absolute left-0 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-2 shadow-sm transition hover:bg-black hover:text-white md:-translate-x-full">
+            <button onClick={() => go(-1)} aria-label={t('a11y.prev')} className="absolute left-0 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-2 shadow-sm transition hover:bg-black hover:text-white md:-translate-x-full">
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <button onClick={() => go(1)} aria-label="Next" className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-1/2 rounded-full border border-black/10 bg-white p-2 shadow-sm transition hover:bg-black hover:text-white md:translate-x-full">
+            <button onClick={() => go(1)} aria-label={t('a11y.next')} className="absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-1/2 rounded-full border border-black/10 bg-white p-2 shadow-sm transition hover:bg-black hover:text-white md:translate-x-full">
               <ChevronRight className="h-5 w-5" />
             </button>
 
@@ -64,17 +64,17 @@ export default function Testimonials() {
                     </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="mb-4 flex justify-center gap-1 md:justify-start" aria-label="5 stars">
+                    <div className="mb-4 flex justify-center gap-1 md:justify-start" aria-label={t('a11y.stars')}>
                       {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-amber-400 text-amber-400" />)}
                     </div>
-                    <blockquote className="font-serif text-xl leading-snug text-ink sm:text-2xl md:text-[1.7rem]">“{it.quote}”</blockquote>
+                    <blockquote className="font-serif text-xl leading-snug text-ink sm:text-2xl md:text-[1.7rem]">“{txt(it.quote, lang)}”</blockquote>
                     <figcaption className="mt-6 flex flex-col items-center gap-2 md:flex-row md:items-center md:gap-3">
                       <div className="text-sm">
                         <div className="font-medium text-ink">{it.name}</div>
-                        <div className="text-muted">{it.role} · {it.org}</div>
+                        <div className="text-muted">{txt(it.role, lang)} · {it.org}</div>
                       </div>
                       {it.badge && (
-                        <span className="rounded-full bg-black/[0.06] px-3 py-1 text-xs text-ink md:ml-auto">{it.badge}</span>
+                        <span className="rounded-full bg-black/[0.06] px-3 py-1 text-xs text-ink md:ml-auto">{txt(it.badge, lang)}</span>
                       )}
                     </figcaption>
                   </div>

@@ -323,7 +323,7 @@ function Settings({ church }: { church: Church }) {
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
           {LANGUAGE_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
         </Select>
-        <Field label={t('ad.recipients')} hint={t('ad.recipientsHint')} value={recipients} onChange={e => setRecipients(e.target.value)} placeholder="pastor@church.org, office@church.org" />
+        <Field label={t('ad.recipients')} hint={t('ad.recipientsHint')} value={recipients} onChange={e => setRecipients(e.target.value)} placeholder={t('ad.recipientsPh')} />
         <ErrorMsg msg={err} />
         {msg && <Note>{msg}</Note>}
         <Button type="submit" loading={busy}>{busy ? t('a.working') : t('ad.save')}</Button>
