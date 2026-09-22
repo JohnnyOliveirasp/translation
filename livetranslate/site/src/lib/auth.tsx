@@ -24,7 +24,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadProfile = useCallback(async (s: Session | null) => {
     if (!s) { setMemberships([]); setIsPlatformAdmin(false); return; }
     const [m, p] = await Promise.all([
-      supabase.from('memberships').select('church_id, role, churches(*)').order('church_id'),
+      // SÓ as do usuário: a plataforma enxerga todas as memberships pela RLS e, sem o filtro, o Johnny
+      // "herdava" a igreja de outro admin no /admin (visto em 22/09 ao abrir uma igreja pelo /platform).
+      supabase.from('memberships').select('church_id, role, churches(*)').eq('user_id', s.user.id).order('church_id'),
       supabase.from('platform_admins').select('user_id').maybeSingle(),
     ]);
     setMemberships(((m.data ?? []) as unknown) as Membership[]);
