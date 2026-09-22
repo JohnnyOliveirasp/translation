@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { CalendarDays, Check, Copy, CreditCard, Download, FileDown, Loader2, ExternalLink, LayoutDashboard, Languages as Languages2, Radio, Settings2, Trash2, Users } from 'lucide-react';
+import { CalendarDays, Check, ChevronDown, Copy, CreditCard, Download, FileDown, Loader2, ExternalLink, LayoutDashboard, Languages as Languages2, Radio, Settings2, Trash2, Users } from 'lucide-react';
 import { supabase, logoUrl, type Church, type Role } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
@@ -496,12 +496,19 @@ function Team({ church, userId }: { church: Church; userId: string }) {
 }
 
 /* ── Sermões em PDF (gerados no fim de cada culto) ────────────────────────── */
+// MÊS → CULTO (uma linha por dia) → um botão por idioma, com filtros de mês, data e idioma
+// que só oferecem o que existe (pedido do Johnny em 22/09: "para não ficar solto").
 type SermonRow = { file: string; date: string; lang: string; bytes: number };
 
 function Sermons({ church }: { church: Church }) {
   const { t, lang } = useLang();
   const [rows, setRows] = useState<SermonRow[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [baixando, setBaixando] = useState<string | null>(null);
+  const [fMes, setFMes] = useState('');
+  const [fData, setFData] = useState('');
+  const [fLang, setFLang] = useState('');
+  const [abertos, setAbertos] = useState<Record<string, boolean>>({});
 
   async function auth(): Promise<Record<string, string>> {
     const { data } = await supabase.auth.getSession();
@@ -521,6 +528,7 @@ function Sermons({ church }: { church: Church }) {
 
   async function baixar(row: SermonRow) {
     setErro(null);
+    setBaixando(row.file);
     try {
       const r = await fetch(`/api/sermons?slug=${encodeURIComponent(church.slug)}&file=${encodeURIComponent(row.file)}`, { headers: await auth() });
       if (!r.ok) throw new Error(String(r.status));
@@ -531,31 +539,119 @@ function Sermons({ church }: { church: Church }) {
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(href), 4000);
     } catch (e) { setErro(String(e)); }
+    finally { setBaixando(null); }
   }
 
   const loc = lang === 'pt' ? 'pt-BR' : lang;
   if (rows === null) return <Loader2 className="h-4 w-4 animate-spin text-muted" />;
   if (!rows.length) return <p className="text-sm text-muted">{t('ad.noSermons')}</p>;
 
+  const nomeLang = (c: string) => (c === 'original' ? t('ad.sermonOriginal') : langLabel(c));
+  const maiuscula = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
+  const mesDe = (d: string) => d.slice(0, 7);
+  const rotuloMes = (m: string) => maiuscula(new Date(`${m}-15T12:00:00`).toLocaleDateString(loc, { month: 'long', year: 'numeric' }));
+  const rotuloDia = (d: string) => maiuscula(new Date(`${d}T12:00:00`).toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' }));
+  // original primeiro; depois pelo nome do idioma
+  const ordemLang = (a: string, b: string) => (a === 'original' ? -1 : b === 'original' ? 1 : nomeLang(a).localeCompare(nomeLang(b), loc));
+
+  // opções dos filtros: só o que existe (a data respeita o mês escolhido)
+  const meses = [...new Set(rows.map(r => mesDe(r.date)))].sort().reverse();
+  const datas = [...new Set(rows.filter(r => !fMes || mesDe(r.date) === fMes).map(r => r.date))].sort().reverse();
+  const idiomas = [...new Set(rows.map(r => r.lang))].sort(ordemLang);
+
+  const visiveis = rows.filter(r => (!fMes || mesDe(r.date) === fMes) && (!fData || r.date === fData) && (!fLang || r.lang === fLang));
+  const grupos = new Map<string, Map<string, SermonRow[]>>();   // mês → dia → PDFs
+  for (const r of visiveis) {
+    const m = mesDe(r.date);
+    if (!grupos.has(m)) grupos.set(m, new Map());
+    const dias = grupos.get(m)!;
+    if (!dias.has(r.date)) dias.set(r.date, []);
+    dias.get(r.date)!.push(r);
+  }
+  const mesesVis = [...grupos.keys()].sort().reverse();
+  const filtrando = !!(fMes || fData || fLang);
+  // aberto: o mês mais recente, ou todos quando há filtro; o clique manda
+  const aberto = (m: string, i: number) => abertos[m] ?? (filtrando || i === 0);
+
   return (
     <div>
       <p className="mb-4 text-sm text-muted">{t('ad.sermonsHint')}</p>
+
+      <div className="mb-3 grid gap-3 sm:grid-cols-3">
+        <Select label={t('ad.fMonth')} value={fMes} onChange={e => { setFMes(e.target.value); setFData(''); }}>
+          <option value="">{t('ad.allMonths')}</option>
+          {meses.map(m => <option key={m} value={m}>{rotuloMes(m)}</option>)}
+        </Select>
+        <Select label={t('ad.fDate')} value={fData} onChange={e => setFData(e.target.value)}>
+          <option value="">{t('ad.allDates')}</option>
+          {datas.map(d => <option key={d} value={d}>{rotuloDia(d)}</option>)}
+        </Select>
+        <Select label={t('ad.fLang')} value={fLang} onChange={e => setFLang(e.target.value)}>
+          <option value="">{t('ad.allLangs')}</option>
+          {idiomas.map(c => <option key={c} value={c}>{nomeLang(c)}</option>)}
+        </Select>
+      </div>
+      <div className="mb-5 h-5">
+        {filtrando && (
+          <button onClick={() => { setFMes(''); setFData(''); setFLang(''); }} className="text-xs text-muted underline underline-offset-2 hover:text-ink">
+            {t('ad.clearFilters')}
+          </button>
+        )}
+      </div>
+
       <ErrorMsg msg={erro} />
-      <ul className="divide-y divide-black/[0.06] rounded-2xl border border-black/[0.08] bg-white">
-        {rows.map(r => (
-          <li key={r.file} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
-            <div>
-              <div>{new Date(r.date + 'T12:00:00').toLocaleDateString(loc, { dateStyle: 'long' })}</div>
-              <div className="text-xs text-muted">
-                {r.lang === 'original' ? t('ad.sermonOriginal') : langLabel(r.lang)} · {Math.round(r.bytes / 1024)} KB
-              </div>
-            </div>
-            <button onClick={() => baixar(r)} className="inline-flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-xs hover:bg-black/[0.04]">
-              <FileDown className="h-3.5 w-3.5" /> PDF
-            </button>
-          </li>
-        ))}
-      </ul>
+
+      {!mesesVis.length ? <p className="text-sm text-muted">{t('ad.noMatch')}</p> : (
+        <div className="space-y-4">
+          {mesesVis.map((m, i) => {
+            const dias = grupos.get(m)!;
+            const chaves = [...dias.keys()].sort().reverse();
+            const abre = aberto(m, i);
+            return (
+              <section key={m} className="overflow-hidden rounded-2xl border border-black/[0.08] bg-white">
+                <button onClick={() => setAbertos({ ...abertos, [m]: !abre })} aria-expanded={abre}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-black/[0.02]">
+                  <span className="font-serif text-xl">{rotuloMes(m)}</span>
+                  <span className="flex items-center gap-2 text-xs text-muted">
+                    {chaves.length === 1 ? t('ad.oneService') : t('ad.nServices').replace('{n}', String(chaves.length))}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${abre ? 'rotate-180' : ''}`} />
+                  </span>
+                </button>
+                {abre && (
+                  <table className="w-full table-fixed text-sm">
+                    <thead className="border-t border-black/[0.06] text-left text-xs text-muted">
+                      <tr>
+                        {/* largura fixa: a coluna de PDFs fica alinhada entre os meses */}
+                        <th className="w-[42%] px-4 py-2 font-medium sm:w-[34%]">{t('ad.colService')}</th>
+                        <th className="px-4 py-2 font-medium">{t('ad.colPdfs')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black/[0.06]">
+                      {chaves.map(d => (
+                        <tr key={d} className="align-top">
+                          <td className="px-4 py-3">{rotuloDia(d)}</td>
+                          <td className="px-4 py-2.5">
+                            <div className="flex flex-wrap gap-2">
+                              {[...dias.get(d)!].sort((a, b) => ordemLang(a.lang, b.lang)).map(r => (
+                                <button key={r.file} onClick={() => baixar(r)} disabled={baixando === r.file}
+                                  title={`${Math.round(r.bytes / 1024)} KB`}
+                                  className="inline-flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-xs hover:bg-black/[0.04] disabled:opacity-50">
+                                  {baixando === r.file ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
+                                  {nomeLang(r.lang)}
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
