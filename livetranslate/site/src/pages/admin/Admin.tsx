@@ -312,7 +312,8 @@ function LanguagesTab({ church }: { church: Church }) {
     } else {
       // antes saía calado (parecia bug: "o botão só desliga") — agora explica o limite
       if (enabled.length >= limit) { setErr(t('ad.langLimit').replace('{n}', String(limit))); return; }
-      const { error } = await supabase.from('church_languages').insert({ church_id: church.id, lang_code: code });
+      // upsert: a linha pode existir desligada (sobra de versão antiga) — insert dava 'duplicate key'
+      const { error } = await supabase.from('church_languages').upsert({ church_id: church.id, lang_code: code, enabled: true }, { onConflict: 'church_id,lang_code' });
       if (error) { setErr(error.message); return; }
       setEnabled([...enabled, code]);
     }

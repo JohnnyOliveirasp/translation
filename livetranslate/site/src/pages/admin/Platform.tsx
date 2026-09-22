@@ -441,7 +441,7 @@ function ChurchDetail({ church, grants, packs, reload }: { church: ChurchRow; gr
     setErr(null);
     const q = on
       ? supabase.from('church_languages').delete().eq('church_id', church.id).eq('lang_code', code)
-      : supabase.from('church_languages').insert({ church_id: church.id, lang_code: code });
+      : supabase.from('church_languages').upsert({ church_id: church.id, lang_code: code, enabled: true }, { onConflict: 'church_id,lang_code' });   // a linha pode existir desligada
     const { error } = await q;
     if (error) { setErr(error.message); return; }
     await reload();
