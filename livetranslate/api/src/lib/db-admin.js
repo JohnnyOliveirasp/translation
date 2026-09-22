@@ -12,7 +12,7 @@ const SRK = process.env.SUPABASE_SERVICE_ROLE_KEY;
 export const dbAdminConfigurado = () => !!(SUPA_URL && SRK);
 let avisou = false;
 
-async function rest(path, { method = 'GET', body, prefer } = {}) {
+export async function rest(path, { method = 'GET', body, prefer } = {}) {
   if (!dbAdminConfigurado()) {
     if (!avisou) { console.warn('[db-admin] SUPABASE_SERVICE_ROLE_KEY ausente — cultos e custo NÃO serão gravados no banco'); avisou = true; }
     return null;
@@ -41,6 +41,23 @@ export async function churchIdBySlug(slug) {
   const id = rows?.[0]?.id ?? null;
   if (id) idPorSlug.set(s, id);
   return id;
+}
+
+/** Linha completa da igreja (campos de cobrança inclusos) — só para as rotas de billing. */
+export async function igrejaPorSlug(slug) {
+  const rows = await rest(`churches?select=id,slug,name,country,billing_currency,plan,status,trial_ends_at,stripe_account,stripe_customer_id,stripe_subscription_id,current_period_end,cancel_at_period_end&slug=eq.${encodeURIComponent(String(slug || '').toLowerCase())}&limit=1`);
+  return rows?.[0] ?? null;
+}
+export async function igrejaPorId(id) {
+  const rows = await rest(`churches?select=id,slug,name,country,plan,status,trial_ends_at,stripe_account,stripe_customer_id,stripe_subscription_id&id=eq.${Number(id)}&limit=1`);
+  return rows?.[0] ?? null;
+}
+export async function igrejaPorCampo(campo, valor) {
+  const rows = await rest(`churches?select=id,slug,name,plan,status,stripe_account,stripe_customer_id,stripe_subscription_id&${campo}=eq.${encodeURIComponent(valor)}&limit=1`);
+  return rows?.[0] ?? null;
+}
+export async function atualizarIgreja(id, campos) {
+  await rest(`churches?id=eq.${Number(id)}`, { method: 'PATCH', body: campos, prefer: 'return=minimal' });
 }
 
 // ── culto (services) ──────────────────────────────────────────────────────────────────

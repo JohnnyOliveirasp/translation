@@ -35,6 +35,7 @@ type Settings = {
   plan_prices: Record<string, { usd: number | null; brl: number | null }>;
 };
 type Grant = { id: number; church_id: number; days: number; until_at: string; note: string | null; created_at: string };
+type Payment = { id: number; church_id: number; provider: string; amount_cents: number; currency: 'usd' | 'brl'; paid_at: string };
 
 const GOOGLE_SPEND = 'https://aistudio.google.com/app/spend';
 const FIXED_KEYS = ['hetzner', 'supabase', 'livekit', 'resend', 'cloudflare', 'other'] as const;
@@ -59,6 +60,7 @@ function usePlatformData() {
   const [churches, setChurches] = useState<ChurchRow[]>([]);
   const [services, setServices] = useState<ServiceRow[]>([]);
   const [grants, setGrants] = useState<Grant[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -66,17 +68,19 @@ function usePlatformData() {
   const reload = useCallback(async () => {
     setErr(null);
     const since = new Date(); since.setMonth(since.getMonth() - 12); since.setDate(1);
-    const [c, s, g, st] = await Promise.all([
+    const [c, s, g, p, st] = await Promise.all([
       supabase.from('churches').select('*, memberships(role, profiles(email, full_name)), church_languages(lang_code, enabled, blocked_by_platform)').order('created_at', { ascending: false }),
       supabase.from('services').select('id, church_id, started_at, ended_at, service_languages(lang_code, minutes, peak_listeners), service_costs(lang_code, cost_usd)').gte('started_at', since.toISOString()).order('started_at', { ascending: false }),
       supabase.from('platform_grants').select('id, church_id, days, until_at, note, created_at').order('created_at', { ascending: false }).limit(200),
+      supabase.from('payments').select('id, church_id, provider, amount_cents, currency, paid_at').gte('paid_at', since.toISOString()).order('paid_at', { ascending: false }),
       supabase.from('platform_settings').select('key, value'),
     ]);
-    const e = c.error ?? s.error ?? g.error ?? st.error;
+    const e = c.error ?? s.error ?? g.error ?? p.error ?? st.error;
     if (e) { setErr(e.message); setLoading(false); return; }
     setChurches((c.data ?? []) as unknown as ChurchRow[]);
     setServices((s.data ?? []) as unknown as ServiceRow[]);
     setGrants((g.data ?? []) as Grant[]);
+    setPayments((p.data ?? []) as Payment[]);
     const merged: Settings = { ...DEFAULTS };
     for (const row of st.data ?? []) {
       const r = row as { key: string; value: unknown };
@@ -90,7 +94,7 @@ function usePlatformData() {
   }, []);
 
   useEffect(() => { void reload(); }, [reload]);
-  return { churches, services, grants, settings, loading, err, reload };
+  return { churches, services, grants, payments, settings, loading, err, reload };
 }
 
 export default function Platform() {
@@ -152,7 +156,7 @@ function useFmt() {
 /* ── Visão geral ─────────────────────────────────────────────────────────── */
 type Data = ReturnType<typeof usePlatformData>;
 
-function Overview({ churches, services, settings }: Data) {
+function Overview({ churches, services, payments, settings }: Data) {
   const { t } = useLang();
   const f = useFmt();
   const months = useMemo(() => lastMonths(12), []);
@@ -161,7 +165,12 @@ function Overview({ churches, services, settings }: Data) {
   const fixedMonth = sum(Object.values(settings.fixed_costs_usd_month).map(Number));
   const inMonth = services.filter(s => monthKey(s.started_at) === month);
   const gemini = sum(inMonth.map(serviceCost));
-  const moneyIn = 0;   // Stripe ainda não ligado (HANDOFF §22, item 3)
+  // Entrou: pagamentos do Stripe (US em USD + BR em BRL convertido pela cotação das configurações)
+  const emUsd = (p: Payment) => p.currency === 'brl' ? p.amount_cents / 100 / (settings.usd_brl || 5.5) : p.amount_cents / 100;
+  const paysMonth = payments.filter(p => monthKey(p.paid_at) === month);
+  const moneyIn = sum(paysMonth.map(emUsd));
+  const inUsd = sum(paysMonth.filter(p => p.currency === 'usd').map(p => p.amount_cents / 100));
+  const inBrl = sum(paysMonth.filter(p => p.currency === 'brl').map(p => p.amount_cents / 100));
   const out = gemini + fixedMonth;
 
   const paying = churches.filter(c => c.status === 'active').length;
@@ -171,7 +180,7 @@ function Overview({ churches, services, settings }: Data) {
   // últimos 6 meses para o gráfico (mais antigo → mais novo)
   const chart = lastMonths(6).reverse().map(k => {
     const g = sum(services.filter(s => monthKey(s.started_at) === k).map(serviceCost));
-    return { k, out: g + fixedMonth, gemini: g, in: 0 };
+    return { k, out: g + fixedMonth, gemini: g, in: sum(payments.filter(p => monthKey(p.paid_at) === k).map(emUsd)) };
   });
 
   // cultos do mês por igreja
@@ -192,7 +201,8 @@ function Overview({ churches, services, settings }: Data) {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label={t('pf.kpi.churches')} value={String(churches.length)}
           sub={`${paying} ${t('pf.kpi.paying')} · ${free} ${t('pf.kpi.free')} · ${canceled} ${t('pf.kpi.canceled')}`} />
-        <Kpi label={t('pf.kpi.in')} value={f.usd(moneyIn)} sub={t('pf.noStripe')} />
+        <Kpi label={t('pf.kpi.in')} value={f.usd(moneyIn)}
+          sub={paysMonth.length ? `${paysMonth.length} × · US$ ${inUsd.toFixed(2)} · R$ ${inBrl.toFixed(2)}` : t('pf.noStripe')} />
         <Kpi label={t('pf.kpi.out')} value={f.usd(out)} sub={`${t('pf.gemini')} ${f.usd(gemini)} · ${t('pf.fixed')} ${f.usd(fixedMonth)}`} />
         <Kpi label={t('pf.kpi.result')} value={f.usd(moneyIn - out)} tone={moneyIn - out >= 0 ? 'ok' : 'bad'} />
       </div>

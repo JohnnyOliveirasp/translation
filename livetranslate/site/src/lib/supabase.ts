@@ -14,6 +14,9 @@ export type Church = {
   plan: 'starter' | 'growth' | 'congregation'; status: 'trial' | 'active' | 'past_due' | 'canceled';
   trial_ends_at: string | null; sermon_recipients: string[]; livekit_room: string;
   country: string | null; billing_currency: 'usd' | 'brl';   // 0009: moeda decidida pelo país
+  // 0010: assinatura no Stripe (us | br)
+  stripe_account: 'us' | 'br' | null; stripe_subscription_id: string | null;
+  current_period_end: string | null; cancel_at_period_end: boolean;
 };
 export type Role = 'admin' | 'operator';
 

@@ -10,6 +10,7 @@ import Shell, { PageHead, type NavItem } from './Shell';
 import QrCode, { downloadQrPng } from '../../components/QrCode';
 import ChurchLogo, { detectLightLogo } from '../../components/ChurchLogo';
 import { downloadPosterPdf } from '../../lib/poster';
+import Billing from './Billing';
 
 type Tab = 'overview' | 'settings' | 'languages' | 'team' | 'services' | 'sermons' | 'billing';
 const SITE = 'https://livetranslate.church';
@@ -109,90 +110,6 @@ export default function Admin() {
       {tab === 'sermons' && <Sermons church={church} />}
       {tab === 'billing' && isAdmin && <Billing church={church} />}
     </Shell>
-  );
-}
-
-/* ── Assinatura ──────────────────────────────────────────────────────────── */
-function Billing({ church }: { church: Church }) {
-  const { t, lang } = useLang();
-  const { refresh } = useAuth();
-  const [confirming, setConfirming] = useState(false);
-  const [reason, setReason] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
-
-  const loc = lang === 'pt' ? 'pt-BR' : lang;
-  const ends = church.trial_ends_at ? new Date(church.trial_ends_at) : null;
-  const daysLeft = ends ? Math.max(0, Math.ceil((ends.getTime() - Date.now()) / 86400000)) : null;
-  const canceled = church.status === 'canceled';
-
-  async function cancel() {
-    setErr(null); setBusy(true);
-    const { error } = await supabase.rpc('cancel_subscription');
-    setBusy(false);
-    if (error) { setErr(error.message); return; }
-    setDone(true); await refresh();
-  }
-  async function resume() {
-    setErr(null); setBusy(true);
-    const { error } = await supabase.rpc('resume_subscription');
-    setBusy(false);
-    if (error) { setErr(error.message); return; }
-    setConfirming(false); setDone(false); await refresh();
-  }
-
-  return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <div className="rounded-2xl border border-black/[0.08] bg-white p-6">
-        <p className="text-xs font-medium text-muted">{t('ad.plan')}</p>
-        <p className="mt-1 font-serif text-2xl capitalize">{church.plan}</p>
-        <dl className="mt-5 grid grid-cols-2 gap-y-3 text-sm">
-          <dt className="text-muted">{t('ad.status')}</dt><dd>{t('ad.status.' + church.status)}</dd>
-          <dt className="text-muted">{church.status === 'trial' ? t('ad.trialEnds') : t('ad.accessUntil')}</dt>
-          <dd>{ends ? ends.toLocaleDateString(loc, { dateStyle: 'medium' }) : '—'}</dd>
-        </dl>
-        {church.status === 'trial' && daysLeft !== null && (
-          <p className="mt-4 rounded-xl bg-black/[0.04] px-4 py-3 text-sm">{t('ad.trialLeft').replace('{n}', String(daysLeft))}</p>
-        )}
-      </div>
-
-      <div className="rounded-2xl border border-black/[0.08] bg-white p-6">
-        <p className="text-xs font-medium text-muted">{t('ad.subscription')}</p>
-        <ErrorMsg msg={err} />
-        {canceled ? (
-          <>
-            <p className="mt-3 text-sm text-ink">{t('ad.canceledMsg')}</p>
-            <p className="mt-1 text-xs text-muted">{t('ad.canceledUntil')} {ends ? ends.toLocaleDateString(loc, { dateStyle: 'medium' }) : '—'}</p>
-            <button onClick={resume} disabled={busy} className="mt-5 rounded-full bg-ink px-5 py-2.5 text-sm text-white disabled:opacity-60">
-              {busy ? t('a.working') : t('ad.resume')}
-            </button>
-          </>
-        ) : done ? (
-          <p className="mt-3 text-sm text-ink">{t('ad.cancelDone')}</p>
-        ) : !confirming ? (
-          <>
-            <p className="mt-3 text-sm text-muted">{t('ad.billingHint')}</p>
-            <button onClick={() => setConfirming(true)} className="mt-5 text-sm text-muted underline underline-offset-4 transition-colors hover:text-red-600">
-              {t('ad.cancel')}
-            </button>
-          </>
-        ) : (
-          <div className="mt-3">
-            <p className="font-serif text-xl">{t('ad.cancelTitle')}</p>
-            <p className="mt-2 text-sm text-muted">{t('ad.cancelSub')}</p>
-            <textarea value={reason} onChange={e => setReason(e.target.value)} rows={3} placeholder={t('ad.cancelReason')}
-              className="mt-4 w-full rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-ink" />
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button onClick={() => setConfirming(false)} className="rounded-full border border-black/10 px-5 py-2.5 text-sm hover:bg-black/[0.04]">{t('ad.keep')}</button>
-              <button onClick={cancel} disabled={busy} className="rounded-full border border-red-200 bg-red-50 px-5 py-2.5 text-sm text-red-700 disabled:opacity-60">
-                {busy ? t('a.working') : t('ad.cancelConfirm')}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
