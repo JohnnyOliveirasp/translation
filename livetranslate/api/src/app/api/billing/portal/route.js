@@ -19,7 +19,7 @@ export async function POST(req) {
     const igreja = await igrejaPorSlug(slug);
     if (!igreja?.stripe_customer_id || !igreja.stripe_account) return json({ error: 'no billing account yet', code: 'no_customer' }, 409);
 
-    const body = { customer: igreja.stripe_customer_id, return_url: `${SITE}/admin?church=1` };
+    const body = { customer: igreja.stripe_customer_id, return_url: `${SITE}/admin?church=${igreja.id}` };
     const cfg = portalConfig(igreja.stripe_account);
     if (cfg) body.configuration = cfg;
     const s = await stripe(igreja.stripe_account, 'POST', 'billing_portal/sessions', body);

@@ -58,8 +58,8 @@ export async function POST(req) {
         line_items: [{ quantity: 1, price_data: { currency: moeda, unit_amount: pack[moeda], product_data: { name: nome, metadata: { lt_kind: 'hour_pack' } } } }],
         payment_intent_data: { metadata: { church_id: String(igreja.id), slug: igreja.slug, kind: 'hour_pack', hours: String(pack.hours) } },
         locale: 'auto',
-        success_url: `${SITE}/admin?church=1&billing=pack`,
-        cancel_url: `${SITE}/admin?church=1&billing=cancel`,
+        success_url: `${SITE}/admin?church=${igreja.id}&billing=pack`,
+        cancel_url: `${SITE}/admin?church=${igreja.id}&billing=cancel`,
         metadata: { church_id: String(igreja.id), slug: igreja.slug, kind: 'hour_pack', hours: String(pack.hours), valid_months: String(pack.valid_months ?? 3) },
       });
       return json({ url: sessao.url });
@@ -81,8 +81,8 @@ export async function POST(req) {
       allow_promotion_codes: 'true',
       billing_address_collection: 'auto',
       locale: 'auto',
-      success_url: `${SITE}/admin?church=1&billing=success`,
-      cancel_url: `${SITE}/admin?church=1&billing=cancel`,
+      success_url: `${SITE}/admin?church=${igreja.id}&billing=success`,
+      cancel_url: `${SITE}/admin?church=${igreja.id}&billing=cancel`,
       metadata: { church_id: String(igreja.id), slug: igreja.slug, plan },
     });
     return json({ url: sessao.url });

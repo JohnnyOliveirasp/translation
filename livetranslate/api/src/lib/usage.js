@@ -132,7 +132,7 @@ async function avisarIgreja(ig, nivel, uso) {
   const vars = { igreja: ig.name, used: uso.used.toFixed(1), cap: String(uso.cap), plan: ig.plan };
   const html = `<!doctype html><html lang="${lang}"><body style="font-family:Arial,sans-serif;color:#111;padding:24px">
 <p>${troca(t.p, vars)}</p>
-<p><a href="${SITE}/admin?church=1" style="display:inline-block;background:#0f172a;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none">${TXT[lang].cta}</a></p>
+<p><a href="${SITE}/admin?church=${ig.id}" style="display:inline-block;background:#0f172a;color:#fff;padding:10px 18px;border-radius:999px;text-decoration:none">${TXT[lang].cta}</a></p>
 <p style="color:#666;font-size:12px">LiveTranslate · ${SITE}</p></body></html>`;
   for (const to of emails) {
     try { await enviarEmail({ para: to, assunto: troca(t.s, vars), html }); logEmail(`[usage] ${ig.slug} ${nivel}% → ${to}`); }
