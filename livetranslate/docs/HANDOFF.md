@@ -1,6 +1,6 @@
 # HANDOFF — LiveTranslate (para o próximo agente)
 
-> **ÚLTIMO ESTADO (22/09/2026, noite):** leia as seções **§22 a §28** — painel da plataforma, Stripe com 2 contas e preços novos, teto de horas + pacotes, deploy por GitHub Actions, /testimonials e Perfil do Google. Pendências que esperam terceiros estão em §23.2, §25 e §26. A memória `livetranslate-handoff` tem o resumo.
+> **ÚLTIMO ESTADO (22/09/2026, noite):** leia as seções **§22 a §29** — painel da plataforma, Stripe com 2 contas e preços novos, teto de horas + pacotes, deploy por GitHub Actions, /testimonials e Perfil do Google. Pendências que esperam terceiros estão em §23.2, §25 e §26. A memória `livetranslate-handoff` tem o resumo.
 
 *Escrito em 27/08/2026. Leia isto antes de qualquer coisa. Complementa `PLANEJAMENTO-produto.md` (decisões) e a memória do projeto.*
 
@@ -314,3 +314,10 @@ Pedido do Johnny ("vamos criar um action"). Repo `JohnnyOliveirasp/translation`,
 - Ideia anotada: 2FA opcional (TOTP do Supabase) na aba Settings — depois.
 - **BUG a corrigir (pedido do Johnny, 23/09)**: na aba Settings dá para mudar o nome da igreja, mas **não o link do ouvinte (slug)**. Precisa de campo editável com validação (único, minúsculas, sem espaço), redirect ou aviso de que QR/cartaz antigos param de funcionar, e manter `livekit_room` como está. Hoje só via SQL (feito para a igreja 3: `new-wine-community-church`; `livekit_room` continua `church-churchchrist-test`, funciona).
 - **Campanha de vídeos (23/09)**: 5 criativos × 3 idiomas em `_videos/campanha-reels-2026-09/out/` (fora do git) — ver memória `campanha-videos`. Igreja 3 renomeada pelo Johnny para **New Wine Community Church** (logo enviado), `language_limit=5`. Nunca gravar com a Redeem: o culto de teste dispararia o e-mail do sermão falso para os ouvintes/destinatários reais.
+
+## 29. CAMPANHA DE VÍDEOS ENTREGUE + PRÓXIMO: CONTAS DE MÍDIA (23/09/2026, noite)
+- **Entregue**: 5 criativos × pt/en/es (Reels/Shorts 1080×1920) em `_videos/CRIATIVOS-PRONTOS/` (fora do git; LEIA-ME lá). Pipeline em `_videos/tools/` (Playwright 1.63 pinado + Chrome real para gravar o produto; kie.ai gpt-image-2 + Seedance + Suno; OpenAI TTS por frase; ffmpeg). Detalhes na memória `campanha-videos`.
+- **Igreja de teste** (id 3) agora é **New Wine Community Church**, slug `new-wine-community-church` (mudado por SQL), logo enviado, `language_limit=5`, assinatura Starter ativa com cancelamento agendado (23/10). Serve para gravações e para testar os 7 idiomas de orador. Nunca gravar com a Redeem (e-mail do sermão iria para gente real).
+- **Decisões de mídia (Johnny)**: 1 Instagram + 1 YouTube (não 3 por idioma); perfil orgânico em inglês; anúncios por idioma/região na mesma conta; @livetranslate.br só quando o Brasil tiver funil (Stripe BR + Pix). TikTok: só reservar o nome.
+- **Próximo agente — guiar o Johnny nesta ordem** (ele cria tudo; o agente não cria conta nem digita senha): Meta Business (johnny.oliveira@jcsolutionsus.com) → Página do Facebook "LiveTranslate" → Instagram profissional @livetranslate.church vinculado → conta de anúncios + cartão (JC Business Solutions, NY, USD) → canal de marca no YouTube (talvez o canal do depoimento já sirva) → reservar nomes no TikTok/X. Depois: **Pixel da Meta no site** com eventos de cadastro e assinatura; gerar logo 1080×1080 e capa 1640×624 da marca; subir criativos e montar conjuntos por idioma.
+- **Pendências**: OK do Pastor Marcus para anúncio pago (criativo 05); bug do slug não editável em Settings (acima, §28); Stripe BR ainda pausado (rever 24–25/09); Perfil do Google em verificação; FastCloner (Search Console + marca) fora do LiveTranslate.
