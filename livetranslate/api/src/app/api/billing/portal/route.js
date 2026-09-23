@@ -10,7 +10,7 @@ const SITE = (process.env.PUBLIC_URL || 'https://livetranslate.church').replace(
 
 export async function POST(req) {
   try {
-    const { slug } = await req.json();
+    const { slug, flow } = await req.json();   // flow: 'cancel' abre o portal direto na confirmação de cancelamento
     if (!slug) return json({ error: 'missing slug' }, 400);
     const auth = await requireMember(req, slug);
     if (auth.error) return json({ error: auth.error }, auth.status);
@@ -22,6 +22,14 @@ export async function POST(req) {
     const body = { customer: igreja.stripe_customer_id, return_url: `${SITE}/admin?church=${igreja.id}` };
     const cfg = portalConfig(igreja.stripe_account);
     if (cfg) body.configuration = cfg;
+    // Botão "Cancelar assinatura" da aba (22/09): pula a lista do portal e vai direto à confirmação.
+    if (flow === 'cancel' && igreja.stripe_subscription_id) {
+      body.flow_data = {
+        type: 'subscription_cancel',
+        subscription_cancel: { subscription: igreja.stripe_subscription_id },
+        after_completion: { type: 'redirect', redirect: { return_url: body.return_url } },
+      };
+    }
     const s = await stripe(igreja.stripe_account, 'POST', 'billing_portal/sessions', body);
     return json({ url: s.url });
   } catch (e) {

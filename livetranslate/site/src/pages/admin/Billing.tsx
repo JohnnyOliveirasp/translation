@@ -59,10 +59,10 @@ export default function Billing({ church }: { church: Church }) {
     return () => clearInterval(id);
   }, [banner, refresh]);
 
-  async function go(path: 'checkout' | 'portal', kind: 'subscription' | 'hour_pack' = 'subscription') {
+  async function go(path: 'checkout' | 'portal', kind: 'subscription' | 'hour_pack' = 'subscription', flow?: 'cancel') {
     setErr(null); setBusy(true);
     try {
-      const r = await fetch(`/api/billing/${path}`, { method: 'POST', headers: await authHeaders(), body: JSON.stringify({ slug: church.slug, plan, kind }) });
+      const r = await fetch(`/api/billing/${path}`, { method: 'POST', headers: await authHeaders(), body: JSON.stringify({ slug: church.slug, plan, kind, flow }) });
       const j = await r.json();
       if (!r.ok || !j.url) { setErr(j.code === 'price_pending' ? t('ad.priceSoon') : (j.error || t('a.err.generic'))); setBusy(false); return; }
       window.location.href = j.url;
@@ -121,6 +121,11 @@ export default function Billing({ church }: { church: Church }) {
               <button onClick={() => go('portal')} disabled={busy} className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm text-white disabled:opacity-60">
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />} {t('ad.manage')}
               </button>
+              {!church.cancel_at_period_end && (
+                <button onClick={() => go('portal', 'subscription', 'cancel')} disabled={busy} className="ml-3 mt-5 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-5 py-2.5 text-sm text-red-700 disabled:opacity-60">
+                  {t('ad.cancelSubBtn')}
+                </button>
+              )}
             </>
           ) : church.status === 'canceled' && !church.stripe_subscription_id ? (
             <>
