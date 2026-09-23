@@ -431,7 +431,7 @@ function Team({ church, userId }: { church: Church; userId: string }) {
         <h3 className="mb-3 font-serif text-2xl">{t('ad.invites')}</h3>
         <form onSubmit={invite} className="mb-4 flex flex-wrap items-end gap-2">
           <div className="min-w-[200px] flex-1"><Field label={t('ad.inviteEmail')} type="email" value={email} onChange={e => setEmail(e.target.value)} required /></div>
-          <div className="w-36"><Select label="Role" value={role} onChange={e => setRole(e.target.value as Role)}>
+          <div className="w-36"><Select label={t('ad.roleLabel')} value={role} onChange={e => setRole(e.target.value as Role)}>
             <option value="operator">{t('ad.role.operator')}</option><option value="admin">{t('ad.role.admin')}</option>
           </Select></div>
           <Button type="submit" loading={busy} className="!w-auto">{t('ad.invite')}</Button>

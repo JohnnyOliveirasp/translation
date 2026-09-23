@@ -23,7 +23,8 @@ export default function Signup() {
   const [churchName, setChurchName] = useState('');
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
-  const [speakerLang, setSpeakerLang] = useState('en');
+  // Orador começa no idioma da interface: quem se cadastra em pt quase sempre prega em pt.
+  const [speakerLang, setSpeakerLang] = useState(() => (lang === 'pt' ? 'pt-BR' : lang));
   const [country, setCountry] = useState(() => defaultCountry(lang));   // 0009: o país decide a moeda
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -91,7 +92,7 @@ export default function Signup() {
         <form onSubmit={submitLogado} className="mt-8 space-y-4">
           <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required autoFocus />
           <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
-            required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || 'your-church'}`} />
+            required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || t('a.slugExample')}`} />
           <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
             {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
           </Select>
@@ -134,7 +135,7 @@ export default function Signup() {
       <form onSubmit={submit} className="mt-8 space-y-4">
         <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required autoFocus />
         <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
-          required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || 'your-church'}`} />
+          required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || t('a.slugExample')}`} />
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
           {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
         </Select>

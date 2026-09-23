@@ -60,8 +60,8 @@ const en: Record<string, string> = {
   'feat.1.d': 'Nobody babysits it — your volunteer can worship too',
   'feat.2.t': 'Sermon PDF.',
   'feat.2.a': 'Clean transcript with every Bible verse quoted correctly',
-  'feat.2.b': 'Summary and small-group questions',
-  'feat.2.c': 'Emailed to listeners in their language, pastor approves with one click',
+  'feat.2.b': 'One PDF per language, filed by date in your dashboard',
+  'feat.2.c': 'Emailed automatically to listeners in their language after the service',
   'feat.3.t': 'Unlimited Sundays.',
   'feat.3.a': 'Flat monthly price — no hourly billing',
   'feat.3.b': 'Unlimited listeners, no per-language add-ons',
@@ -84,7 +84,7 @@ const en: Record<string, string> = {
 
   'pr.label': 'Pricing',
   'pr.title': 'Flat price. *Unlimited Sundays.*',
-  'pr.sub': 'Others bill by the hour and charge per extra language. We don\'t. First Sunday free, no card required.',
+  'pr.sub': 'Others bill by the hour and charge per extra language. We don\'t. First month free, no card required.',
   'pr.mo': '/month',
   'pr.starter': 'Starter',
   'pr.growth': 'Growth',
@@ -121,7 +121,7 @@ const en: Record<string, string> = {
 
   'final.title': 'This Sunday, *everyone understands.*',
   'final.cta': 'Try it this Sunday',
-  'final.note': 'Set up in 10 minutes. First Sunday free. Cancel anytime.',
+  'final.note': 'Set up in 10 minutes. First month free. Cancel anytime.',
   'footer.tag': 'Made for churches, by a church.',
   'footer.privacy': 'Privacy',
 };
@@ -185,8 +185,8 @@ const es: Record<string, string> = {
   'feat.1.d': 'Nadie tiene que vigilarlo — tu voluntario también puede adorar',
   'feat.2.t': 'PDF del sermón.',
   'feat.2.a': 'Transcripción limpia con cada versículo citado correctamente',
-  'feat.2.b': 'Resumen y preguntas para grupos pequeños',
-  'feat.2.c': 'Enviado a los oyentes en su idioma; el pastor aprueba con un clic',
+  'feat.2.b': 'Un PDF por idioma, organizado por fecha en tu panel',
+  'feat.2.c': 'Enviado automáticamente a los oyentes en su idioma después del culto',
   'feat.3.t': 'Domingos ilimitados.',
   'feat.3.a': 'Precio mensual fijo — sin cobro por hora',
   'feat.3.b': 'Oyentes ilimitados, sin cargos por idioma extra',
@@ -209,7 +209,7 @@ const es: Record<string, string> = {
 
   'pr.label': 'Precios',
   'pr.title': 'Precio fijo. *Domingos ilimitados.*',
-  'pr.sub': 'Otros cobran por hora y por cada idioma extra. Nosotros no. Primer domingo gratis, sin tarjeta.',
+  'pr.sub': 'Otros cobran por hora y por cada idioma extra. Nosotros no. Primer mes gratis, sin tarjeta.',
   'pr.mo': '/mes',
   'pr.starter': 'Starter',
   'pr.growth': 'Growth',
@@ -246,7 +246,7 @@ const es: Record<string, string> = {
 
   'final.title': 'Este domingo, *todos entienden.*',
   'final.cta': 'Pruébalo este domingo',
-  'final.note': 'Listo en 10 minutos. Primer domingo gratis. Cancela cuando quieras.',
+  'final.note': 'Listo en 10 minutos. Primer mes gratis. Cancela cuando quieras.',
   'footer.tag': 'Hecho para iglesias, por una iglesia.',
   'footer.privacy': 'Privacidad',
 };
@@ -310,8 +310,8 @@ const pt: Record<string, string> = {
   'feat.1.d': 'Ninguém precisa vigiar — seu voluntário também pode adorar',
   'feat.2.t': 'PDF do sermão.',
   'feat.2.a': 'Transcrição limpa com cada versículo citado corretamente',
-  'feat.2.b': 'Resumo e perguntas para pequenos grupos',
-  'feat.2.c': 'Enviado aos ouvintes no idioma deles; o pastor aprova com um clique',
+  'feat.2.b': 'Um PDF por idioma, organizado por data no seu painel',
+  'feat.2.c': 'Enviado automaticamente aos ouvintes no idioma deles depois do culto',
   'feat.3.t': 'Domingos ilimitados.',
   'feat.3.a': 'Preço mensal fixo — sem cobrança por hora',
   'feat.3.b': 'Ouvintes ilimitados, sem taxa por idioma extra',
@@ -334,7 +334,7 @@ const pt: Record<string, string> = {
 
   'pr.label': 'Preços',
   'pr.title': 'Preço fixo. *Domingos ilimitados.*',
-  'pr.sub': 'Outros cobram por hora e por idioma extra. Nós não. Primeiro domingo grátis, sem cartão.',
+  'pr.sub': 'Outros cobram por hora e por idioma extra. Nós não. Primeiro mês grátis, sem cartão.',
   'pr.mo': '/mês',
   'pr.starter': 'Starter',
   'pr.growth': 'Growth',
@@ -371,7 +371,7 @@ const pt: Record<string, string> = {
 
   'final.title': 'Neste domingo, *todo mundo entende.*',
   'final.cta': 'Teste neste domingo',
-  'final.note': 'Pronto em 10 minutos. Primeiro domingo grátis. Cancele quando quiser.',
+  'final.note': 'Pronto em 10 minutos. Primeiro mês grátis. Cancele quando quiser.',
   'footer.tag': 'Feito para igrejas, por uma igreja.',
   'footer.privacy': 'Privacidade',
 };
