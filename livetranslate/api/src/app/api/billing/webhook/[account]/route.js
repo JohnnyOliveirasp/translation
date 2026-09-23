@@ -62,7 +62,9 @@ async function aplicarAssinatura(account, igreja, sub) {
     stripe_customer_id: typeof sub.customer === 'string' ? sub.customer : igreja.stripe_customer_id,
     stripe_subscription_id: sub.id,
     current_period_end: iso(item?.current_period_end ?? sub.current_period_end),
-    cancel_at_period_end: !!sub.cancel_at_period_end,
+    // API nova do Stripe (billing_mode flexible): o portal agenda o cancelamento em `cancel_at` (= fim do período)
+    // e deixa `cancel_at_period_end: false` — visto no teste de 23/09. Os dois valem como "cancela no fim".
+    cancel_at_period_end: !!sub.cancel_at_period_end || (!!sub.cancel_at && sub.status !== 'canceled'),
   };
   // 0012: assinatura paga → o limite de idiomas volta a ser o do plano (override do /platform some)
   if (plano && plano !== 'congregation') { campos.plan = plano; campos.language_limit = null; }

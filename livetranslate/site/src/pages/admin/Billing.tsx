@@ -64,7 +64,10 @@ export default function Billing({ church }: { church: Church }) {
     try {
       const r = await fetch(`/api/billing/${path}`, { method: 'POST', headers: await authHeaders(), body: JSON.stringify({ slug: church.slug, plan, kind, flow }) });
       const j = await r.json();
-      if (!r.ok || !j.url) { setErr(j.code === 'price_pending' ? t('ad.priceSoon') : (j.error || t('a.err.generic'))); setBusy(false); return; }
+      if (!r.ok || !j.url) {
+        if (j.code === 'already_canceling') { setErr(t('ad.alreadyCanceling').replace('{d}', date(church.current_period_end))); setBusy(false); await refresh(); return; }
+        setErr(j.code === 'price_pending' ? t('ad.priceSoon') : (j.error || t('a.err.generic'))); setBusy(false); return;
+      }
       window.location.href = j.url;
     } catch { setErr(t('a.err.generic')); setBusy(false); }
   }

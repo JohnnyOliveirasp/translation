@@ -33,7 +33,11 @@ export async function POST(req) {
     const s = await stripe(igreja.stripe_account, 'POST', 'billing_portal/sessions', body);
     return json({ url: s.url });
   } catch (e) {
-    if (e instanceof StripeError) return json({ error: e.message, code: e.code }, e.status >= 500 ? 502 : e.status);
+    if (e instanceof StripeError) {
+      // já agendado para cancelar (o site estava desatualizado): código próprio para o site mostrar texto amigável
+      if (/already set to be canceled/i.test(e.message)) return json({ error: e.message, code: 'already_canceling' }, 409);
+      return json({ error: e.message, code: e.code }, e.status >= 500 ? 502 : e.status);
+    }
     return json({ error: e.message }, 500);
   }
 }
