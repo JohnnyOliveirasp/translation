@@ -14,7 +14,7 @@ export default function Pricing() {
       items: [t('pr.l2'), t('pr.f.listeners'), t('pr.f.sundays'), t('pr.f.ws'), t('pr.f.pdf'), t('pr.f.support')] },
     { name: t('pr.growth'), price: br ? 'R$ 499' : '$119', per: t('pr.mo'), tag: t('pr.tag'), featured: true, cta: t('pr.cta'), href: '/signup?plan=growth',
       items: [t('pr.l5'), t('pr.f.listeners'), t('pr.f.sundays'), t('pr.f.ws'), t('pr.f.pdf'), t('pr.f.priority')] },
-    { name: t('pr.cong'), price: t('pr.talk'), cta: t('pr.cta3'), href: 'mailto:hello@livetranslate.church',
+    { name: t('pr.cong'), price: t('pr.talk'), cta: t('pr.cta3'), href: 'mailto:contact@jcsolutionsus.com',
       items: [t('pr.l6'), t('pr.f.campus'), t('pr.f.brand'), t('pr.f.listeners')] },
   ];
 

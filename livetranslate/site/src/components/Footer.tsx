@@ -24,8 +24,8 @@ export default function Footer() {
           <p className="text-xs text-muted">{t('footer.tag')} · livetranslate.church</p>
           <div className="flex gap-6 text-xs text-muted">
             <a href="/login" className="hover:text-ink">{t('nav.login')}</a>
-            <a href="mailto:hello@livetranslate.church" className="hover:text-ink">hello@livetranslate.church</a>
-            <a href="#" className="hover:text-ink">{t('footer.privacy')}</a>
+            <a href="mailto:contact@jcsolutionsus.com" className="hover:text-ink">contact@jcsolutionsus.com</a>
+            <a href="/privacy" className="hover:text-ink">{t('footer.privacy')}</a>
           </div>
         </div>
       </footer>
