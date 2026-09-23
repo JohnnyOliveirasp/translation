@@ -41,7 +41,13 @@ export default function Listen({ slug }: { slug: string }) {
       const { data, error } = await supabase.rpc('church_public', { p_slug: slug });
       if (!alive) return;
       const row = (data as Pub[] | null)?.[0];
-      if (error || !row) { setCarga('notfound'); return; }
+      if (error || !row) {
+        // Link antigo (a igreja trocou o link, 0013): o QR impresso continua levando para a página certa.
+        const { data: atual } = await supabase.rpc('resolve_church_slug', { p_slug: slug });
+        if (!alive) return;
+        if (typeof atual === 'string' && atual && atual !== slug) { window.location.replace(`/${atual}${window.location.search}`); return; }
+        setCarga('notfound'); return;
+      }
       setChurch(row);
       setCarga('ok');
       document.title = row.name + ' · LiveTranslate';

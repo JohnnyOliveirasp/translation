@@ -39,6 +39,14 @@ export default function Broadcast({ slug }: { slug: string }) {
   const m = memberships.find(x => x.churches.slug === slug);
   const church: Church | undefined = m?.churches;
 
+  // Favorito com o link antigo (a igreja trocou o link, 0013): leva para o atual.
+  useEffect(() => {
+    if (loading || !user || m) return;
+    supabase.rpc('resolve_church_slug', { p_slug: slug }).then(({ data }) => {
+      if (typeof data === 'string' && data && data !== slug && memberships.some(x => x.churches.slug === data)) navigate(`/broadcast/${data}`);
+    });
+  }, [loading, user, m, slug, memberships, navigate]);
+
   useEffect(() => {
     if (!church) return;
     setSource(church.speaker_lang || 'en');

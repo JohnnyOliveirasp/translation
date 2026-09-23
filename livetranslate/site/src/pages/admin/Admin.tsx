@@ -5,7 +5,7 @@ import { useAuth } from '../../lib/auth';
 import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
 import { LANGUAGE_CATALOG, SPEAKER_CATALOG, languageLimit, langLabel, posterHeadline } from '../../lib/languages';
-import { AuthShell, Field, Select, Button, ErrorMsg, Note } from '../auth/ui';
+import { AuthShell, Field, Select, Button, ErrorMsg, Note, slugify, slugTyping } from '../auth/ui';
 import Shell, { PageHead, type NavItem } from './Shell';
 import QrCode, { downloadQrPng } from '../../components/QrCode';
 import ChurchLogo, { detectLightLogo } from '../../components/ChurchLogo';
@@ -254,6 +254,26 @@ function Settings({ church }: { church: Church }) {
     setMsg(t('ad.saved')); await refresh();
   }
 
+  // Link (slug): troca pela RPC — o antigo vira apelido e o QR já impresso continua abrindo (0013).
+  const [newSlug, setNewSlug] = useState(church.slug);
+  async function changeSlug() {
+    setErr(null); setMsg(null);
+    const s = slugify(newSlug);
+    if (s === church.slug) return;
+    if (!/^[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?$/.test(s)) { setErr(t('ad.slugInvalid')); return; }
+    if (!window.confirm(t('ad.slugConfirm').replace('{s}', s))) return;
+    setBusy(true);
+    const { error } = await supabase.rpc('change_church_slug', { p_church_id: church.id, p_new_slug: s });
+    setBusy(false);
+    if (error) {
+      setErr(/service live/.test(error.message) ? t('ad.slugLive')
+        : /slug taken|23505/.test(error.message + error.code) ? t('a.err.slug')
+        : /invalid slug/.test(error.message) ? t('ad.slugInvalid') : error.message);
+      return;
+    }
+    setMsg(t('ad.saved')); await refresh();
+  }
+
   async function upload(file: File) {
     setErr(null); setMsg(null);
     if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 2 * 1024 * 1024) { setErr(t('ad.logoHint')); return; }
@@ -277,6 +297,14 @@ function Settings({ church }: { church: Church }) {
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
           {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
         </Select>
+        <div>
+          <div className="flex items-end gap-2">
+            <div className="flex-1"><Field label={t('ad.slugTitle')} value={newSlug} onChange={e => setNewSlug(slugTyping(e.target.value))} /></div>
+            <button type="button" onClick={changeSlug} disabled={busy || slugify(newSlug) === church.slug}
+              className="mb-[1px] rounded-full border border-ink px-4 py-2.5 text-sm hover:bg-black/[0.04] disabled:opacity-40">{t('ad.slugSave')}</button>
+          </div>
+          <p className="mt-1.5 text-xs text-muted">livetranslate.church/{slugify(newSlug) || church.slug} — {t('ad.slugHint')}</p>
+        </div>
         <Field label={t('ad.recipients')} hint={t('ad.recipientsHint')} value={recipients} onChange={e => setRecipients(e.target.value)} placeholder={t('ad.recipientsPh')} />
         <ErrorMsg msg={err} />
         {msg && <Note>{msg}</Note>}

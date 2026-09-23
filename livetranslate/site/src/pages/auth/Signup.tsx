@@ -5,7 +5,7 @@ import { useLang } from '../../i18n';
 import { useRouter } from '../../router';
 import { SPEAKER_CATALOG } from '../../lib/languages';
 import { countryOptions, defaultCountry } from '../../lib/countries';
-import { AuthShell, Title, Field, Select, Button, ErrorMsg, GoogleButton, OrDivider, slugify } from './ui';
+import { AuthShell, Title, Field, Select, Button, ErrorMsg, GoogleButton, OrDivider, slugify, slugTyping } from './ui';
 
 type Step = 'form' | 'verify';
 const PENDING_KEY = 'lt-pending-church';
@@ -33,7 +33,7 @@ export default function Signup() {
   const onName = (v: string) => { setChurchName(v); if (!slugTouched) setSlug(slugify(v)); };
 
   async function createChurch() {
-    const pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null') || { name: churchName, slug, lang: speakerLang, country };
+    const pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null') || { name: churchName, slug: slugify(slug), lang: speakerLang, country };
     const defaults = pending.lang === 'en' ? ['es', 'pt-BR'] : ['en'];
     const { error } = await supabase.rpc('create_church', {
       p_name: pending.name, p_slug: pending.slug, p_speaker_lang: pending.lang, p_languages: defaults, p_country: pending.country ?? null,
@@ -52,7 +52,7 @@ export default function Signup() {
     e.preventDefault(); setErr(null);
     if (password.length < 8) { setErr(t('a.err.weak')); return; }
     setBusy(true);
-    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug: slugify(slug), lang: speakerLang, country }));
     const { data, error } = await supabase.auth.signUp({
       email, password, options: { data: { full_name: fullName } },
     });
@@ -79,7 +79,7 @@ export default function Signup() {
   // A conta já existe — não pedimos nome/e-mail/senha de novo.
   async function submitLogado(e: FormEvent) {
     e.preventDefault(); setErr(null); setBusy(true);
-    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
+    sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug: slugify(slug), lang: speakerLang, country }));
     await createChurch();
     setBusy(false);
   }
@@ -91,7 +91,7 @@ export default function Signup() {
         <p className="mt-3 text-sm text-muted">{t('a.finish.sub')}</p>
         <form onSubmit={submitLogado} className="mt-8 space-y-4">
           <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required autoFocus />
-          <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
+          <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugTyping(e.target.value)); }}
             required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || t('a.slugExample')}`} />
           <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
             {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
@@ -134,7 +134,7 @@ export default function Signup() {
           o /admin manda de volta para cá e mostra só o formulário da igreja. */}
       <form onSubmit={submit} className="mt-8 space-y-4">
         <Field label={t('a.churchName')} value={churchName} onChange={e => onName(e.target.value)} required autoFocus />
-        <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugify(e.target.value)); }}
+        <Field label={t('a.slug')} value={slug} onChange={e => { setSlugTouched(true); setSlug(slugTyping(e.target.value)); }}
           required pattern="[a-z0-9](?:[a-z0-9-]{1,38}[a-z0-9])?" hint={`livetranslate.church/${slug || t('a.slugExample')}`} />
         <Select label={t('a.speakerLang')} value={speakerLang} onChange={e => setSpeakerLang(e.target.value)}>
           {SPEAKER_CATALOG.map(l => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
@@ -145,7 +145,7 @@ export default function Signup() {
         <p className="-mt-2 text-[11px] text-muted/80">{t('a.countryHint')}</p>
         <p className="pt-4 text-sm font-medium text-ink">{t('a.signup.how')}</p>
         <GoogleButton label={t('a.google')} onBefore={() => {
-          if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug, lang: speakerLang, country }));
+          if (churchName && slug) sessionStorage.setItem(PENDING_KEY, JSON.stringify({ name: churchName, slug: slugify(slug), lang: speakerLang, country }));
         }} />
         <OrDivider label={t('a.or')} />
         <Field label={t('a.fullName')} value={fullName} onChange={e => setFullName(e.target.value)} required autoComplete="name" />

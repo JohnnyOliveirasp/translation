@@ -86,3 +86,12 @@ export async function requireMember(req, slug) {
     },
   };
 }
+
+/** Links antigos da igreja (0013): os PDFs de antes da troca ficam em sermons/{slug-antigo}. */
+export async function slugAliases(req, churchId) {
+  const auth = req.headers.get('authorization') || '';
+  const r = await fetch(`${SUPA_URL}/rest/v1/church_slug_aliases?select=slug&church_id=eq.${Number(churchId)}`,
+    { headers: { apikey: ANON, Authorization: auth } });
+  if (!r.ok) return [];
+  return (await r.json()).map(x => x.slug).filter(s => /^[a-z0-9-]+$/.test(s));
+}

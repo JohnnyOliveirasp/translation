@@ -102,6 +102,12 @@ export function Note({ children }: { children: ReactNode }) {
 }
 
 /** "Grace Church of Tampa" → "grace-church-of-tampa" */
+/** Enquanto a pessoa digita: mesma limpeza do slugify, mas sem cortar o hífen do fim (senão não dá para separar palavras). */
+export function slugTyping(s: string) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+/, '').slice(0, 40);
+}
+
 export function slugify(s: string) {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
