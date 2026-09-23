@@ -1,5 +1,6 @@
 import { useLang, segments } from '../i18n';
 import { Rise } from './TextEffects';
+import SocialLinks from './SocialLinks';
 
 export default function Footer() {
   const { t } = useLang();
@@ -27,6 +28,9 @@ export default function Footer() {
             <a href="mailto:contact@jcsolutionsus.com" className="hover:text-ink">contact@jcsolutionsus.com</a>
             <a href="/privacy" className="hover:text-ink">{t('footer.privacy')}</a>
           </div>
+        </div>
+        <div className="mx-auto max-w-7xl border-t border-black/[0.06] px-8 py-6">
+          <SocialLinks />
         </div>
       </footer>
     </>

@@ -124,6 +124,8 @@ const en: Record<string, string> = {
   'final.note': 'Set up in 10 minutes. First month free. Cancel anytime.',
   'footer.tag': 'Made for churches, by a church.',
   'footer.privacy': 'Privacy',
+  'footer.follow': 'Follow LiveTranslate',
+  'footer.soon': 'Coming soon',
 };
 
 const es: Record<string, string> = {
@@ -249,6 +251,8 @@ const es: Record<string, string> = {
   'final.note': 'Listo en 10 minutos. Primer mes gratis. Cancela cuando quieras.',
   'footer.tag': 'Hecho para iglesias, por una iglesia.',
   'footer.privacy': 'Privacidad',
+  'footer.follow': 'Sigue a LiveTranslate',
+  'footer.soon': 'Próximamente',
 };
 
 const pt: Record<string, string> = {
@@ -374,6 +378,8 @@ const pt: Record<string, string> = {
   'final.note': 'Pronto em 10 minutos. Primeiro mês grátis. Cancele quando quiser.',
   'footer.tag': 'Feito para igrejas, por uma igreja.',
   'footer.privacy': 'Privacidade',
+  'footer.follow': 'Siga o LiveTranslate',
+  'footer.soon': 'Em breve',
 };
 
 import { AUTH_DICT } from './auth';
