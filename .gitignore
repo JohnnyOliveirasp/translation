@@ -23,3 +23,7 @@ Thumbs.db
 
 # Lixo de sessao do Playwright MCP
 .playwright-mcp/
+
+# Gravações de campanha: perfil do Chrome de gravação (cookies) e dependências
+_videos/tools/profile/
+_videos/tools/node_modules/
