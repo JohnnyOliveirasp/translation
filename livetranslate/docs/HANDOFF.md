@@ -333,3 +333,13 @@ Pedido do Johnny ("vamos criar um action"). Repo `JohnnyOliveirasp/translation`,
 - **Guia PDF em português para igrejas do Brasil** (plano gratuito): `docs/guia-igrejas-pt/` (fonte, não commitada) e `Downloads/LiveTranslate-Guia-Igrejas-PT.pdf`. Atualizar a seção 3 do guia (o link AGORA pode ser trocado).
 - **Site: e-mail de contato** = contact@jcsolutionsus.com (hello@livetranslate.church não existe); link Privacy do rodapé corrigido.
 - **Mídias**: Página do Facebook LiveTranslate criada (id 1370467279476455) e conta de anúncios USD/NY criada SEM cartão, ambas no portfólio JC Business Solutions. Próximo: Instagram @livetranslate.church.
+
+## 31. PRÓXIMO: FASE "AO VIVO EM CASA" + PODCAST (planejado 28/09/2026 — aguarda OK da Redeem)
+- **Status:** só planejamento. Desenho enviado ao Pastor Cris e ao Bret (Redeem) — EN: https://claude.ai/artifact/BSM4LJsQFZ8JUx3F9nPwDh · PT: https://claude.ai/artifact/PtiUDPkZGyAhjNFK9jvYyh. Proposta de teste discreto no domingo 04/10. **Começar só quando o Johnny confirmar a aprovação.**
+- **Branches (regra nova):** desenvolvimento na `dev`; merge para `main` (= deploy automático) só depois de testado. `dev` não tem ambiente próprio: testar em local. Migrations do Supabase vão direto para produção — manter aditivas.
+- **Fase 1 — ao vivo em casa:** link fixo `/{slug}/live` (separado do QR do banco para não dar eco); página com logo, fundo (imagem ou vídeo ~15 s), selo AO VIVO, onda de áudio real, "Original" + idiomas; louvor original e pregação traduzida (troca pelo Worship Sense); "fora do ar — próximo culto" fora do horário. Aba "Ao vivo em casa" no admin: liga no Entrar no ar, desliga no Encerrar, admin pode desligar; copiar link, WhatsApp, QR fixo, slide do telão 1920×1080, fundo, horários. Botão "Mandar para quem está em casa" na página do banco. Músicas são autorais da igreja → transmitir tudo.
+  - **Antes:** corrigir `session-manager.request()` (abre ponte Gemini e culto no banco mesmo sem operador no ar → cultos fantasmas/horas gastas) e criar modo de áudio alta qualidade no /broadcast.
+- **Fase 1.1 — podcast:** hoje NÃO há áudio gravado (só texto e PDF). Gravar o original + marcas de louvor; após Encerrar, traduzir só a pregação em cada idioma ligado; episódio por idioma (louvor original + pregação traduzida); um podcast por idioma por igreja na conta LiveTranslate com vitrine da igreja; página "Ouvir de novo".
+- **Fase 2 — YouTube/Facebook Live:** imagem + áudio via ffmpeg, uma live por idioma; YouTube ~10 lives simultâneas por canal; Facebook pela Página LiveTranslate + crosspost para a da igreja. Discutir depois.
+- Detalhes completos (pesquisa de plataformas, custos, riscos) na memória do agente `fase-ao-vivo-em-casa`.
+
