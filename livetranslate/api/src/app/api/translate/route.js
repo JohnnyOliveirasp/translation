@@ -65,11 +65,12 @@ export async function POST(req) {
       return json({ ok: true, muted: !!body.muted });
     }
     if (action === 'stop-all') {
+      manager.igreja(church);   // garante o estado de reunião privada (0014) antes de decidir sobre PDF/e-mail
       const sermoes = await manager.stopAll(church.id, church.name);
       // e-mail do sermão: a lista é lida AGORA com o token de quem encerrou; o envio sai
       // daqui a alguns minutos. Sem await — o operador não espera por isso.
       const token = (req.headers.get('authorization') || '').replace(/^Bearer /, '');
-      agendarEnvioSermao({ slug: church.slug, feitos: sermoes, token }).catch(() => {});
+      if (!church.privateMode) agendarEnvioSermao({ slug: church.slug, feitos: sermoes, token }).catch(() => {});
       return json({ ok: true, sermoes });
     }
     return json({ error: 'invalid action' }, 400);

@@ -27,6 +27,7 @@ export async function churchPublic(slug) {
     languages: row.languages || [],
     logoPath: row.logo_path ?? null,
     logoIsLight: !!row.logo_is_light,
+    privateMode: !!row.private_mode,   // 0014: reunião privada — não grava nada
   };
 }
 
@@ -53,7 +54,7 @@ export async function requireMember(req, slug) {
 
   // Consulta COM O TOKEN DO USUÁRIO: a RLS só devolve as igrejas dele.
   const q = new URL(`${SUPA_URL}/rest/v1/memberships`);
-  q.searchParams.set('select', 'role,churches(id,slug,name,livekit_room,speaker_lang,status)');
+  q.searchParams.set('select', 'role,churches(id,slug,name,livekit_room,speaker_lang,status,private_mode)');
   const m = await fetch(q, { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
   if (!m.ok) return { error: 'membership lookup failed', status: 403 };
   const rows = await m.json();
@@ -65,7 +66,7 @@ export async function requireMember(req, slug) {
     const pa = await fetch(`${SUPA_URL}/rest/v1/platform_admins?select=user_id&limit=1`, { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
     const ehPlataforma = pa.ok && (await pa.json()).length > 0;
     if (ehPlataforma) {
-      const c = await fetch(`${SUPA_URL}/rest/v1/churches?select=id,slug,name,livekit_room,speaker_lang,status&slug=eq.${encodeURIComponent(String(slug || '').toLowerCase())}&limit=1`,
+      const c = await fetch(`${SUPA_URL}/rest/v1/churches?select=id,slug,name,livekit_room,speaker_lang,status,private_mode&slug=eq.${encodeURIComponent(String(slug || '').toLowerCase())}&limit=1`,
         { headers: { apikey: ANON, Authorization: `Bearer ${token}` } });
       const igreja = c.ok ? (await c.json())[0] : null;
       if (igreja) hit = { role: 'admin', churches: igreja };
@@ -83,6 +84,7 @@ export async function requireMember(req, slug) {
       name: hit.churches.name,
       room: hit.churches.livekit_room,
       speakerLang: hit.churches.speaker_lang,
+      privateMode: !!hit.churches.private_mode,
     },
   };
 }

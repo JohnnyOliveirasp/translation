@@ -13,7 +13,7 @@ import { listenerStrings, RTL_LANGS } from '../i18n/listener';
  * Um toque no idioma já começa a ouvir — o toque é o gesto que o navegador exige
  * para liberar áudio.
  */
-type Pub = { name: string; logo_path: string | null; logo_is_light: boolean; speaker_lang: string; languages: string[] };
+type Pub = { name: string; logo_path: string | null; logo_is_light: boolean; speaker_lang: string; languages: string[]; private_mode?: boolean };
 
 export default function Listen({ slug }: { slug: string }) {
   const { t } = useLang();
@@ -213,8 +213,8 @@ export default function Listen({ slug }: { slug: string }) {
             )}
           </div>
 
-          {/* PDF por e-mail — sem cadastro, só o endereço */}
-          {estado === 'ouvindo' && (
+          {/* PDF por e-mail — sem cadastro, só o endereço. Reunião privada (0014): nada é enviado, então nem oferece. */}
+          {estado === 'ouvindo' && !church?.private_mode && (
             <div className="surface mt-4 rounded-3xl p-5">
               {assinado ? (
                 <p className="flex items-center justify-center gap-2 text-sm text-ink">

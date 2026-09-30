@@ -48,6 +48,12 @@ class SessionManager {
       c.room = church.room || c.room;         // mantém em dia se o cadastro mudar
       c.slug = church.slug || c.slug;
     }
+    // Reunião privada (0014): vem de toda chamada (ouvinte e operador) e vale na hora, inclusive
+    // para as pontes já abertas — ligar no meio do culto para de gravar a partir dali.
+    if (typeof church.privateMode === 'boolean' && c.private !== church.privateMode) {
+      c.private = church.privateMode;
+      for (const e of this.entries.values()) if (e.churchId === church.id) e.bridge.gravar = !c.private;
+    }
     return c;
   }
 
@@ -108,6 +114,7 @@ class SessionManager {
       // Worship Sense: ela falava a letra traduzida no fone e gravava a música no texto do
       // sermão (PDF/e-mail de 20/09 saíram com letra — achado em 22/09).
       bridge.worship = !!c.muted;
+      bridge.gravar = !c.private;   // reunião privada: traduz, mas não escreve transcrição em disco
       e = { bridge, vazioDesde: null, startedAt: Date.now(), churchId: church.id, lang, pico: 0 };
       this.entries.set(k, e);
       this.garantirEscriba(church.id);
@@ -267,6 +274,9 @@ class SessionManager {
     const c = this.churches.get(churchId);
     if (c) { c.muted = false; c.eventStartedAt = null; }
     await this.fecharCultoNoBanco(c, 'encerrado pelo operador');   // depois dos teardowns: todos os trechos já somados
+
+    // Reunião privada (0014): nada de PDF — e sem PDF o e-mail também não sai (agendarEnvioSermao com lista vazia).
+    if (c?.private) { this.logCusto(c, 'PDF não gerado: reunião privada'); return []; }
 
     // Fim do culto: o PDF do sermão sai sozinho, do original e de cada idioma.
     try {

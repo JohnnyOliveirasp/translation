@@ -310,6 +310,7 @@ function Settings({ church }: { church: Church }) {
         {msg && <Note>{msg}</Note>}
         <Button type="submit" loading={busy}>{busy ? t('a.working') : t('ad.save')}</Button>
       </div>
+      <div className="space-y-6">
       <div className="rounded-2xl border border-black/[0.08] bg-white p-6">
         <p className="text-xs font-medium text-muted">{t('ad.logo')}</p>
         <div className="mt-3 flex flex-wrap items-center gap-4">
@@ -334,6 +335,26 @@ function Settings({ church }: { church: Church }) {
             <span>{t('ad.logoLight')}</span>
           </label>
         )}
+      </div>
+
+      {/* Reunião privada (0014): grava na hora, como o logo claro — sem depender do Salvar */}
+      <div className={`rounded-2xl border p-6 ${church.private_mode ? 'border-ink bg-ink text-white' : 'border-black/[0.08] bg-white'}`}>
+        <label className="flex cursor-pointer items-start justify-between gap-4">
+          <span>
+            <span className="flex items-center gap-2 font-medium"><Lock className="h-4 w-4" /> {t('ad.private')}</span>
+            <span className={`mt-1 block text-sm ${church.private_mode ? 'text-white/80' : 'text-muted'}`}>{t('ad.privateHint')}</span>
+          </span>
+          <input type="checkbox" role="switch" checked={church.private_mode} disabled={busy} className="mt-1 h-5 w-5 shrink-0 accent-white"
+            onChange={async e => {
+              const v = e.target.checked;
+              setErr(null); setMsg(null);
+              const { error } = await supabase.from('churches').update({ private_mode: v }).eq('id', church.id);
+              if (error) { setErr(error.message); return; }
+              await refresh();
+            }} />
+        </label>
+        {church.private_mode && <p className="mt-3 text-sm font-medium">{t('ad.privateOn')}</p>}
+      </div>
       </div>
     </form>
   );

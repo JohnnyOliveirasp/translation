@@ -71,6 +71,7 @@ export class TranslationBridge {
     // escriba: a ponte que grava a fala do orador (uma por igreja — o texto de entrada
     // é o mesmo para todos os idiomas, gravar em todas duplicaria o sermão)
     this.escriba = false;
+    this.gravar = true;   // false = reunião privada (0014): nenhuma transcrição vai para o disco
   }
 
   log(...a) { console.log(`[bridge:${this.tag}:${this.lang}]`, ...a); }
@@ -282,7 +283,7 @@ export class TranslationBridge {
     // conteúdo vale da sessão ativa E da drenando (que termina de falar após o chaveio)
     if (sess && sess !== this.session && sess !== this.drenando) return;
     const sc = msg.serverContent;
-    if (this.escriba && sc?.inputTranscription?.text && !this.worship) {
+    if (this.gravar && this.escriba && sc?.inputTranscription?.text && !this.worship) {
       logSermao(this.tag, sc.inputTranscription.text);
     }
     if (this.worship) {
@@ -294,7 +295,7 @@ export class TranslationBridge {
     }
     if (sc?.outputTranscription?.text) {
       this.sendLegenda(sc.outputTranscription.text);
-      logTraducao(this.tag, this.lang, sc.outputTranscription.text);
+      if (this.gravar) logTraducao(this.tag, this.lang, sc.outputTranscription.text);
     }
     for (const part of sc?.modelTurn?.parts ?? []) {
       if (part.inlineData?.data) this.enqueuePlayback(Buffer.from(part.inlineData.data, 'base64'));
